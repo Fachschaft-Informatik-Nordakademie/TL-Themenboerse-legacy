@@ -1,0 +1,5 @@
+image:
+  file: .gitpod.dockerfile
+ports:
+  - port: 3000 # React Frontend
+  - port: 8000 # API-Platform Backend
