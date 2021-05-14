@@ -3,3 +3,8 @@ image:
 ports:
   - port: 3000 # React Frontend
   - port: 8000 # API-Platform Backend
+tasks:
+  - init: cd frontend && yarn
+    command: cd frontend && yarn dev
+  - init: cd backend && composer install
+    command: cd backend && php -S 0.0.0.0:8000 -t public
