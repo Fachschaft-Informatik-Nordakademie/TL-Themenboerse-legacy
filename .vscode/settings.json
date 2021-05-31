@@ -1,0 +1,11 @@
+{
+    "php.suggest.basic": false,
+    "[php]": {
+        "editor.formatOnSave": true,
+        "editor.quickSuggestions": {
+            "other": true,
+            "comments": true,
+            "strings": false
+        }
+    }
+}
