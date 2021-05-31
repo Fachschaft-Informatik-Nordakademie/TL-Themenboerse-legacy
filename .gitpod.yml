@@ -3,8 +3,41 @@ image:
 ports:
   - port: 3000 # React Frontend
   - port: 8000 # API-Platform Backend
+  - port: 3389 # LDAP server (private)
+    onOpen: ignore
+    visibility: private
+  - port: 3306 # MySQL server (private)
+    onOpen: ignore
+    visibility: private
 tasks:
   - init: cd frontend && yarn
     command: cd frontend && yarn dev
-  - init: cd backend && composer install
+  - init: cd backend && composer install 
     command: cd backend && php -S 0.0.0.0:8000 -t public
+  - init: |-
+      docker container create \
+      --name ldap \
+      -p "3389:389" \
+      --env LDAP_ORGANISATION="Awesome University" \
+      --env LDAP_DOMAIN="awesome-university.com" \
+      --env LDAP_ADMIN_PASSWORD="awesome" \
+      --env LDAP_REMOVE_CONFIG_AFTER_SETUP="false" \
+      --env LDAP_TLS="false" \
+      --env LDAP_READONLY_USER="true" \
+      --volume /workspace/themenboerse/.gitpod/ldap-bootstrap.ldif:/container/service/slapd/assets/config/bootstrap/ldif/50-bootstrap.ldif:ro \
+      osixia/openldap:1.5.0 \
+      --copy-service
+    command: docker start ldap
+  - init: |-
+      gp await-port 3306 \
+      && sudo mysql -e "CREATE USER 'app'@'localhost' IDENTIFIED BY 'secret';GRANT ALL ON *.* TO 'app'@'localhost';flush privileges;"
+    command: |-
+      gp await-port 3306 && gp await-port 8000 \
+      && php backend/bin/console doctrine:database:create --if-not-exists \
+      && php backend/bin/console doctrine:migrations:migrate --no-interaction \
+      && php backend/bin/console hautelook:fixtures:load --no-interaction
+vscode:
+  extensions:
+    - junstyle.php-cs-fixer
+    - bmewburn.vscode-intelephense-client
+    - cvergne.vscode-php-getters-setters-cv

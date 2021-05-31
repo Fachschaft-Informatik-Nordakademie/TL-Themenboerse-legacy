@@ -1,0 +1,77 @@
+# OU for all users
+dn: ou=people,dc=awesome-university,dc=com
+objectclass: top
+objectclass: organizationalUnit
+ou: people
+
+# Students
+dn: ou=students,ou=people,dc=awesome-university,dc=com
+objectclass: top
+objectclass: organizationalUnit
+ou: students
+
+dn: cn=10000,ou=students,ou=people,dc=awesome-university,dc=com
+objectclass: top
+objectclass: person
+objectclass: organizationalPerson
+objectclass: inetOrgPerson
+cn: 10000
+displayName: Max Mustermann - A19a
+givenName: Max
+sn: Schimpfhauser
+mail: max.mustermann@awesome-university.com
+userPassword: secret
+
+dn: cn=20000,ou=students,ou=people,dc=awesome-university,dc=com
+objectclass: top
+objectclass: person
+objectclass: organizationalPerson
+objectclass: inetOrgPerson
+cn: 20000
+displayName: Mareike Musterfrau - A19a
+givenName: Mareike
+sn: Musterfrau
+mail: mareike.musterfrau@awesome-university.com
+userPassword: secret
+
+dn: cn=30000,ou=students,ou=people,dc=awesome-university,dc=com
+objectclass: top
+objectclass: person
+objectclass: organizationalPerson
+objectclass: inetOrgPerson
+cn: 30000
+displayName: Klaus Kleber - I20b
+givenName: Klaus
+sn: Kleber
+mail: klaus.kleber@awesome-university.com
+userPassword: secret
+
+# Employees
+dn: ou=employees,ou=people,dc=awesome-university,dc=com
+objectclass: top
+objectclass: organizationalUnit
+ou: employees
+
+dn: cn=hauke,ou=employees,ou=people,dc=awesome-university,dc=com
+objectclass: top
+objectclass: person
+objectclass: organizationalPerson
+objectclass: inetOrgPerson
+cn: hauke
+displayName: Hauke Reier
+givenName: Hauke
+sn: Reier
+mail: hauke.reier@awesome-university.com
+userPassword: secret
+
+dn: cn=olivia,ou=employees,ou=people,dc=awesome-university,dc=com
+objectclass: top
+objectclass: person
+objectclass: organizationalPerson
+objectclass: inetOrgPerson
+cn: olivia
+displayName: Olivia Jones
+givenName: Olivia
+sn: Jones
+mail: olivia.jones@awesome-university.com
+userPassword: secret

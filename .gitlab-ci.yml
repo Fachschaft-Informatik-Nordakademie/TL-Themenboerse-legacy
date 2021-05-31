@@ -1,0 +1,43 @@
+image: themenboerse-test-base:latest
+
+# Only run in Merge Requests
+workflow:
+  rules:
+    - if: $CI_MERGE_REQUEST_IID
+
+
+# Pick zero or more services to be used on all builds.
+# Only needed when using a docker container to run your tests in.
+# Check out: http://docs.gitlab.com/ce/ci/docker/using_docker_images.html#what-is-a-service
+services:
+  - name: osixia/openldap:1.5.0
+    alias: ldap
+
+variables:
+  LDAP_ORGANISATION: "Awesome University"
+  LDAP_DOMAIN: "awesome-university.com"
+  LDAP_ADMIN_PASSWORD: "awesome"
+  LDAP_REMOVE_CONFIG_AFTER_SETUP: "false"
+  LDAP_TLS: "false"
+  LDAP_READONLY_USER: "true"
+  
+# This folder is cached between builds
+# http://docs.gitlab.com/ce/ci/yaml/README.html#cache
+cache:
+  paths:
+    - backend/vendor/
+
+before_script:
+  - cd backend && composer install && cd ..
+  - ldapadd -x -D "cn=admin,dc=awesome-university,dc=com" -w awesome -H ldap://ldap:389 -f .gitpod/ldap-bootstrap.ldif
+
+test:
+  variables:
+    APP_LDAP_SERVER: "ldap"
+    APP_LDAP_PORT: 389
+    XDEBUG_MODE: "coverage"
+  script:
+    - cd backend && php ./vendor/bin/phpunit --coverage-text --colors=never --log-junit=phpunit-report.xml
+  artifacts:
+    reports:
+      junit: backend/phpunit-report.xml
