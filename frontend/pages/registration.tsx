@@ -37,6 +37,8 @@ export default function Registration () {
     const [confirmDirty, setConfirmDirty] = useState(false);
     const [passwordError, setPasswordError] = useState('');
     const [confirmError, setConfirmError] = useState('');
+    const [emailError, setEmailError] = useState('');
+    const [submit, setSubmit] = useState(false);
 
     const title: string = "Registierung";
     const emailPlaceHolder = "E-Mail";
@@ -45,25 +47,46 @@ export default function Registration () {
     const submitCaption: string = "Registrieren";
     const tooShortPassword: string = "Das Passwort muss mindestens 8 Zeichen lang sein.";
     const passwordsNotMatching: string = "Die Passwörter stimmen nicht überein.";
+    const emptyEmail: string = "Bitte geben Sie eine E-Mail-Adresse ein.";
+    const emptyPassword: string = "Bitte geben Sie ein Passwort ein.";
 
     const minPasswordLength: number = 8;
 
     useEffect(() => {
-        password.length < minPasswordLength && password.length > 0 ? setPasswordError(tooShortPassword) : setPasswordError(null);
+        if (emailError && email.length > 0) {
+            setEmailError(null);
+        }
+    }, [email]);
+
+    useEffect(() => {
+        const invalidPasswordLength: boolean = password.length < minPasswordLength && password.length > 0;
+        invalidPasswordLength ? setPasswordError(tooShortPassword) : setPasswordError(null);
     }, [password]);
 
     useEffect(() => {
-        if (password !== confirm && confirmDirty) {
-            setConfirmError(passwordsNotMatching);
-         } else {
-             setConfirmError(null);
-         }
+        password !== confirm && confirmDirty ? setConfirmError(passwordsNotMatching) : setConfirmError(null);
     }, [password, confirm]);
+
+    useEffect(() => {
+        const isEmptyPassword: boolean = password.length === 0;
+        const isEmptyEmail: boolean = email.length === 0;
+        if (isEmptyPassword && submit) {
+            setPasswordError(emptyPassword);
+         }
+         if (isEmptyEmail && submit) {
+             setEmailError(emptyEmail);
+         }
+         setSubmit(false);
+    }, [submit]);
 
     const handleConfirmChange = (value: string) => {
         setConfirm(value);
         setConfirmDirty(true);
-    }
+    };
+
+    const onSubmit = () => {
+        setSubmit(true);       
+    };
 
     const classes = useStyles();
 
@@ -72,13 +95,13 @@ export default function Registration () {
             <CardContent className={classes.content}>
                 <Typography variant="h4">{title}</Typography>
                 <form className={classes.form} noValidate>
-                    <TextField required id="email" type="email" value={email} onChange={e => setEmail(e.target.value)} label={emailPlaceHolder} autoComplete="email" spellCheck="false" />
+                    <TextField required id="email" type="email" error={!!emailError} value={email} onChange={e => setEmail(e.target.value)} label={emailPlaceHolder} helperText={emailError} autoComplete="email" spellCheck="false" />
                     <TextField required id="password" type="password" error={!!passwordError} value={password} onChange={e => setPassword(e.target.value)} label={passwordPlaceHolder} helperText={passwordError} autoComplete="new-password" spellCheck="false" />
                     <TextField required id="password-confirm" type="password" error={!!confirmError} value={confirm} onChange={e => handleConfirmChange(e.target.value)} label={confirmPlaceHolder} helperText={confirmError} autoComplete="new-password" spellCheck="false" />
                 </form>
             </CardContent>
             <CardActions className={classes.actions}>
-            <Button className={classes.submit} variant="contained" color="primary">{submitCaption}</Button>
+                <Button className={classes.submit} variant="contained" color="primary" type="submit" onClick={onSubmit}>{submitCaption}</Button>
             </CardActions>
         </Card>
       </Container>
