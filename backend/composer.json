@@ -15,6 +15,7 @@
         "doctrine/orm": "^2.9",
         "nelmio/cors-bundle": "^2.1",
         "phpdocumentor/reflection-docblock": "^5.2",
+        "symfony-bundles/json-request-bundle": "^4.0",
         "symfony/asset": "5.2.*",
         "symfony/browser-kit": "5.2.*",
         "symfony/console": "5.2.*",

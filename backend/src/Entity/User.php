@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Repository\UserRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\ORM\PersistentCollection;
 use Symfony\Component\Security\Core\User\EquatableInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
@@ -30,6 +31,9 @@ class User implements UserInterface, EquatableInterface
 
     #[ORM\Column(type: "string", name: '`password`', nullable: true)]
     private ?string $password;
+
+    #[ORM\OneToMany(targetEntity: "App\Entity\Topic", mappedBy: "author")]
+    private PersistentCollection $topics;
 
     public function getRoles(): array
     {
@@ -147,5 +151,29 @@ class User implements UserInterface, EquatableInterface
         }
 
         return true;
+    }
+
+    /**
+     * Get the value of topics
+     *
+     * @return  ?PersistentCollection
+     */
+    public function getTopics()
+    {
+        return $this->topics;
+    }
+
+    /**
+     * Set the value of topics
+     *
+     * @param  ?PersistentCollection  $topics
+     *
+     * @return  self
+     */
+    public function setTopics(?PersistentCollection $topics)
+    {
+        $this->topics = $topics;
+
+        return $this;
     }
 }
