@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import Container from '@material-ui/core/Container';
 import Card from '@material-ui/core/Card';
 import CardActions from '@material-ui/core/CardActions';
@@ -30,20 +31,54 @@ const useStyles = makeStyles(() => ({
 }))
 
 export default function Registration () {
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [confirm, setConfirm] = useState('');
+    const [confirmDirty, setConfirmDirty] = useState(false);
+    const [passwordError, setPasswordError] = useState('');
+    const [confirmError, setConfirmError] = useState('');
+
+    const title: string = "Registierung";
+    const emailPlaceHolder = "E-Mail";
+    const passwordPlaceHolder: string = "Passwort";
+    const confirmPlaceHolder: string = "Passwort bestätigen";
+    const submitCaption: string = "Registrieren";
+    const tooShortPassword: string = "Das Passwort muss mindestens 8 Zeichen lang sein.";
+    const passwordsNotMatching: string = "Die Passwörter stimmen nicht überein.";
+
+    const minPasswordLength: number = 8;
+
+    useEffect(() => {
+        password.length < minPasswordLength && password.length > 0 ? setPasswordError(tooShortPassword) : setPasswordError(null);
+    }, [password]);
+
+    useEffect(() => {
+        if (password !== confirm && confirmDirty) {
+            setConfirmError(passwordsNotMatching);
+         } else {
+             setConfirmError(null);
+         }
+    }, [password, confirm]);
+
+    const handleConfirmChange = (value: string) => {
+        setConfirm(value);
+        setConfirmDirty(true);
+    }
+
     const classes = useStyles();
 
     return <Container maxWidth="sm">
         <Card variant="outlined">
             <CardContent className={classes.content}>
-                <Typography variant="h4">Registierung</Typography>
+                <Typography variant="h4">{title}</Typography>
                 <form className={classes.form} noValidate>
-                    <TextField required id="email" type="email" label="E-Mail" autoComplete="email" spellCheck="false" />
-                    <TextField required id="password" type="password" label="Passwort" autoComplete="new-password" spellCheck="false" />
-                    <TextField required id="password-confirm" type="password" label="Passwort bestätigen" autoComplete="new-password" spellCheck="false" />
+                    <TextField required id="email" type="email" value={email} onChange={e => setEmail(e.target.value)} label={emailPlaceHolder} autoComplete="email" spellCheck="false" />
+                    <TextField required id="password" type="password" error={!!passwordError} value={password} onChange={e => setPassword(e.target.value)} label={passwordPlaceHolder} helperText={passwordError} autoComplete="new-password" spellCheck="false" />
+                    <TextField required id="password-confirm" type="password" error={!!confirmError} value={confirm} onChange={e => handleConfirmChange(e.target.value)} label={confirmPlaceHolder} helperText={confirmError} autoComplete="new-password" spellCheck="false" />
                 </form>
             </CardContent>
             <CardActions className={classes.actions}>
-            <Button className={classes.submit} variant="contained" color="primary">Registrieren</Button>
+            <Button className={classes.submit} variant="contained" color="primary">{submitCaption}</Button>
             </CardActions>
         </Card>
       </Container>
