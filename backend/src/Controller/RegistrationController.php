@@ -29,7 +29,7 @@ class RegistrationController extends AbstractController
     #[Route('register', name: 'register', methods: ['post'])]
     public function register(Request $request): Response
     {
-        $this->jsonAuth->supports($request);
+        $this->jsonAuth->supportsRegistration($request);
         $credentials = $this->jsonAuth->getCredentials($request);
         $email = $credentials['email'];
         $password = $this->hashPw->hashPassword($credentials['password']);
