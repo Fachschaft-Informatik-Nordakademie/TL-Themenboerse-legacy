@@ -24,6 +24,7 @@ class Topic
     #[ORM\Column(type: "string", length: 1000, nullable: true)]
     private ?string $requirements;
 
+    /*Hier vllt auch eine Array von Strings?*/
     #[ORM\Column(type: "string", length: 100, nullable: true)]
     private ?string $website;
 
@@ -32,6 +33,17 @@ class Topic
 
     #[ORM\Column(type: "string", nullable: true)]
     private ?string $scope;
+
+
+    #[ORM\Column(type: "datetime", nullable: true)]
+    private ?\DateTime $start;
+
+    #[ORM\Column(type: "integer", nullable: true)]
+    private ?int $pages;
+
+
+    #[ORM\Column(type: "string", name: '`type`', length: 50, nullable: false)]
+    private string $status;
 
     #[ORM\Column(type: "datetime", nullable: true)]
     private ?\DateTime $deadline;
@@ -233,6 +245,78 @@ class Topic
     public function setAuthor(?User $author)
     {
         $this->author = $author;
+
+        return $this;
+    }
+
+    /**
+     * Get the value of start
+     *
+     * @return  ?\DateTime
+     */
+    public function getStart()
+    {
+        return $this->start;
+    }
+
+    /**
+     * Set the value of start
+     *
+     * @param  ?\DateTime  $start
+     *
+     * @return  self
+     */
+    public function setStart(?\DateTime $start)
+    {
+        $this->start = $start;
+
+        return $this;
+    }
+
+    /**
+     * Get the value of pages
+     *
+     * @return  ?int
+     */
+    public function getPages()
+    {
+        return $this->pages;
+    }
+
+    /**
+     * Set the value of pages
+     *
+     * @param  ?int  $pages
+     *
+     * @return  self
+     */
+    public function setPages(?int $pages)
+    {
+        $this->pages = $pages;
+
+        return $this;
+    }
+
+    /**
+     * Get the value of status
+     *
+     * @return  string
+     */
+    public function getStatus()
+    {
+        return $this->status;
+    }
+
+    /**
+     * Set the value of status
+     *
+     * @param  string  $status
+     *
+     * @return  self
+     */
+    public function setStatus(string $status)
+    {
+        $this->status = $status;
 
         return $this;
     }

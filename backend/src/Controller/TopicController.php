@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\StatusType;
 use App\Entity\Topic;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
@@ -15,9 +16,12 @@ class TopicController extends AbstractController
     {
         $user = $this->getUser();
 
+        $status = StatusType::OPEN;
+
         if (!$user) {
             return $this->json(['message' => 'Authentication failed. You have to call this endpoint with a json body either containing email + password or username (ldap) + password'], Response::HTTP_UNAUTHORIZED);
         }
+
 
         $topic = new Topic();
         $topic->setAuthor($user);
@@ -26,6 +30,9 @@ class TopicController extends AbstractController
         $topic->setRequirements($request->get('requirements'));
         $topic->setTags($request->get('tags'));
         $topic->setDeadline($request->get('deadline'));
+        $topic->setPages($request->get('pages'));
+        $topic->setStart($request->get('start'));
+        $topic->setStatus($status);
 
         $entityManager = $this->getDoctrine()->getManager();
         $entityManager->persist($topic);
@@ -37,12 +44,12 @@ class TopicController extends AbstractController
     #[Route('/topic/:id', name: 'topic', methods: ['get'])]
     public function getTopic(): Response
     {
-        $user = $this->getUser();
+        $topic = $this->loadTopicById;
 
-        if (!$user) {
-            return $this->json(['message' => 'Authentication failed. You have to call this endpoint with a json body either containing email + password or username (ldap) + password'], Response::HTTP_UNAUTHORIZED);
+        if (!$topic) {
+            return $this->json(['message' => 'Topic not found'], Response::HTTP_UNAUTHORIZED);
         }
 
-        return $this->json(['message' => 'Welcome ' . $user->getUsername()]);
+        return $this->json(['message' => 'You find the theme ' . $topic->getTitle()]);
     }
 }
