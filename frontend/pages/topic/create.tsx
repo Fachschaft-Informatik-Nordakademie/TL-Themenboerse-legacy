@@ -2,8 +2,17 @@ import { Button, Container, TextField } from "@material-ui/core";
 import { makeStyles } from '@material-ui/core/styles';
 import { Autocomplete, Value } from "@material-ui/lab";
 import { KeyboardDatePicker } from "@material-ui/pickers";
-import React, { ChangeEvent } from "react";
+import { useFormik } from "formik";
+import * as yup from 'yup';
+import React from "react";
 
+interface IFormValues {
+    readonly title: string;
+    readonly description: string;
+    readonly requirements: string;
+    readonly deadline: Date | null;
+    readonly tags: string[];
+}
 
 const useStyles = makeStyles((theme) => ({
     formField: {
@@ -12,33 +21,32 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-function create() {
-    const [title, setTitle] = React.useState("");
-    const handleTitleChange = (e: ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
-        setTitle(e.target.value);
-    }
-    const [description, setDescription] = React.useState("");
-    const handleDescriptionChange = (e: ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
-        setDescription(e.target.value);
-    }
-    const [requirements, setRequirements] = React.useState("");
-    const handleRequirementsChange = (e: ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
-        setRequirements(e.target.value);
-    }
-    const [deadline, setDeadline] = React.useState(null);
-    const [tags, setTags] = React.useState([]);
-    const handleTagesChange = (event: React.ChangeEvent<{}>, values: string[]) => {
-        setTags(values)
-    };
+const validationSchema = yup.object({
+    title: yup
+        .string()
+        .required('Titel ist ein Pflichtfeld'),
+    description: yup
+        .string()
+        .required('Beschreibung ist ein Pflichtfeld'),
+    requirements: yup
+        .string()
+        .required('Beschreibung ist ein Pflichtfeld'),
+    deadline: yup.date().nullable(),
+    tags: yup
+        .array()
+        .ensure()
+});
 
-    const submitForm = async (e) => {
-        e.preventDefault();
+
+function create() {
+
+    const submitForm = async (values: IFormValues) => {
         const topicData = {
-            title: title,
-            description: description,
-            requirements: requirements,
-            deadline: setDeadline,
-            tags: tags
+            title: values.title,
+            description: values.description,
+            requirements: values.requirements,
+            deadline: values.deadline,
+            tags: values.tags
         }
         const response = await fetch('/topic', {
             method: 'POST',
@@ -50,41 +58,67 @@ function create() {
         // TODO: success message/back navigation? error handling?
     };
 
+    const formik = useFormik<IFormValues>({
+        initialValues: {
+            title: '',
+            description: '',
+            tags: [],
+            deadline: null,
+            requirements: ''
+        },
+        validationSchema: validationSchema,
+        onSubmit: (values) => {
+            console.log("test");
+            submitForm(values);
+        },
+    });
+    
+    console.log("errors", formik.errors, formik.touched);
     const classes = useStyles();
+
     return <Container>
         <h1>Neues Thema erstellen</h1>
-        <form autoComplete="off" onSubmit={submitForm}>
-            <TextField label="Titel" fullWidth className={classes.formField} value={title} onChange={handleTitleChange} />
-            <TextField label="Beschreibung" fullWidth multiline className={classes.formField} onChange={handleDescriptionChange} />
-            <TextField label="Anforderungen" fullWidth multiline className={classes.formField} onChange={handleRequirementsChange} />
+        <form onSubmit={(e) => { e.preventDefault(); formik.submitForm() }}>
+            <TextField label="Titel" name="title" fullWidth className={classes.formField} value={formik.values.title} onChange={formik.handleChange}
+                helperText={formik.touched.title && formik.errors.title} error={formik.touched.title && Boolean(formik.errors.title)}
+                onBlur={formik.handleBlur} required />
+            <TextField label="Beschreibung" name="description" fullWidth multiline className={classes.formField} value={formik.values.description} onChange={formik.handleChange}
+                helperText={formik.touched.description && formik.errors.description} error={formik.touched.description && Boolean(formik.errors.description)}
+                onBlur={formik.handleBlur} required />
+            <TextField label="Anforderungen" name="requirements" fullWidth multiline className={classes.formField} value={formik.values.requirements} onChange={formik.handleChange}
+                helperText={formik.touched.requirements && formik.errors.requirements} error={formik.touched.requirements && Boolean(formik.errors.requirements)}
+                onBlur={formik.handleBlur} required />
             <KeyboardDatePicker
-          disableToolbar
-          variant="inline"
-          format="dd/MM/yyyy"
-          margin="normal"
-          id="date-picker-inline"
-          label="Endtermin"
-          value={deadline}
-          onChange={setDeadline}
-          KeyboardButtonProps={{
-            'aria-label': 'change date',
-          }}
-        />
+                name="deadline"
+                disableToolbar
+                variant="inline"
+                format="dd/MM/yyyy"
+                margin="normal"
+                label="Endtermin"
+                value={formik.values.deadline}
+                onChange={(value) => formik.setFieldValue('deadline', value)}
+                helperText={formik.touched.deadline && formik.errors.deadline}
+                error={formik.touched.deadline && Boolean(formik.errors.deadline)}
+                onBlur={formik.handleBlur}
+            />
             <Autocomplete
+                id="tags"
                 className={classes.formField}
                 multiple
                 freeSolo
-                value={tags}
-                onChange={handleTagesChange}
-                id="tags-standard"
+                value={formik.values.tags}
+                onChange={(e, values) => formik.setFieldValue('tags', values)}
                 options={tagOptions}
                 getOptionLabel={(option) => option}
                 defaultValue={[]}
+                onBlur={formik.handleBlur}
                 renderInput={(params) => (
                     <TextField
                         {...params}
                         variant="standard"
                         label="Tags"
+                        helperText={formik.touched.tags && formik.errors.tags}
+                        error={formik.touched.tags && Boolean(formik.errors.tags)}
                     />
                 )}
             />
