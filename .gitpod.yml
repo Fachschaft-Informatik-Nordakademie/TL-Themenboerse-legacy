@@ -11,7 +11,7 @@ ports:
     visibility: private
 tasks:
   - init: cd frontend && yarn
-    command: cd frontend && yarn dev
+    command: export NEXT_PUBLIC_BACKEND_URL=`gp url 8000` && cd frontend && yarn dev
   - init: cd backend && composer install 
     command: cd backend && php -S 0.0.0.0:8000 -t public
   - init: |-
