@@ -7,6 +7,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\PersistentCollection;
 use Symfony\Component\Security\Core\User\EquatableInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Serializer\Annotation\Ignore;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: "`user`")]
@@ -32,6 +33,7 @@ class User implements UserInterface, EquatableInterface
     #[ORM\Column(type: "string", name: '`password`', nullable: true)]
     private ?string $password;
 
+    #[Ignore]
     #[ORM\OneToMany(targetEntity: "App\Entity\Topic", mappedBy: "author")]
     private PersistentCollection $topics;
 

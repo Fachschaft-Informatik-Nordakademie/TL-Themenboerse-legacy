@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Entity\User;
 use App\Repository\TopicRepository;
+use Symfony\Component\Serializer\Annotation\Ignore;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: TopicRepository::class)]
@@ -15,7 +16,7 @@ class Topic
     #[ORM\Column(type: "integer")]
     private ?int $id;
 
-    #[ORM\Column(type: "string", name: '`type`', length: 500, nullable: false)]
+    #[ORM\Column(type: "string", length: 500, nullable: false)]
     private string $title;
 
     #[ORM\Column(type: "string", length: 4000, nullable: true)]
@@ -34,20 +35,19 @@ class Topic
     #[ORM\Column(type: "string", nullable: true)]
     private ?string $scope;
 
-
     #[ORM\Column(type: "datetime", nullable: true)]
     private ?\DateTime $start;
 
     #[ORM\Column(type: "integer", nullable: true)]
     private ?int $pages;
 
-
-    #[ORM\Column(type: "string", name: '`type`', length: 50, nullable: false)]
+    #[ORM\Column(type: "string", length: 10, nullable: false)]
     private string $status;
 
     #[ORM\Column(type: "datetime", nullable: true)]
     private ?\DateTime $deadline;
 
+    #[Ignore]
     #[ORM\ManyToOne(targetEntity: "App\Entity\User", inversedBy: "topics")]
     private ?User $author;
 

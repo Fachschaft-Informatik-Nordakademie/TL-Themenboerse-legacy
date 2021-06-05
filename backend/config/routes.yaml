@@ -1,6 +1,0 @@
-#index:
-#    path: /
-#    controller: App\Controller\DefaultController::index
-topic:
-  path: /topic
-  controller: App\Controller\TopicController::index

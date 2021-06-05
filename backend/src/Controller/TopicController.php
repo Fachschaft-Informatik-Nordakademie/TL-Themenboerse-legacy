@@ -8,11 +8,12 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Serializer\SerializerInterface;
 
 class TopicController extends AbstractController
 {
-    #[Route('/topic', name: 'topic', methods: ['post'])]
-    public function index(Request $request): Response
+    #[Route('/topic', name: 'topic_post', methods: ['post'])]
+    public function postTopic(Request $request): Response
     {
         $user = $this->getUser();
 
@@ -29,27 +30,34 @@ class TopicController extends AbstractController
         $topic->setDescription($request->get('description'));
         $topic->setRequirements($request->get('requirements'));
         $topic->setTags($request->get('tags'));
-        $topic->setDeadline($request->get('deadline'));
+        $deadline = $request->get('deadline');
+        if ($deadline) {
+            $topic->setDeadline(\DateTime::createFromFormat('Y-m-d', $deadline));
+        }
+        $start = $request->get('start');
+        if ($start) {
+            $topic->setStart(\DateTime::createFromFormat('Y-m-d', $start));
+        }
         $topic->setPages($request->get('pages'));
-        $topic->setStart($request->get('start'));
         $topic->setStatus($status);
 
         $entityManager = $this->getDoctrine()->getManager();
         $entityManager->persist($topic);
         $entityManager->flush();
 
-        return $this->json(['message' => 'Successfully saved new topic']);
+        return $this->json(['id' => $topic->getId()]);
     }
 
-    #[Route('/topic/:id', name: 'topic', methods: ['get'])]
-    public function getTopic(): Response
+    #[Route('/topic/{id}', name: 'topic_get', methods: ['get'])]
+    public function getTopic(int $id): Response
     {
-        $topic = $this->loadTopicById;
+        $topic = $this->getDoctrine()
+            ->getRepository(Topic::class)
+            ->find($id);
 
         if (!$topic) {
             return $this->json(['message' => 'Topic not found'], Response::HTTP_UNAUTHORIZED);
         }
-
-        return $this->json(['message' => 'You find the theme ' . $topic->getTitle()]);
+        return $this->json($topic);
     }
 }
