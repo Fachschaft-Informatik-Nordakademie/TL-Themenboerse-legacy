@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Container from '@material-ui/core/Container';
 import Card from '@material-ui/core/Card';
 import CardActions from '@material-ui/core/CardActions';
@@ -30,7 +30,7 @@ const useStyles = makeStyles(() => ({
     }
 }))
 
-export default function Registration () {
+export default function Registration() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [confirm, setConfirm] = useState('');
@@ -72,11 +72,11 @@ export default function Registration () {
         const isEmptyEmail: boolean = email.length === 0;
         if (isEmptyPassword && submit) {
             setPasswordError(emptyPassword);
-         }
-         if (isEmptyEmail && submit) {
-             setEmailError(emptyEmail);
-         }
-         setSubmit(false);
+        }
+        if (isEmptyEmail && submit) {
+            setEmailError(emptyEmail);
+        }
+        setSubmit(false);
     }, [submit]);
 
     const handleConfirmChange = (value: string) => {
@@ -84,9 +84,17 @@ export default function Registration () {
         setConfirmDirty(true);
     };
 
-    const onSubmit = () => {
-        setSubmit(true);       
-    };
+    const onSubmit = useCallback(async () => {
+        setSubmit(true);
+        const requestOptions = {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 'email': email, 'password': password })
+        }; // TODO URL 
+        const response = await fetch('https://8000-black-cattle-kpp45iw9.ws-eu08.gitpod.io/register', requestOptions);
+        setSubmit(false);
+        return response.json;
+    }, [email, password]);
 
     const classes = useStyles();
 
@@ -104,5 +112,6 @@ export default function Registration () {
                 <Button className={classes.submit} variant="contained" color="primary" type="submit" onClick={onSubmit}>{submitCaption}</Button>
             </CardActions>
         </Card>
-      </Container>
+    </Container>
 }
+
