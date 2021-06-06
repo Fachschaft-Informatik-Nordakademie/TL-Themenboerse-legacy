@@ -21,29 +21,6 @@ class ExternalJsonAuthenticator extends AbstractJsonAuthenticator
         return $this->supportsJsonLoginType($request, 'external');
     }
 
-    public function supportsRegistration(Request $request): ?bool // TODO refactor
-    {
-        if (!$this->httpUtils->checkRequestPath($request, '/registration')) {
-            return false;
-        }
-        if (false === strpos($request->getRequestFormat(), 'json') && false === strpos($request->getContentType(), 'json')) {
-            return false;
-        }
-        $data = json_decode($request->getContent());
-        if (!$data instanceof \stdClass) {
-            throw new BadRequestHttpException('Invalid JSON.');
-        }
-        $email = $this->propertyAccessor->getValue($data, 'email');
-        if (!\is_string($email)) {
-            throw new BadRequestException('The key "email" must be provided.');
-        }
-        $password = $this->propertyAccessor->getValue($data, 'password');
-        if (!\is_string($password)) {
-            throw new BadRequestException('The key "password" must be provided.');
-        }
-        return true;
-    }
-
     public function getCredentials(Request $request)
     {
         $data = $this->decodeRequestBody($request);
