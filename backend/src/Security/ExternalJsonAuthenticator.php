@@ -4,7 +4,6 @@ namespace App\Security;
 
 use App\Entity\User;
 use App\Entity\UserType;
-use Symfony\Component\HttpFoundation\Exception\BadRequestException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\Security\Core\Exception\AuthenticationServiceException;
