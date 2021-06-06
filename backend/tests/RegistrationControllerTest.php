@@ -95,4 +95,17 @@ class RegistrationControllerTest extends ApiTestCase
         $this->assertResponseStatusCodeSame(400);
         $this->assertJsonContains(['message' => 'The e-mail address is already in use.']);
     }
+
+    public function test_that_register_throws_error_when_email_is_not_valid(): void
+    {
+        $this->client->request('POST', '/register', [
+            'json' => [
+                'email' => 'user4',
+                'password' => 'password4',
+            ],
+        ]);
+
+        $this->assertResponseStatusCodeSame(400);
+        $this->assertJsonContains(['message' => 'The e-mail address is not valid.']);
+    }
 }

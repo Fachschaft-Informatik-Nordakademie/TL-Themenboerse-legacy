@@ -12,6 +12,8 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
+use Symfony\Component\Validator\Constraints\Email;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class RegistrationController extends AbstractController
 {
@@ -20,13 +22,15 @@ class RegistrationController extends AbstractController
     private ExternalJsonAuthenticator $jsonAuth;
     private UserPasswordEncoderInterface $pwEncoder;
     private UserRepository $userRepository;
+    private ValidatorInterface $validator;
 
-    public function __construct(EntityManagerInterface $em, ExternalJsonAuthenticator $jsonAuth, UserPasswordEncoderInterface $pwEncoder, UserRepository $userRepository)
+    public function __construct(EntityManagerInterface $em, ExternalJsonAuthenticator $jsonAuth, UserPasswordEncoderInterface $pwEncoder, UserRepository $userRepository, ValidatorInterface $validator)
     {
         $this->em = $em;
         $this->jsonAuth = $jsonAuth;
         $this->pwEncoder = $pwEncoder;
         $this->userRepository = $userRepository;
+        $this->validator = $validator;
     }
 
     #[Route('/register', name: 'register', methods: ['post'])]
@@ -35,6 +39,10 @@ class RegistrationController extends AbstractController
         $credentials = $this->jsonAuth->getCredentials($request); // TODO 
         $email = $credentials['email'];
         $password = $credentials['password'];
+        $errors = $this->validator->validate($email, new Email());
+        if (count($errors) > 0) {
+            return $this->json(['message' => 'The e-mail address is not valid.'], Response::HTTP_BAD_REQUEST);
+        }
         if ($this->userRepository->loadUserByEmail($email)) {
             return $this->json(['message' => 'The e-mail address is already in use.'], Response::HTTP_BAD_REQUEST);
         }
