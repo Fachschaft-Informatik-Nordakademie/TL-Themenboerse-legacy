@@ -35,25 +35,28 @@ class TopicController extends AbstractController
         }
 
         $topic = new Topic();
-        $topic->setAuthor($user);
-        $topic->setTitle($request->get('title'));
-        $topic->setDescription($request->get('description'));
-        $topic->setRequirements($request->get('requirements'));
-        $topic->setTags($request->get('tags'));
-        $deadline = $request->get('deadline');
-        if ($deadline) {
-            $topic->setDeadline(\DateTime::createFromFormat('Y-m-d', $deadline));
+        try {
+            $topic->setAuthor($user);
+            $topic->setTitle($request->get('title') ?? '');
+            $topic->setDescription($request->get('description'));
+            $topic->setRequirements($request->get('requirements'));
+            $topic->setTags($request->get('tags'));
+            $deadline = $request->get('deadline');
+            if ($deadline) {
+                $topic->setDeadline(\DateTime::createFromFormat('Y-m-d', $deadline));
+            }
+            $start = $request->get('start');
+            if ($start) {
+                $topic->setStart(\DateTime::createFromFormat('Y-m-d', $start));
+            }
+            $topic->setPages($request->get('pages'));
+            $topic->setStatus($status);
+        } catch (\TypeError $e) {
+            return $this->json(['message' => 'Invalid topic received'], Response::HTTP_BAD_REQUEST);
         }
-        $start = $request->get('start');
-        if ($start) {
-            $topic->setStart(\DateTime::createFromFormat('Y-m-d', $start));
-        }
-        $topic->setPages($request->get('pages'));
-        $topic->setStatus($status);
-
         $errors = $this->validator->validate($topic);
         if (count($errors) > 0) {
-            return $this->json(['message' => 'Invalid topic received']);
+            return $this->json(['message' => 'Invalid topic received'], Response::HTTP_BAD_REQUEST);
         }
 
         $entityManager = $this->getDoctrine()->getManager();
@@ -71,7 +74,7 @@ class TopicController extends AbstractController
             ->find($id);
 
         if (!$topic) {
-            return $this->json(['message' => 'Topic not found'], Response::HTTP_UNAUTHORIZED);
+            return $this->json(['message' => 'Topic not found'], Response::HTTP_NOT_FOUND);
         }
         return $this->json($topic);
     }

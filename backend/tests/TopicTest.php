@@ -12,7 +12,7 @@ class TopicTest extends SecureApiTestCase
             'json' => [
                 'title' => 'test title',
                 'description' => 'This is a description.',
-                'requirements' => 'This are the requirements',
+                'requirements' => 'These are the requirements',
                 'tags' => array("PHP"),
                 'deadline' => "2021-10-04",
                 'pages' => 80,
@@ -23,7 +23,7 @@ class TopicTest extends SecureApiTestCase
         $this->assertResponseStatusCodeSame(200);
     }
 
-    public function test_topic_getter(): void
+    public function test_topic_retrieved_with_id(): void
     {
         $this->ensureLogin();
 
@@ -45,7 +45,59 @@ class TopicTest extends SecureApiTestCase
         $this->assertJsonContains([
             'title' => 'test title',
             'description' => 'This is a description.',
+            'requirements' => 'These are the requirements',
+            'tags' => array("PHP"),
+            'pages' => 80,
             'status' => 'OPEN'
         ]);
+    }
+
+    public function test_topic_empty_request_fails(): void
+    {
+        $this->ensureLogin();
+        $this->client->request('POST', '/topic');
+        $this->assertResponseStatusCodeSame(400);
+    }
+
+    public function test_topic_malformed_title_fails(): void
+    {
+        $this->ensureLogin();
+
+        $this->client->request('POST', '/topic', [
+            'json' => [
+                // Empty titles are not allowed
+                'title' => ''
+            ],
+        ]);
+
+        $this->assertResponseStatusCodeSame(400);
+    }
+
+    public function test_topic_malformed_date_fails(): void
+    {
+        $this->ensureLogin();
+
+        $this->client->request('POST', '/topic', [
+            'json' => [
+                'title' => 'Correct Title',
+                'start' => "a-b-c"
+            ],
+        ]);
+
+        $this->assertResponseStatusCodeSame(400);
+    }
+
+    public function test_topic_unauthorized_access(): void
+    {
+        $this->ensureLogout();
+        $this->client->request('POST', '/topic');
+        $this->assertResponseStatusCodeSame(401);
+    }
+
+    public function test_topic_fails_retrieve(): void
+    {
+        $this->ensureLogin();
+        $this->client->request('GET', '/topic/9999999');
+        $this->assertResponseStatusCodeSame(404);
     }
 }

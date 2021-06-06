@@ -31,4 +31,9 @@ abstract class SecureApiTestCase extends ApiTestCase
             ],
         ]);
     }
+
+    protected function ensureLogout(): void 
+    {
+        $this->client->request('POST', '/logout');
+    }
 }

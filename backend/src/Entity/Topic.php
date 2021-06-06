@@ -22,7 +22,7 @@ class Topic
     private string $title;
 
     #[ORM\Column(type: "string", length: 4000, nullable: true)]
-    private string $description;
+    private ?string $description;
 
     #[ORM\Column(type: "string", length: 1000, nullable: true)]
     private ?string $requirements;
@@ -51,7 +51,7 @@ class Topic
     private ?\DateTime $deadline;
 
     #[Ignore]
-    #[ORM\ManyToOne(targetEntity: "App\Entity\User", inversedBy: "topics")]
+    #[ORM\ManyToOne(targetEntity: User::class, inversedBy: "topics")]
     private ?User $author;
 
     /**
@@ -91,7 +91,7 @@ class Topic
     /**
      * Get the value of description
      *
-     * @return  string
+     * @return  ?string
      */
     public function getDescription()
     {
@@ -101,11 +101,11 @@ class Topic
     /**
      * Set the value of description
      *
-     * @param  string  $description
+     * @param  ?string  $description
      *
      * @return  self
      */
-    public function setDescription(string $description)
+    public function setDescription(?string $description)
     {
         $this->description = $description;
 

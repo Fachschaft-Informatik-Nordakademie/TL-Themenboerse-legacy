@@ -34,7 +34,7 @@ class User implements UserInterface, EquatableInterface
     private ?string $password;
 
     #[Ignore]
-    #[ORM\OneToMany(targetEntity: App\Entity\Topic::class, mappedBy: "author")]
+    #[ORM\OneToMany(targetEntity: Topic::class, mappedBy: "author")]
     private PersistentCollection $topics;
 
     public function getRoles(): array
