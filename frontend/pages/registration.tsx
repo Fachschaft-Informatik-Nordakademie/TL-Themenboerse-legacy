@@ -5,8 +5,13 @@ import CardActions from '@material-ui/core/CardActions';
 import CardContent from '@material-ui/core/CardContent';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
+import MuiAlert from '@material-ui/lab/Alert';
 import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
+
+function createSubmitError(message: string) {
+    return <MuiAlert variant="standard" severity="error">{message}</MuiAlert>;
+}
 
 const useStyles = makeStyles(() => ({
     root: {
@@ -38,6 +43,7 @@ export default function Registration() {
     const [passwordError, setPasswordError] = useState('');
     const [confirmError, setConfirmError] = useState('');
     const [emailError, setEmailError] = useState('');
+    const [submitError, setSubmitError] = useState('');
     const [submit, setSubmit] = useState(false);
 
     const title: string = "Registierung";
@@ -84,6 +90,14 @@ export default function Registration() {
         setConfirmDirty(true);
     };
 
+    const checkSubmitError = async (response: Response) => {
+        const json = await response.json();
+        if (response.status === 400) {
+            setSubmitError(json.message);
+        }
+        return json;
+    };
+
     const onSubmit = useCallback(async () => {
         setSubmit(true);
         setPasswordError(null);
@@ -99,7 +113,7 @@ export default function Registration() {
             body: JSON.stringify({ email, password })
         };
         const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/register`, requestOptions);
-        return await response.json();
+        return await checkSubmitError(response);
     }, [email, password, emailError, passwordError, confirmError]);
 
     const classes = useStyles();
@@ -108,6 +122,7 @@ export default function Registration() {
         <Card variant="outlined">
             <CardContent className={classes.content}>
                 <Typography variant="h4">{title}</Typography>
+                {submitError && createSubmitError(submitError)}
                 <form className={classes.form} noValidate>
                     <TextField required id="email" type="email" error={!!emailError} value={email} onChange={e => setEmail(e.target.value)} label={emailPlaceHolder} helperText={emailError} autoComplete="email" spellCheck="false" />
                     <TextField required id="password" type="password" error={!!passwordError} value={password} onChange={e => setPassword(e.target.value)} label={passwordPlaceHolder} helperText={passwordError} autoComplete="new-password" spellCheck="false" />
