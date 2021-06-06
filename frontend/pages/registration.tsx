@@ -5,12 +5,12 @@ import CardActions from '@material-ui/core/CardActions';
 import CardContent from '@material-ui/core/CardContent';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
-import MuiAlert from '@material-ui/lab/Alert';
+import MuiAlert, {Color} from '@material-ui/lab/Alert';
 import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
 
-function createSubmitError(message: string) {
-    return <MuiAlert variant="standard" severity="error">{message}</MuiAlert>;
+function createNotification(message: string, type: Color) {
+    return <MuiAlert variant="standard" severity={type}>{message}</MuiAlert>;
 }
 
 const useStyles = makeStyles(() => ({
@@ -45,6 +45,7 @@ export default function Registration() {
     const [emailError, setEmailError] = useState('');
     const [submitError, setSubmitError] = useState('');
     const [submit, setSubmit] = useState(false);
+    const [successfulRegister, setSuccessfulRegister] = useState(false);
 
     const title: string = "Registierung";
     const emailPlaceHolder = "E-Mail";
@@ -55,6 +56,7 @@ export default function Registration() {
     const passwordsNotMatching: string = "Die Passwörter stimmen nicht überein.";
     const emptyEmail: string = "Bitte geben Sie eine E-Mail-Adresse ein.";
     const emptyPassword: string = "Bitte geben Sie ein Passwort ein.";
+    const successMessage: string = 'Registrierung erfolgreich';
 
     const minPasswordLength: number = 8;
 
@@ -94,6 +96,8 @@ export default function Registration() {
         const json = await response.json();
         if (response.status === 400) {
             setSubmitError(json.message);
+        } else {
+            setSuccessfulRegister(true);
         }
         return json;
     };
@@ -122,7 +126,8 @@ export default function Registration() {
         <Card variant="outlined">
             <CardContent className={classes.content}>
                 <Typography variant="h4">{title}</Typography>
-                {submitError && createSubmitError(submitError)}
+                {submitError && createNotification(submitError, 'error')}
+                {successfulRegister && createNotification(successMessage, 'success')}
                 <form className={classes.form} noValidate>
                     <TextField required id="email" type="email" error={!!emailError} value={email} onChange={e => setEmail(e.target.value)} label={emailPlaceHolder} helperText={emailError} autoComplete="email" spellCheck="false" />
                     <TextField required id="password" type="password" error={!!passwordError} value={password} onChange={e => setPassword(e.target.value)} label={passwordPlaceHolder} helperText={passwordError} autoComplete="new-password" spellCheck="false" />
