@@ -37,7 +37,7 @@ class TopicController extends AbstractController
         $topic = new Topic();
         try {
             $topic->setAuthor($user);
-            $topic->setTitle($request->get('title') ?? '');
+            $topic->setTitle($request->get('title'));
             $topic->setDescription($request->get('description'));
             $topic->setRequirements($request->get('requirements'));
             $topic->setTags($request->get('tags'));
@@ -69,9 +69,7 @@ class TopicController extends AbstractController
     #[Route('/topic/{id}', name: 'topic_get', methods: ['get'])]
     public function getTopic(int $id): Response
     {
-        $topic = $this->getDoctrine()
-            ->getRepository(Topic::class)
-            ->find($id);
+        $topic = $this->topicRepository->find($id);
 
         if (!$topic) {
             return $this->json(['message' => 'Topic not found'], Response::HTTP_NOT_FOUND);

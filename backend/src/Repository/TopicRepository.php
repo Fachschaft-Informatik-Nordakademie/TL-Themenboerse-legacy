@@ -12,13 +12,4 @@ class TopicRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, Topic::class);
     }
-
-    public function loadTopicById(int $id): ?Topic
-    {
-        return $this->createQueryBuilder('t')
-            ->andWhere('t.id = :id')
-            ->setParameter('id', $id)
-            ->getQuery()
-            ->getOneOrNullResult();
-    }
 }
