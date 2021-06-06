@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Entity\User;
 use App\Repository\TopicRepository;
 use Symfony\Component\Serializer\Annotation\Ignore;
+use Symfony\Component\Validator\Constraints as Assert;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: TopicRepository::class)]
@@ -16,6 +17,7 @@ class Topic
     #[ORM\Column(type: "integer")]
     private ?int $id;
 
+    #[Assert\NotBlank]
     #[ORM\Column(type: "string", length: 500, nullable: false)]
     private string $title;
 
@@ -38,6 +40,7 @@ class Topic
     #[ORM\Column(type: "datetime", nullable: true)]
     private ?\DateTime $start;
 
+    #[Assert\PositiveOrZero]
     #[ORM\Column(type: "integer", nullable: true)]
     private ?int $pages;
 

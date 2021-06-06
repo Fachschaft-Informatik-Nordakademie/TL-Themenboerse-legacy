@@ -45,7 +45,7 @@ tasks:
     command: |-
       gp await-port 3306 && gp await-port 8000 \
       && php backend/bin/console doctrine:database:create --if-not-exists \
-      && php backend/bin/console doctrine:migrations:migrate --no-interaction \
+      && php backend/bin/console doctrine:schema:update --force \
       && php backend/bin/console hautelook:fixtures:load --no-interaction
 vscode:
   extensions:
