@@ -86,15 +86,21 @@ export default function Registration() {
 
     const onSubmit = useCallback(async () => {
         setSubmit(true);
+        setPasswordError(null);
+        const hasBlankFields: boolean = email === '' || password === '' || confirmError === '';
+        const hasErrors: boolean = !!emailError || !!passwordError || !!confirmError;
+
+        if (hasBlankFields || hasErrors) {
+            return;
+        }
         const requestOptions = {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 'email': email, 'password': password })
-        }; // TODO URL 
-        const response = await fetch('https://8000-black-cattle-kpp45iw9.ws-eu08.gitpod.io/register', requestOptions);
-        setSubmit(false);
-        return response.json;
-    }, [email, password]);
+            body: JSON.stringify({ email, password })
+        };
+        const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/register`, requestOptions);
+        return await response.json();
+    }, [email, password, emailError, passwordError, confirmError]);
 
     const classes = useStyles();
 
