@@ -6,6 +6,7 @@ use App\Repository\UserRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\EquatableInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Validator\Constraints\Email;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: "`user`")]
@@ -20,6 +21,7 @@ class User implements UserInterface, EquatableInterface
     private string $type;
 
     #[ORM\Column(type: "string", length: 255, nullable: false, unique: true)]
+    #[Email]
     private string $email;
 
     #[ORM\Column(type: "string", length: 255, nullable: true, unique: true)]
