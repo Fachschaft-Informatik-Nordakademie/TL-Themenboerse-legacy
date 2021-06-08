@@ -48,7 +48,7 @@ function create() {
             deadline: values.deadline,
             tags: values.tags
         }
-        const response = await fetch('/topic', {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/topic`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
