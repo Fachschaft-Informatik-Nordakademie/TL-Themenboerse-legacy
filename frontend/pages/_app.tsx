@@ -4,6 +4,7 @@ import React from 'react';
 import theme from '../src/theme';
 import '../styles/globals.css';
 import DateFnsUtils from '@date-io/date-fns';
+import Head from 'next/head';
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 function MyApp({ Component, pageProps }): JSX.Element {
@@ -16,13 +17,19 @@ function MyApp({ Component, pageProps }): JSX.Element {
   }, []);
 
   return (
-    <ThemeProvider theme={theme}>
-      <MuiPickersUtilsProvider utils={DateFnsUtils}>
-        {/* CssBaseline kickstart an elegant, consistent, and simple baseline to build upon. */}
-        <CssBaseline />
-        <Component {...pageProps} />
-      </MuiPickersUtilsProvider>
-    </ThemeProvider>
+    <React.Fragment>
+      <Head>
+        <title>Themenbörse</title>
+        <meta name="viewport" content="minimum-scale=1, initial-scale=1, width=device-width" />
+      </Head>
+      <ThemeProvider theme={theme}>
+        <MuiPickersUtilsProvider utils={DateFnsUtils}>
+          {/* CssBaseline kickstart an elegant, consistent, and simple baseline to build upon. */}
+          <CssBaseline />
+          <Component {...pageProps} />
+        </MuiPickersUtilsProvider>
+      </ThemeProvider>
+    </React.Fragment>
   );
 }
 

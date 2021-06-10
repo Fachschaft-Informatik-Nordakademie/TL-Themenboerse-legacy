@@ -10,6 +10,7 @@ import AssignmentIndOutlinedIcon from '@material-ui/icons/AssignmentIndOutlined'
 import Avatar from '@material-ui/core/Avatar';
 import Grid from '@material-ui/core/Grid';
 import Link from '../src/components/MaterialNextLink';
+import Head from 'next/head';
 
 function createNotification(message: string, type: Color): JSX.Element {
   return (
@@ -131,75 +132,80 @@ export default function Registration(): JSX.Element {
   const classes = useStyles();
 
   return (
-    <Container component="main" maxWidth="xs">
-      <CssBaseline />
-      <div className={classes.paper}>
-        <Avatar className={classes.avatar}>
-          <AssignmentIndOutlinedIcon />
-        </Avatar>
-        <Typography component="h1" variant="h5">
-          {title}
-        </Typography>
-        <form className={classes.form} onSubmit={onSubmit} noValidate>
-          {submitError && createNotification(submitError, 'error')}
-          {successfulRegister && createNotification(successMessage, 'success')}
-          <TextField
-            variant="outlined"
-            margin="normal"
-            required
-            fullWidth
-            id="email"
-            type="email"
-            error={!!emailError}
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            label={emailPlaceHolder}
-            helperText={emailError}
-            autoComplete="email"
-            spellCheck="false"
-          />
-          <TextField
-            variant="outlined"
-            margin="normal"
-            required
-            fullWidth
-            id="password"
-            type="password"
-            error={!!passwordError}
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            label={passwordPlaceHolder}
-            helperText={passwordError}
-            autoComplete="new-password"
-            spellCheck="false"
-          />
-          <TextField
-            variant="outlined"
-            margin="normal"
-            required
-            fullWidth
-            id="password-confirm"
-            type="password"
-            error={!!confirmError}
-            value={confirm}
-            onChange={(e) => handleConfirmChange(e.target.value)}
-            label={confirmPlaceHolder}
-            helperText={confirmError}
-            autoComplete="new-password"
-            spellCheck="false"
-          />
-          <Button type="submit" fullWidth variant="contained" color="primary" className={classes.submit}>
-            {submitCaption}
-          </Button>
-          <Grid container>
-            <Grid item xs>
-              <Link prefetch href="/login" variant="body2">
-                Bereits registriert oder du hast einen CIS-Account? Zum Login!
-              </Link>
+    <>
+      <Head>
+        <title>Registrieren - Themenbörse</title>
+      </Head>
+      <Container component="main" maxWidth="xs">
+        <CssBaseline />
+        <div className={classes.paper}>
+          <Avatar className={classes.avatar}>
+            <AssignmentIndOutlinedIcon />
+          </Avatar>
+          <Typography component="h1" variant="h5">
+            {title}
+          </Typography>
+          <form className={classes.form} onSubmit={onSubmit} noValidate>
+            {submitError && createNotification(submitError, 'error')}
+            {successfulRegister && createNotification(successMessage, 'success')}
+            <TextField
+              variant="outlined"
+              margin="normal"
+              required
+              fullWidth
+              id="email"
+              type="email"
+              error={!!emailError}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              label={emailPlaceHolder}
+              helperText={emailError}
+              autoComplete="email"
+              spellCheck="false"
+            />
+            <TextField
+              variant="outlined"
+              margin="normal"
+              required
+              fullWidth
+              id="password"
+              type="password"
+              error={!!passwordError}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              label={passwordPlaceHolder}
+              helperText={passwordError}
+              autoComplete="new-password"
+              spellCheck="false"
+            />
+            <TextField
+              variant="outlined"
+              margin="normal"
+              required
+              fullWidth
+              id="password-confirm"
+              type="password"
+              error={!!confirmError}
+              value={confirm}
+              onChange={(e) => handleConfirmChange(e.target.value)}
+              label={confirmPlaceHolder}
+              helperText={confirmError}
+              autoComplete="new-password"
+              spellCheck="false"
+            />
+            <Button type="submit" fullWidth variant="contained" color="primary" className={classes.submit}>
+              {submitCaption}
+            </Button>
+            <Grid container>
+              <Grid item xs>
+                <Link prefetch href="/login" variant="body2">
+                  Bereits registriert oder du hast einen CIS-Account? Zum Login!
+                </Link>
+              </Grid>
             </Grid>
-          </Grid>
-        </form>
-      </div>
-    </Container>
+          </form>
+        </div>
+      </Container>
+    </>
   );
 }

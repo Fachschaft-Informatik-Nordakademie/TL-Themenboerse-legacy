@@ -5,6 +5,7 @@ import { KeyboardDatePicker } from '@material-ui/pickers';
 import { useFormik } from 'formik';
 import * as yup from 'yup';
 import React from 'react';
+import Head from 'next/head';
 
 interface IFormValues {
   readonly title: string;
@@ -67,91 +68,96 @@ function CreateTopic(): JSX.Element {
   const classes = useStyles();
 
   return (
-    <Container>
-      <h1>Neues Thema erstellen</h1>
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          formik.submitForm();
-        }}
-      >
-        <TextField
-          label="Titel"
-          name="title"
-          fullWidth
-          className={classes.formField}
-          value={formik.values.title}
-          onChange={formik.handleChange}
-          helperText={formik.touched.title && formik.errors.title}
-          error={formik.touched.title && Boolean(formik.errors.title)}
-          onBlur={formik.handleBlur}
-          required
-        />
-        <TextField
-          label="Beschreibung"
-          name="description"
-          fullWidth
-          multiline
-          className={classes.formField}
-          value={formik.values.description}
-          onChange={formik.handleChange}
-          helperText={formik.touched.description && formik.errors.description}
-          error={formik.touched.description && Boolean(formik.errors.description)}
-          onBlur={formik.handleBlur}
-          required
-        />
-        <TextField
-          label="Anforderungen"
-          name="requirements"
-          fullWidth
-          multiline
-          className={classes.formField}
-          value={formik.values.requirements}
-          onChange={formik.handleChange}
-          helperText={formik.touched.requirements && formik.errors.requirements}
-          error={formik.touched.requirements && Boolean(formik.errors.requirements)}
-          onBlur={formik.handleBlur}
-          required
-        />
-        <KeyboardDatePicker
-          name="deadline"
-          disableToolbar
-          variant="inline"
-          format="dd/MM/yyyy"
-          margin="normal"
-          label="Endtermin"
-          value={formik.values.deadline}
-          onChange={(value) => formik.setFieldValue('deadline', value)}
-          helperText={formik.touched.deadline && formik.errors.deadline}
-          error={formik.touched.deadline && Boolean(formik.errors.deadline)}
-          onBlur={formik.handleBlur}
-        />
-        <Autocomplete
-          id="tags"
-          className={classes.formField}
-          multiple
-          freeSolo
-          value={formik.values.tags}
-          onChange={(e, values) => formik.setFieldValue('tags', values)}
-          options={tagOptions}
-          getOptionLabel={(option) => option}
-          defaultValue={[]}
-          onBlur={formik.handleBlur}
-          renderInput={(params) => (
-            <TextField
-              {...params}
-              variant="standard"
-              label="Tags"
-              helperText={formik.touched.tags && formik.errors.tags}
-              error={formik.touched.tags && Boolean(formik.errors.tags)}
-            />
-          )}
-        />
-        <Button variant="contained" color="primary" type="submit">
-          Erstellen
-        </Button>
-      </form>
-    </Container>
+    <>
+      <Head>
+        <title>Thema erstellen - Themenbörse</title>
+      </Head>
+      <Container>
+        <h1>Neues Thema erstellen</h1>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            formik.submitForm();
+          }}
+        >
+          <TextField
+            label="Titel"
+            name="title"
+            fullWidth
+            className={classes.formField}
+            value={formik.values.title}
+            onChange={formik.handleChange}
+            helperText={formik.touched.title && formik.errors.title}
+            error={formik.touched.title && Boolean(formik.errors.title)}
+            onBlur={formik.handleBlur}
+            required
+          />
+          <TextField
+            label="Beschreibung"
+            name="description"
+            fullWidth
+            multiline
+            className={classes.formField}
+            value={formik.values.description}
+            onChange={formik.handleChange}
+            helperText={formik.touched.description && formik.errors.description}
+            error={formik.touched.description && Boolean(formik.errors.description)}
+            onBlur={formik.handleBlur}
+            required
+          />
+          <TextField
+            label="Anforderungen"
+            name="requirements"
+            fullWidth
+            multiline
+            className={classes.formField}
+            value={formik.values.requirements}
+            onChange={formik.handleChange}
+            helperText={formik.touched.requirements && formik.errors.requirements}
+            error={formik.touched.requirements && Boolean(formik.errors.requirements)}
+            onBlur={formik.handleBlur}
+            required
+          />
+          <KeyboardDatePicker
+            name="deadline"
+            disableToolbar
+            variant="inline"
+            format="dd/MM/yyyy"
+            margin="normal"
+            label="Endtermin"
+            value={formik.values.deadline}
+            onChange={(value) => formik.setFieldValue('deadline', value)}
+            helperText={formik.touched.deadline && formik.errors.deadline}
+            error={formik.touched.deadline && Boolean(formik.errors.deadline)}
+            onBlur={formik.handleBlur}
+          />
+          <Autocomplete
+            id="tags"
+            className={classes.formField}
+            multiple
+            freeSolo
+            value={formik.values.tags}
+            onChange={(e, values) => formik.setFieldValue('tags', values)}
+            options={tagOptions}
+            getOptionLabel={(option) => option}
+            defaultValue={[]}
+            onBlur={formik.handleBlur}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                variant="standard"
+                label="Tags"
+                helperText={formik.touched.tags && formik.errors.tags}
+                error={formik.touched.tags && Boolean(formik.errors.tags)}
+              />
+            )}
+          />
+          <Button variant="contained" color="primary" type="submit">
+            Erstellen
+          </Button>
+        </form>
+      </Container>
+    </>
   );
 }
 

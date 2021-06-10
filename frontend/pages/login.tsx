@@ -13,6 +13,7 @@ import { useRouter } from 'next/router';
 import isMail from 'isemail';
 
 import Link from '../src/components/MaterialNextLink';
+import Head from 'next/head';
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -74,69 +75,74 @@ export default function SignIn(): JSX.Element {
   };
 
   return (
-    <Container component="main" maxWidth="xs">
-      <CssBaseline />
-      <div className={classes.paper}>
-        <Avatar className={classes.avatar}>
-          <LockOutlinedIcon />
-        </Avatar>
-        <Typography component="h1" variant="h5">
-          Anmeldung {isNakUser ? '(NAK)' : '(extern)'}
-        </Typography>
-        <form className={classes.form} onSubmit={login}>
-          <TextField
-            variant="outlined"
-            margin="normal"
-            required
-            fullWidth
-            id="username"
-            label={isNakUser ? 'CIS-Benutzername' : 'E-Mail-Adresse'}
-            name="username"
-            autoComplete="email"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            error={!isUserValid()}
-          />
-          <TextField
-            variant="outlined"
-            margin="normal"
-            required
-            fullWidth
-            name="password"
-            label="Passwort"
-            type="password"
-            id="password"
-            autoComplete="current-password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-          <Button type="submit" fullWidth variant="contained" color="primary" className={classes.submit}>
-            Anmelden
-          </Button>
-          <Button
-            type="button"
-            fullWidth
-            variant="contained"
-            color="default"
-            className={classes.switchTypeButton}
-            onClick={() => setIsNakUser((currentValue) => !currentValue)}
-          >
-            {isNakUser ? 'Login mit E-Mail' : 'Zum CIS-Login'}
-          </Button>
-          <Grid container>
-            <Grid item xs>
-              <Link href="/registration" variant="body2">
-                Password vergessen?
-              </Link>
+    <>
+      <Head>
+        <title>Login - Themenbörse</title>
+      </Head>
+      <Container component="main" maxWidth="xs">
+        <CssBaseline />
+        <div className={classes.paper}>
+          <Avatar className={classes.avatar}>
+            <LockOutlinedIcon />
+          </Avatar>
+          <Typography component="h1" variant="h5">
+            Anmeldung {isNakUser ? '(NAK)' : '(extern)'}
+          </Typography>
+          <form className={classes.form} onSubmit={login}>
+            <TextField
+              variant="outlined"
+              margin="normal"
+              required
+              fullWidth
+              id="username"
+              label={isNakUser ? 'CIS-Benutzername' : 'E-Mail-Adresse'}
+              name="username"
+              autoComplete="email"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              error={!isUserValid()}
+            />
+            <TextField
+              variant="outlined"
+              margin="normal"
+              required
+              fullWidth
+              name="password"
+              label="Passwort"
+              type="password"
+              id="password"
+              autoComplete="current-password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+            <Button type="submit" fullWidth variant="contained" color="primary" className={classes.submit}>
+              Anmelden
+            </Button>
+            <Button
+              type="button"
+              fullWidth
+              variant="contained"
+              color="default"
+              className={classes.switchTypeButton}
+              onClick={() => setIsNakUser((currentValue) => !currentValue)}
+            >
+              {isNakUser ? 'Login mit E-Mail' : 'Zum CIS-Login'}
+            </Button>
+            <Grid container>
+              <Grid item xs>
+                <Link href="/registration" variant="body2">
+                  Password vergessen?
+                </Link>
+              </Grid>
+              <Grid item>
+                <Link prefetch href="/registration" variant="body2">
+                  Registrieren
+                </Link>
+              </Grid>
             </Grid>
-            <Grid item>
-              <Link prefetch href="/registration" variant="body2">
-                Registrieren
-              </Link>
-            </Grid>
-          </Grid>
-        </form>
-      </div>
-    </Container>
+          </form>
+        </div>
+      </Container>
+    </>
   );
 }
