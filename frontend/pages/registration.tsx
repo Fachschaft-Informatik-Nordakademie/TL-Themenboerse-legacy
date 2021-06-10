@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import React, {useState, useEffect, useCallback} from 'react';
 import Container from '@material-ui/core/Container';
 import Card from '@material-ui/core/Card';
 import CardActions from '@material-ui/core/CardActions';
@@ -7,33 +7,36 @@ import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
 import MuiAlert, {Color} from '@material-ui/lab/Alert';
 import Typography from '@material-ui/core/Typography';
-import { makeStyles } from '@material-ui/core/styles';
+import {makeStyles} from '@material-ui/core/styles';
+import {CssBaseline} from "@material-ui/core";
+import AssignmentIndOutlinedIcon from '@material-ui/icons/AssignmentIndOutlined';
+import Avatar from "@material-ui/core/Avatar";
+import Grid from "@material-ui/core/Grid";
+import Link from "../src/components/MaterialNextLink";
 
 function createNotification(message: string, type: Color) {
     return <MuiAlert variant="standard" severity={type}>{message}</MuiAlert>;
 }
 
-const useStyles = makeStyles(() => ({
-    root: {
+const useStyles = makeStyles((theme) => ({
+    paper: {
+        marginTop: theme.spacing(8),
         display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center'
+        flexDirection: 'column',
+        alignItems: 'center',
     },
-    content: {
-        flex: '1',
-        margin: '1rem 2rem 0'
+    avatar: {
+        margin: theme.spacing(1),
+        backgroundColor: theme.palette.warning.main,
     },
     form: {
-        display: 'flex',
-        flexDirection: 'column'
-    },
-    actions: {
-        margin: '0 2rem 1rem'
+        width: '100%', // Fix IE 11 issue.
+        marginTop: theme.spacing(1),
     },
     submit: {
-        marginLeft: 'auto'
-    }
-}))
+        margin: theme.spacing(3, 0, 2),
+    },
+}));
 
 export default function Registration() {
     const [email, setEmail] = useState('');
@@ -102,7 +105,8 @@ export default function Registration() {
         return json;
     };
 
-    const onSubmit = useCallback(async () => {
+    const onSubmit = useCallback(async (e: React.FormEvent) => {
+        e.preventDefault();
         setSubmit(true);
         setPasswordError(null);
         const hasBlankFields: boolean = email === '' || password === '' || confirmError === '';
@@ -113,8 +117,8 @@ export default function Registration() {
         }
         const requestOptions = {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email, password })
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({email, password})
         };
         const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/register`, requestOptions);
         return await checkSubmitError(response);
@@ -122,22 +126,50 @@ export default function Registration() {
 
     const classes = useStyles();
 
-    return <Container maxWidth="sm">
-        <Card variant="outlined">
-            <CardContent className={classes.content}>
-                <Typography variant="h4">{title}</Typography>
+    return <Container component="main" maxWidth="xs">
+        <CssBaseline/>
+        <div className={classes.paper}>
+            <Avatar className={classes.avatar}>
+                <AssignmentIndOutlinedIcon/>
+            </Avatar>
+            <Typography component="h1" variant="h5">{title}</Typography>
+            <form className={classes.form} onSubmit={onSubmit} noValidate>
                 {submitError && createNotification(submitError, 'error')}
                 {successfulRegister && createNotification(successMessage, 'success')}
-                <form className={classes.form} noValidate>
-                    <TextField required id="email" type="email" error={!!emailError} value={email} onChange={e => setEmail(e.target.value)} label={emailPlaceHolder} helperText={emailError} autoComplete="email" spellCheck="false" />
-                    <TextField required id="password" type="password" error={!!passwordError} value={password} onChange={e => setPassword(e.target.value)} label={passwordPlaceHolder} helperText={passwordError} autoComplete="new-password" spellCheck="false" />
-                    <TextField required id="password-confirm" type="password" error={!!confirmError} value={confirm} onChange={e => handleConfirmChange(e.target.value)} label={confirmPlaceHolder} helperText={confirmError} autoComplete="new-password" spellCheck="false" />
-                </form>
-            </CardContent>
-            <CardActions className={classes.actions}>
-                <Button className={classes.submit} variant="contained" color="primary" type="submit" onClick={onSubmit}>{submitCaption}</Button>
-            </CardActions>
-        </Card>
+                <TextField variant="outlined"
+                           margin="normal"
+                           required autoFocus
+                           fullWidth id="email" type="email" error={!!emailError} value={email}
+                           onChange={e => setEmail(e.target.value)} label={emailPlaceHolder} helperText={emailError}
+                           autoComplete="email" spellCheck="false"/>
+                <TextField variant="outlined"
+                           margin="normal"
+                           required
+                           fullWidth id="password" type="password" error={!!passwordError} value={password}
+                           onChange={e => setPassword(e.target.value)} label={passwordPlaceHolder}
+                           helperText={passwordError} autoComplete="new-password" spellCheck="false"/>
+                <TextField variant="outlined"
+                           margin="normal"
+                           required
+                           fullWidth id="password-confirm" type="password" error={!!confirmError} value={confirm}
+                           onChange={e => handleConfirmChange(e.target.value)} label={confirmPlaceHolder}
+                           helperText={confirmError} autoComplete="new-password" spellCheck="false"/>
+                <Button
+                    type="submit"
+                    fullWidth
+                    variant="contained"
+                    color="primary"
+                    className={classes.submit}
+                >
+                    {submitCaption}
+                </Button>
+                <Grid container>
+                    <Grid item xs>
+                        <Link href="/login" variant="body2">Bereits registriert oder du hast einen CIS-Account? Zum Login!</Link>
+                    </Grid>
+                </Grid>
+            </form>
+        </div>
     </Container>
 }
 
