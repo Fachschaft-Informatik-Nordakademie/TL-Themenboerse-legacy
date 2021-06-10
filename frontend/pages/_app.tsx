@@ -5,6 +5,7 @@ import theme from '../src/theme';
 import '../styles/globals.css';
 import DateFnsUtils from '@date-io/date-fns';
 import Head from 'next/head';
+import { appWithTranslation } from 'next-i18next';
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 function MyApp({ Component, pageProps }): JSX.Element {
@@ -33,4 +34,4 @@ function MyApp({ Component, pageProps }): JSX.Element {
   );
 }
 
-export default MyApp;
+export default appWithTranslation(MyApp);

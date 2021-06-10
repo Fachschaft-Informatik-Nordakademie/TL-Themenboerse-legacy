@@ -208,7 +208,7 @@ export default function Registration(): JSX.Element {
             </Button>
             <Grid container>
               <Grid item xs>
-                <Link prefetch href="/login" variant="body2">
+                <Link href="/login" variant="body2">
                   Bereits registriert oder du hast einen CIS-Account? Zum Login!
                 </Link>
               </Grid>

@@ -1,0 +1,13 @@
+{
+  "title": "Anmeldung",
+  "titleNakMode": "NAK",
+  "titleEmailMode": "Extern",
+  "labelCisUsername": "CIS-Benutzername",
+  "labelEmail": "E-Mail-Adresse",
+  "labelPassword": "Passwort",
+  "buttonLogin": "Anmelden",
+  "buttonLoginWithEmail": "Login mit E-Mail",
+  "buttonLoginWithCis": "Zum CIS-Login",
+  "linkPasswordReset": "Password vergessen?",
+  "linkRegister": "Registrieren"
+}

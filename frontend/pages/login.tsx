@@ -15,6 +15,22 @@ import isMail from 'isemail';
 import Link from '../src/components/MaterialNextLink';
 import Head from 'next/head';
 
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
+import { SSRConfig, useTranslation } from 'next-i18next';
+
+type StaticProps = {
+  props: SSRConfig;
+};
+
+export async function getStaticProps({ locale }): Promise<StaticProps> {
+  return {
+    props: {
+      ...(await serverSideTranslations(locale, ['common', 'login'])),
+      // Will be passed to the page component as props
+    },
+  };
+}
+
 const useStyles = makeStyles((theme) => ({
   paper: {
     marginTop: theme.spacing(8),
@@ -39,6 +55,8 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 export default function SignIn(): JSX.Element {
+  const { t: tLogin } = useTranslation('login');
+  const { t: tCommon } = useTranslation('common');
   const classes = useStyles();
   const router = useRouter();
   const [username, setUsername] = useState('');
@@ -77,7 +95,9 @@ export default function SignIn(): JSX.Element {
   return (
     <>
       <Head>
-        <title>Login - Themenbörse</title>
+        <title>
+          {tLogin('title')} - {tCommon('appName')}
+        </title>
       </Head>
       <Container component="main" maxWidth="xs">
         <CssBaseline />
@@ -86,7 +106,7 @@ export default function SignIn(): JSX.Element {
             <LockOutlinedIcon />
           </Avatar>
           <Typography component="h1" variant="h5">
-            Anmeldung {isNakUser ? '(NAK)' : '(extern)'}
+            {tLogin('title')} {isNakUser ? `(${tLogin('titleNakMode')})` : `(${tLogin('titleEmailMode')})`}
           </Typography>
           <form className={classes.form} onSubmit={login}>
             <TextField
@@ -95,7 +115,7 @@ export default function SignIn(): JSX.Element {
               required
               fullWidth
               id="username"
-              label={isNakUser ? 'CIS-Benutzername' : 'E-Mail-Adresse'}
+              label={isNakUser ? tLogin('labelCisUsername') : tLogin('labelEmail')}
               name="username"
               autoComplete="email"
               value={username}
@@ -108,7 +128,7 @@ export default function SignIn(): JSX.Element {
               required
               fullWidth
               name="password"
-              label="Passwort"
+              label={tLogin('labelPassword')}
               type="password"
               id="password"
               autoComplete="current-password"
@@ -116,7 +136,7 @@ export default function SignIn(): JSX.Element {
               onChange={(e) => setPassword(e.target.value)}
             />
             <Button type="submit" fullWidth variant="contained" color="primary" className={classes.submit}>
-              Anmelden
+              {tLogin('buttonLogin')}
             </Button>
             <Button
               type="button"
@@ -126,17 +146,17 @@ export default function SignIn(): JSX.Element {
               className={classes.switchTypeButton}
               onClick={() => setIsNakUser((currentValue) => !currentValue)}
             >
-              {isNakUser ? 'Login mit E-Mail' : 'Zum CIS-Login'}
+              {isNakUser ? tLogin('buttonLoginWithEmail') : tLogin('buttonLoginWithCis')}
             </Button>
             <Grid container>
               <Grid item xs>
                 <Link href="/registration" variant="body2">
-                  Password vergessen?
+                  {tLogin('linkPasswordReset')}
                 </Link>
               </Grid>
               <Grid item>
-                <Link prefetch href="/registration" variant="body2">
-                  Registrieren
+                <Link href="/registration" variant="body2">
+                  {tLogin('linkRegister')}
                 </Link>
               </Grid>
             </Grid>
