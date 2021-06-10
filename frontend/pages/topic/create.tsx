@@ -6,6 +6,7 @@ import { useFormik } from 'formik';
 import * as yup from 'yup';
 import React from 'react';
 import Head from 'next/head';
+import axiosClient from '../../src/api';
 
 interface IFormValues {
   readonly title: string;
@@ -39,13 +40,7 @@ function CreateTopic(): JSX.Element {
       deadline: values.deadline,
       tags: values.tags,
     };
-    await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/topic`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(topicData),
-    });
+    await axiosClient.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/topic`, topicData);
     // TODO: success message/back navigation? error handling?
   };
 

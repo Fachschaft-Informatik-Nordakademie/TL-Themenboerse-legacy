@@ -8,7 +8,7 @@ import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
-import axios from 'axios';
+import axiosClient from '../src/api';
 import { useRouter } from 'next/router';
 import isMail from 'isemail';
 
@@ -63,8 +63,8 @@ export default function SignIn(): JSX.Element {
       } else {
         req = { type: 'external', email: username, password: password };
       }
-      axios
-        .post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/login`, req)
+      axiosClient
+        .post(`/login`, req)
         .then(() => router.push('/'))
         .catch((error) => {
           console.log(error);

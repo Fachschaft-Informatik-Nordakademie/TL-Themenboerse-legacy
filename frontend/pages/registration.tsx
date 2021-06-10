@@ -11,6 +11,8 @@ import Avatar from '@material-ui/core/Avatar';
 import Grid from '@material-ui/core/Grid';
 import Link from '../src/components/MaterialNextLink';
 import Head from 'next/head';
+import axiosClient from '../src/api';
+import { AxiosResponse } from 'axios';
 
 function createNotification(message: string, type: Color): JSX.Element {
   return (
@@ -41,16 +43,16 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 export default function Registration(): JSX.Element {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirm, setConfirm] = useState('');
-  const [confirmDirty, setConfirmDirty] = useState(false);
-  const [passwordError, setPasswordError] = useState('');
-  const [confirmError, setConfirmError] = useState('');
-  const [emailError, setEmailError] = useState('');
-  const [submitError, setSubmitError] = useState('');
-  const [submit, setSubmit] = useState(false);
-  const [successfulRegister, setSuccessfulRegister] = useState(false);
+  const [email, setEmail] = useState<string>('');
+  const [password, setPassword] = useState<string>('');
+  const [confirm, setConfirm] = useState<string>('');
+  const [confirmDirty, setConfirmDirty] = useState<boolean>(false);
+  const [passwordError, setPasswordError] = useState<string | undefined>('');
+  const [confirmError, setConfirmError] = useState<string | undefined>('');
+  const [emailError, setEmailError] = useState<string | undefined>('');
+  const [submitError, setSubmitError] = useState<string | undefined>('');
+  const [submit, setSubmit] = useState<boolean>(false);
+  const [successfulRegister, setSuccessfulRegister] = useState<boolean>(false);
 
   const title = 'Registierung';
   const emailPlaceHolder = 'E-Mail';
@@ -97,34 +99,42 @@ export default function Registration(): JSX.Element {
     setConfirmDirty(true);
   };
 
-  const checkSubmitError = async (response: Response): Promise<void> => {
-    const json = await response.json();
+  const checkSubmitError = async (response: AxiosResponse): Promise<void> => {
+    const data = response.data;
+
     if (response.status === 400) {
-      setSubmitError(json.message);
+      setSubmitError(data.message);
     } else {
       setSuccessfulRegister(true);
     }
-    return json;
+    return data;
   };
 
   const onSubmit = useCallback(
     async (e: React.FormEvent): Promise<void> => {
       e.preventDefault();
       setSubmit(true);
-      setPasswordError(null);
+      setPasswordError(undefined);
+
+      setSubmitError(undefined);
+      setSuccessfulRegister(false);
+
       const hasBlankFields: boolean = email === '' || password === '' || confirmError === '';
       const hasErrors: boolean = !!emailError || !!passwordError || !!confirmError;
 
       if (hasBlankFields || hasErrors) {
         return;
       }
-      const requestOptions = {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      };
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/register`, requestOptions);
-      return await checkSubmitError(response);
+      try {
+        const response = await axiosClient.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/register`, { email, password });
+        await checkSubmitError(response);
+      } catch (e) {
+        if (e.response && e.response.data && e.response.data.message) {
+          setSubmitError(e.response.data.message);
+        } else {
+          setSubmitError('Unbekannter Fehler aufgetreten');
+        }
+      }
     },
     [email, password, emailError, passwordError, confirmError],
   );
