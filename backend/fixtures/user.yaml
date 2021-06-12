@@ -3,3 +3,5 @@ App\Entity\User:
         email: dummy@example.com
         type: EXTERNAL
         password: <hashPassword('password')>
+        firstName: Test
+        lastName: Test

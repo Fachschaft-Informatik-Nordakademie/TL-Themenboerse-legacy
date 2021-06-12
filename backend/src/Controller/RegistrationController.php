@@ -34,12 +34,20 @@ class RegistrationController extends AbstractController
     {
         $email = $request->get('email') ?? '';
         $password = $request->get('password');
+        $firstName = $request->get('firstName');
+        $lastName = $request->get('lastName');
 
         $user = new User();
         $user->setEmail($email);
 
         $errors = $this->validator->validate($user);
 
+        if (strlen($firstName) < 2) {
+            return $this->json(['message' => 'The first name must contain at least 2 characters.'], Response::HTTP_BAD_REQUEST);
+        }
+        if (strlen($lastName) < 2) {
+            return $this->json(['message' => 'The last name must contain at least 2 characters.'], Response::HTTP_BAD_REQUEST);
+        }
         if (count($errors) > 0) {
             return $this->json(['message' => 'The e-mail address is not valid.'], Response::HTTP_BAD_REQUEST);
         }
@@ -50,7 +58,7 @@ class RegistrationController extends AbstractController
             return $this->json(['message' => 'The password must contain at least 8 characters.'], Response::HTTP_BAD_REQUEST);
         }
         $password = $this->pwEncoder->encodePassword($user, $password);
-        $user->setPassword($password)->setType(UserType::EXTERNAL);
+        $user->setPassword($password)->setType(UserType::EXTERNAL)->setFirstName($firstName)->setLastName($lastName);
         $this->em->persist($user);
         $this->em->flush();
         return $this->json(['message' => 'Registered user ' . $email]);

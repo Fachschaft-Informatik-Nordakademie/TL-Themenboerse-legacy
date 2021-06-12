@@ -97,6 +97,8 @@ class LdapJsonAuthenticator extends AbstractJsonAuthenticator
     {
         $mailAttribute = $this->params->get('app.ldap_attribute_mail');
         $usernameAttribute = $this->params->get('app.ldap_attribute_username');
+        $firstNameAttribute = $this->params->get('app.ldap_attribute_first_name');
+        $lastNameAttribute = $this->params->get('app.ldap_attribute_last_name');
 
         $emailValue = $entry->getAttribute($mailAttribute);
         if ($emailValue === null || count($emailValue) !== 1) {
@@ -107,6 +109,10 @@ class LdapJsonAuthenticator extends AbstractJsonAuthenticator
         if ($usernameValue === null || count($usernameValue) !== 1) {
             throw new LogicException("User has multiple stored usernames");
         }
+
+        $firstNameValue = $entry->getAttribute($firstNameAttribute);
+
+        $lastNameValue = $entry->getAttribute($lastNameAttribute);
 
         $user = $this->userRepository->loadUserByLdapUsername($usernameValue[0]);
 
@@ -120,6 +126,8 @@ class LdapJsonAuthenticator extends AbstractJsonAuthenticator
         $user->setLdapDn($entry->getDn());
         $user->setEmail($emailValue[0]);
         $user->setType(UserType::LDAP);
+        $user->setFirstName($firstNameValue[0]);
+        $user->setLastName($lastNameValue[0]);
 
         $this->em->persist($user);
         $this->em->flush();
