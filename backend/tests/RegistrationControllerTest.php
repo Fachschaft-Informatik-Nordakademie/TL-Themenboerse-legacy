@@ -28,7 +28,7 @@ class RegistrationControllerTest extends ApiTestCase
 
     public function test_error_when_first_name_is_not_provided(): void
     {
-        $this->client->request('POST', '/register', [
+        $response = $this->client->request('POST', '/register', [
             'json' => [
                 'email' => 'user1@example.com',
                 'password' => 'password1',
@@ -37,12 +37,12 @@ class RegistrationControllerTest extends ApiTestCase
         ]);
 
         $this->assertResponseStatusCodeSame(400);
-        $this->assertJsonContains(['message' => 'The first name must contain at least 2 characters.']);
+        $this->assertStringContainsString('The first name must contain at least 2 characters.', $response->getContent(false));
     }
 
     public function test_error_when_first_name_is_empty(): void
     {
-        $this->client->request('POST', '/register', [
+        $response = $this->client->request('POST', '/register', [
             'json' => [
                 'email' => 'user1@example.com',
                 'password' => 'password1',
@@ -52,13 +52,13 @@ class RegistrationControllerTest extends ApiTestCase
         ]);
 
         $this->assertResponseStatusCodeSame(400);
-        $this->assertJsonContains(['message' => 'The first name must contain at least 2 characters.']);
+        $this->assertStringContainsString('The first name must contain at least 2 characters.', $response->getContent(false));
     }
 
 
     public function test_error_when_last_name_is_not_provided(): void
     {
-        $this->client->request('POST', '/register', [
+        $response = $this->client->request('POST', '/register', [
             'json' => [
                 'email' => 'user1@example.com',
                 'password' => 'password1',
@@ -67,12 +67,12 @@ class RegistrationControllerTest extends ApiTestCase
         ]);
 
         $this->assertResponseStatusCodeSame(400);
-        $this->assertJsonContains(['message' => 'The last name must contain at least 2 characters.']);
+        $this->assertStringContainsString('The last name must contain at least 2 characters.', $response->getContent(false));
     }
 
     public function test_error_when_last_name_is_empty(): void
     {
-        $this->client->request('POST', '/register', [
+        $response = $this->client->request('POST', '/register', [
             'json' => [
                 'email' => 'user1@example.com',
                 'password' => 'password1',
@@ -82,12 +82,12 @@ class RegistrationControllerTest extends ApiTestCase
         ]);
 
         $this->assertResponseStatusCodeSame(400);
-        $this->assertJsonContains(['message' => 'The last name must contain at least 2 characters.']);
+        $this->assertStringContainsString('The last name must contain at least 2 characters.', $response->getContent(false));
     }
 
     public function test_that_registration_works(): void
     {
-        $this->client->request('POST', '/register', [
+        $response = $this->client->request('POST', '/register', [
             'json' => [
                 'email' => 'user1@example.com',
                 'password' => 'password1',
@@ -152,7 +152,7 @@ class RegistrationControllerTest extends ApiTestCase
         ]);
         $this->assertResponseStatusCodeSame(200);
 
-        $this->client->request('POST', '/register', [
+        $response = $this->client->request('POST', '/register', [
             'json' => [
                 'email' => 'user3@example.com',
                 'password' => 'password3',
@@ -162,12 +162,12 @@ class RegistrationControllerTest extends ApiTestCase
         ]);
 
         $this->assertResponseStatusCodeSame(400);
-        $this->assertJsonContains(['message' => 'The e-mail address is already in use.']);
+        $this->assertStringContainsString('The e-mail address is already in use.', $response->getContent(false));
     }
 
     public function test_that_register_throws_error_when_email_is_not_valid(): void
     {
-        $this->client->request('POST', '/register', [
+        $response = $this->client->request('POST', '/register', [
             'json' => [
                 'email' => 'user4',
                 'password' => 'password4',
@@ -177,6 +177,6 @@ class RegistrationControllerTest extends ApiTestCase
         ]);
 
         $this->assertResponseStatusCodeSame(400);
-        $this->assertJsonContains(['message' => 'The e-mail address is not valid.']);
+        $this->assertStringContainsString('The e-mail address is not valid.', $response->getContent(false));
     }
 }

@@ -32,24 +32,18 @@ class RegistrationController extends AbstractController
     #[Route('/register', name: 'register', methods: ['post'])]
     public function register(Request $request): Response
     {
-        $email = $request->get('email') ?? '';
+        $email = $request->get('email', '');
         $password = $request->get('password');
-        $firstName = $request->get('firstName');
-        $lastName = $request->get('lastName');
+        $firstName = $request->get('firstName', '');
+        $lastName = $request->get('lastName', '');
 
         $user = new User();
-        $user->setEmail($email);
+        $user->setEmail($email)->setFirstName($firstName)->setLastName($lastName)->setType(UserType::EXTERNAL);
 
         $errors = $this->validator->validate($user);
 
-        if (strlen($firstName) < 2) {
-            return $this->json(['message' => 'The first name must contain at least 2 characters.'], Response::HTTP_BAD_REQUEST);
-        }
-        if (strlen($lastName) < 2) {
-            return $this->json(['message' => 'The last name must contain at least 2 characters.'], Response::HTTP_BAD_REQUEST);
-        }
         if (count($errors) > 0) {
-            return $this->json(['message' => 'The e-mail address is not valid.'], Response::HTTP_BAD_REQUEST);
+            return $this->json(['message' => (string) $errors], Response::HTTP_BAD_REQUEST);
         }
         if ($this->userRepository->loadUserByEmail($email)) {
             return $this->json(['message' => 'The e-mail address is already in use.'], Response::HTTP_BAD_REQUEST);
@@ -58,7 +52,7 @@ class RegistrationController extends AbstractController
             return $this->json(['message' => 'The password must contain at least 8 characters.'], Response::HTTP_BAD_REQUEST);
         }
         $password = $this->pwEncoder->encodePassword($user, $password);
-        $user->setPassword($password)->setType(UserType::EXTERNAL)->setFirstName($firstName)->setLastName($lastName);
+        $user->setPassword($password);
         $this->em->persist($user);
         $this->em->flush();
         return $this->json(['message' => 'Registered user ' . $email]);
