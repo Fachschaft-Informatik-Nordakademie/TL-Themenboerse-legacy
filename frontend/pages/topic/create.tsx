@@ -12,8 +12,11 @@ interface IFormValues {
   readonly title: string;
   readonly description: string;
   readonly requirements: string;
+  readonly pages: number | null;
+  readonly start: Date | null;
   readonly deadline: Date | null;
   readonly tags: string[];
+  readonly website: string;
 }
 
 const useStyles = makeStyles((theme) => ({
@@ -21,26 +24,25 @@ const useStyles = makeStyles((theme) => ({
     marginTop: theme.spacing(2),
     marginBottom: theme.spacing(2),
   },
+  deadlineField: {
+    marginLeft: theme.spacing(2),
+  },
 }));
 
 const validationSchema = yup.object({
   title: yup.string().required('Titel ist ein Pflichtfeld'),
   description: yup.string().required('Beschreibung ist ein Pflichtfeld'),
   requirements: yup.string().required('Beschreibung ist ein Pflichtfeld'),
+  start: yup.date().nullable(),
   deadline: yup.date().nullable(),
   tags: yup.array().ensure(),
+  pages: yup.number().nullable(),
+  website: yup.string().nullable().url(),
 });
 
 function CreateTopic(): JSX.Element {
   const submitForm = async (values: IFormValues): Promise<void> => {
-    const topicData = {
-      title: values.title,
-      description: values.description,
-      requirements: values.requirements,
-      deadline: values.deadline,
-      tags: values.tags,
-    };
-    await axiosClient.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/topic`, topicData);
+    await axiosClient.post(`/topic`, values);
     // TODO: success message/back navigation? error handling?
   };
 
@@ -49,17 +51,19 @@ function CreateTopic(): JSX.Element {
       title: '',
       description: '',
       tags: [],
+      start: null,
       deadline: null,
       requirements: '',
+      pages: null,
+      website: '',
     },
     validationSchema: validationSchema,
     onSubmit: (values) => {
-      console.log('test');
+      console.log('submitting topic!');
       submitForm(values);
     },
   });
 
-  console.log('errors', formik.errors, formik.touched);
   const classes = useStyles();
 
   return (
@@ -70,6 +74,7 @@ function CreateTopic(): JSX.Element {
       <Container>
         <h1>Neues Thema erstellen</h1>
         <form
+          noValidate
           onSubmit={(e) => {
             e.preventDefault();
             formik.submitForm();
@@ -113,11 +118,48 @@ function CreateTopic(): JSX.Element {
             onBlur={formik.handleBlur}
             required
           />
+          <TextField
+            label="Geschätzte Seitenzahl"
+            name="pages"
+            fullWidth
+            type="number"
+            className={classes.formField}
+            value={formik.values.pages}
+            onChange={formik.handleChange}
+            helperText={formik.touched.pages && formik.errors.pages}
+            error={formik.touched.pages && Boolean(formik.errors.pages)}
+            onBlur={formik.handleBlur}
+          />
+          <TextField
+            label="Website"
+            name="website"
+            fullWidth
+            className={classes.formField}
+            value={formik.values.website}
+            onChange={formik.handleChange}
+            helperText={formik.touched.website && formik.errors.website}
+            error={formik.touched.website && Boolean(formik.errors.website)}
+            onBlur={formik.handleBlur}
+          />
           <KeyboardDatePicker
+            name="start"
+            disableToolbar
+            variant="inline"
+            format="dd.MM.yyyy"
+            margin="normal"
+            label="Starttermin"
+            value={formik.values.start}
+            onChange={(value) => formik.setFieldValue('start', value)}
+            helperText={formik.touched.start && formik.errors.start}
+            error={formik.touched.start && Boolean(formik.errors.start)}
+            onBlur={formik.handleBlur}
+          />
+          <KeyboardDatePicker
+            className={classes.deadlineField}
             name="deadline"
             disableToolbar
             variant="inline"
-            format="dd/MM/yyyy"
+            format="dd.MM.yyyy"
             margin="normal"
             label="Endtermin"
             value={formik.values.deadline}
