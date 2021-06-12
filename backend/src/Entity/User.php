@@ -67,6 +67,7 @@ class User implements UserInterface, EquatableInterface
         return null;
     }
 
+    #[Ignore]
     public function getUsername()
     {
         return $this->email;

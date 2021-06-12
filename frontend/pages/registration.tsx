@@ -23,17 +23,27 @@ function createNotification(message: string, type: Color): JSX.Element {
 }
 
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
-import { SSRConfig, useTranslation } from 'next-i18next';
+import { useTranslation } from 'next-i18next';
+import { GetServerSidePropsContext, GetServerSidePropsResult } from 'next';
+import { fetchUser } from '../src/server/fetchUser';
 
-type StaticProps = {
-  props: SSRConfig;
-};
+export async function getServerSideProps(
+  context: GetServerSidePropsContext,
+): Promise<GetServerSidePropsResult<unknown>> {
+  const user = await fetchUser(context.req.cookies);
 
-export async function getStaticProps({ locale }): Promise<StaticProps> {
+  if (user) {
+    return {
+      redirect: {
+        destination: '/',
+        permanent: false,
+      },
+    };
+  }
+
   return {
     props: {
-      ...(await serverSideTranslations(locale, ['common', 'registration'])),
-      // Will be passed to the page component as props
+      ...(await serverSideTranslations('de', ['common', 'registration'])),
     },
   };
 }

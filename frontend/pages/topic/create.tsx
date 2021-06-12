@@ -7,12 +7,14 @@ import * as yup from 'yup';
 import React from 'react';
 import Head from 'next/head';
 import axiosClient from '../../src/api';
+import { GetServerSidePropsContext, GetServerSidePropsResult } from 'next';
+import { fetchUser } from '../../src/server/fetchUser';
 
 interface IFormValues {
   readonly title: string;
   readonly description: string;
   readonly requirements: string;
-  readonly pages: number | null;
+  readonly pages: number;
   readonly start: Date | null;
   readonly deadline: Date | null;
   readonly tags: string[];
@@ -29,18 +31,30 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const validationSchema = yup.object({
-  title: yup.string().required('Titel ist ein Pflichtfeld'),
-  description: yup.string().required('Beschreibung ist ein Pflichtfeld'),
-  requirements: yup.string().required('Beschreibung ist ein Pflichtfeld'),
-  start: yup.date().nullable(),
-  deadline: yup.date().nullable(),
-  tags: yup.array().ensure(),
-  pages: yup.number().nullable(),
-  website: yup.string().nullable().url(),
-});
+export async function getServerSideProps(context: GetServerSidePropsContext): Promise<GetServerSidePropsResult<any>> {
+  const user = await fetchUser(context.req.cookies);
+
+  if (user === null) {
+    return { redirect: { destination: '/login', permanent: false } };
+  }
+
+  return {
+    props: { user },
+  };
+}
 
 function CreateTopic(): JSX.Element {
+  const validationSchema = yup.object({
+    title: yup.string().required('Titel ist ein Pflichtfeld'),
+    description: yup.string().required('Beschreibung ist ein Pflichtfeld'),
+    requirements: yup.string().required('Beschreibung ist ein Pflichtfeld'),
+    start: yup.date().nullable(),
+    deadline: yup.date().nullable(),
+    tags: yup.array().ensure(),
+    pages: yup.number().nullable(),
+    website: yup.string().nullable().url('Bitte eine gültige URL eingeben'),
+  });
+
   const submitForm = async (values: IFormValues): Promise<void> => {
     await axiosClient.post(`/topic`, values);
     // TODO: success message/back navigation? error handling?
@@ -54,7 +68,7 @@ function CreateTopic(): JSX.Element {
       start: null,
       deadline: null,
       requirements: '',
-      pages: null,
+      pages: 0,
       website: '',
     },
     validationSchema: validationSchema,
