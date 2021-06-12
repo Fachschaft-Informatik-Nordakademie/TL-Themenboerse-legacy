@@ -22,6 +22,22 @@ function createNotification(message: string, type: Color): JSX.Element {
   );
 }
 
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
+import { SSRConfig, useTranslation } from 'next-i18next';
+
+type StaticProps = {
+  props: SSRConfig;
+};
+
+export async function getStaticProps({ locale }): Promise<StaticProps> {
+  return {
+    props: {
+      ...(await serverSideTranslations(locale, ['common', 'registration'])),
+      // Will be passed to the page component as props
+    },
+  };
+}
+
 const useStyles = makeStyles((theme) => ({
   paper: {
     marginTop: theme.spacing(8),
@@ -43,6 +59,9 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 export default function Registration(): JSX.Element {
+  const { t: tRegistration } = useTranslation('registration');
+  const { t: tCommon } = useTranslation('common');
+
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [confirm, setConfirm] = useState<string>('');
@@ -54,17 +73,6 @@ export default function Registration(): JSX.Element {
   const [submit, setSubmit] = useState<boolean>(false);
   const [successfulRegister, setSuccessfulRegister] = useState<boolean>(false);
 
-  const title = 'Registierung';
-  const emailPlaceHolder = 'E-Mail';
-  const passwordPlaceHolder = 'Passwort';
-  const confirmPlaceHolder = 'Passwort bestätigen';
-  const submitCaption = 'Registrieren';
-  const tooShortPassword = 'Das Passwort muss mindestens 8 Zeichen lang sein.';
-  const passwordsNotMatching = 'Die Passwörter stimmen nicht überein.';
-  const emptyEmail = 'Bitte geben Sie eine E-Mail-Adresse ein.';
-  const emptyPassword = 'Bitte geben Sie ein Passwort ein.';
-  const successMessage = 'Registrierung erfolgreich';
-
   const minPasswordLength = 8;
 
   useEffect((): void => {
@@ -75,21 +83,23 @@ export default function Registration(): JSX.Element {
 
   useEffect((): void => {
     const invalidPasswordLength: boolean = password.length < minPasswordLength && password.length > 0;
-    invalidPasswordLength ? setPasswordError(tooShortPassword) : setPasswordError(null);
+    invalidPasswordLength ? setPasswordError(tRegistration('tooShortPassword')) : setPasswordError(null);
   }, [password]);
 
   useEffect((): void => {
-    password !== confirm && confirmDirty ? setConfirmError(passwordsNotMatching) : setConfirmError(null);
+    password !== confirm && confirmDirty
+      ? setConfirmError(tRegistration('passwordsNotMatching'))
+      : setConfirmError(null);
   }, [password, confirm]);
 
   useEffect((): void => {
     const isEmptyPassword: boolean = password.length === 0;
     const isEmptyEmail: boolean = email.length === 0;
     if (isEmptyPassword && submit) {
-      setPasswordError(emptyPassword);
+      setPasswordError(tRegistration('emptyPassword'));
     }
     if (isEmptyEmail && submit) {
-      setEmailError(emptyEmail);
+      setEmailError(tRegistration('emptyEmail'));
     }
     setSubmit(false);
   }, [submit]);
@@ -132,7 +142,7 @@ export default function Registration(): JSX.Element {
         if (e.response && e.response.data && e.response.data.message) {
           setSubmitError(e.response.data.message);
         } else {
-          setSubmitError('Unbekannter Fehler aufgetreten');
+          setSubmitError(tCommon('unknownError'));
         }
       }
     },
@@ -144,7 +154,9 @@ export default function Registration(): JSX.Element {
   return (
     <>
       <Head>
-        <title>Registrieren - Themenbörse</title>
+        <title>
+          {tRegistration('title')} - {tCommon('appName')}
+        </title>
       </Head>
       <Container component="main" maxWidth="xs">
         <CssBaseline />
@@ -153,11 +165,11 @@ export default function Registration(): JSX.Element {
             <AssignmentIndOutlinedIcon />
           </Avatar>
           <Typography component="h1" variant="h5">
-            {title}
+            {tRegistration('title')}
           </Typography>
           <form className={classes.form} onSubmit={onSubmit} noValidate>
             {submitError && createNotification(submitError, 'error')}
-            {successfulRegister && createNotification(successMessage, 'success')}
+            {successfulRegister && createNotification(tRegistration('successMessage'), 'success')}
             <TextField
               variant="outlined"
               margin="normal"
@@ -168,7 +180,7 @@ export default function Registration(): JSX.Element {
               error={!!emailError}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              label={emailPlaceHolder}
+              label={tRegistration('emailPlaceHolder')}
               helperText={emailError}
               autoComplete="email"
               spellCheck="false"
@@ -183,7 +195,7 @@ export default function Registration(): JSX.Element {
               error={!!passwordError}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              label={passwordPlaceHolder}
+              label={tRegistration('passwordPlaceHolder')}
               helperText={passwordError}
               autoComplete="new-password"
               spellCheck="false"
@@ -198,18 +210,18 @@ export default function Registration(): JSX.Element {
               error={!!confirmError}
               value={confirm}
               onChange={(e) => handleConfirmChange(e.target.value)}
-              label={confirmPlaceHolder}
+              label={tRegistration('confirmPlaceHolder')}
               helperText={confirmError}
               autoComplete="new-password"
               spellCheck="false"
             />
             <Button type="submit" fullWidth variant="contained" color="primary" className={classes.submit}>
-              {submitCaption}
+              {tRegistration('submitCaption')}
             </Button>
             <Grid container>
               <Grid item xs>
                 <Link href="/login" variant="body2">
-                  Bereits registriert oder du hast einen CIS-Account? Zum Login!
+                  {tRegistration('linkLogin')}
                 </Link>
               </Grid>
             </Grid>
