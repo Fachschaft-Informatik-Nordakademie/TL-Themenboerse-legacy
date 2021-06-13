@@ -19,6 +19,7 @@ class TopicRepository extends ServiceEntityRepository
 
         return $this->createQueryBuilder('t')
             ->orderBy('t.'. $orderBy, $orderDirection)
+            ->addOrderBy('t.id', 'asc')
             ->setMaxResults($pageSize)
             ->setFirstResult($offset)
             ->getQuery()

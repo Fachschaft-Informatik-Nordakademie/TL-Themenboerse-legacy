@@ -43,7 +43,7 @@ class TopicController extends AbstractController
         return $this->json([
             "content" => $topics,
             "total" => $totalAmount,
-            "pages" => $totalPages,
+            "pages" => min($totalPages, 1),
             "last" => $pageNumber === ($totalPages - 1),
             "perPage" => $pageSize,
         ]);
