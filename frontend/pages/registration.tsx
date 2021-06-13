@@ -72,12 +72,16 @@ export default function Registration(): JSX.Element {
   const { t: tRegistration } = useTranslation('registration');
   const { t: tCommon } = useTranslation('common');
 
+  const [firstName, setFirstName] = useState<string>('');
+  const [lastName, setLastName] = useState<string>('');
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [confirm, setConfirm] = useState<string>('');
   const [confirmDirty, setConfirmDirty] = useState<boolean>(false);
   const [passwordError, setPasswordError] = useState<string | undefined>('');
   const [confirmError, setConfirmError] = useState<string | undefined>('');
+  const [firstNameError, setFirstNameError] = useState<string | undefined>('');
+  const [lastNameError, setLastNameError] = useState<string | undefined>('');
   const [emailError, setEmailError] = useState<string | undefined>('');
   const [submitError, setSubmitError] = useState<string | undefined>('');
   const [submit, setSubmit] = useState<boolean>(false);
@@ -86,10 +90,16 @@ export default function Registration(): JSX.Element {
   const minPasswordLength = 8;
 
   useEffect((): void => {
+    if (firstNameError && firstName.length > 0) {
+      setFirstNameError(null);
+    }
+    if (lastNameError && lastName.length > 0) {
+      setLastNameError(null);
+    }
     if (emailError && email.length > 0) {
       setEmailError(null);
     }
-  }, [email]);
+  }, [firstName, lastName, email]);
 
   useEffect((): void => {
     const invalidPasswordLength: boolean = password.length < minPasswordLength && password.length > 0;
@@ -104,9 +114,18 @@ export default function Registration(): JSX.Element {
 
   useEffect((): void => {
     const isEmptyPassword: boolean = password.length === 0;
+    const isEmptyFirstName: boolean = firstName.length === 0;
+    const isEmptyLastName: boolean = lastName.length === 0;
     const isEmptyEmail: boolean = email.length === 0;
+
     if (isEmptyPassword && submit) {
       setPasswordError(tRegistration('emptyPassword'));
+    }
+    if (isEmptyFirstName && submit) {
+      setFirstNameError(tRegistration('emptyFirstName'));
+    }
+    if (isEmptyLastName && submit) {
+      setLastNameError(tRegistration('emptyLastName'));
     }
     if (isEmptyEmail && submit) {
       setEmailError(tRegistration('emptyEmail'));
@@ -139,14 +158,14 @@ export default function Registration(): JSX.Element {
       setSubmitError(undefined);
       setSuccessfulRegister(false);
 
-      const hasBlankFields: boolean = email === '' || password === '' || confirmError === '';
-      const hasErrors: boolean = !!emailError || !!passwordError || !!confirmError;
+      const hasBlankFields: boolean = firstName === '' || lastName === '' || email === '' || password === '' || confirmError === '';
+      const hasErrors: boolean = !!firstNameError || !!lastNameError || !!emailError || !!passwordError || !!confirmError;
 
       if (hasBlankFields || hasErrors) {
         return;
       }
       try {
-        const response = await axiosClient.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/register`, { email, password });
+        const response = await axiosClient.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/register`, { firstName, lastName, email, password });
         await checkSubmitError(response);
       } catch (e) {
         if (e.response && e.response.data && e.response.data.message) {
@@ -156,7 +175,7 @@ export default function Registration(): JSX.Element {
         }
       }
     },
-    [email, password, emailError, passwordError, confirmError],
+    [firstName, lastName, email, password, firstNameError, lastNameError, emailError, passwordError, confirmError],
   );
 
   const classes = useStyles();
@@ -180,6 +199,36 @@ export default function Registration(): JSX.Element {
           <form className={classes.form} onSubmit={onSubmit} noValidate>
             {submitError && createNotification(submitError, 'error')}
             {successfulRegister && createNotification(tRegistration('successMessage'), 'success')}
+            <TextField
+              variant="outlined"
+              margin="normal"
+              required
+              fullWidth
+              id="firstName"
+              type="text"
+              error={!!firstNameError}
+              value={firstName}
+              onChange={(e) => setFirstName(e.target.value)}
+              label={tRegistration('firstNamePlaceHolder')}
+              helperText={firstNameError}
+              autoComplete="given-name"
+              spellCheck="false"
+            />
+            <TextField
+              variant="outlined"
+              margin="normal"
+              required
+              fullWidth
+              id="lastName"
+              type="text"
+              error={!!lastNameError}
+              value={lastName}
+              onChange={(e) => setLastName(e.target.value)}
+              label={tRegistration('lastNamePlaceHolder')}
+              helperText={lastNameError}
+              autoComplete="family-name"
+              spellCheck="false"
+            />
             <TextField
               variant="outlined"
               margin="normal"
