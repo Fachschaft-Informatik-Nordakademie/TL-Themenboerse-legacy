@@ -10,6 +10,8 @@ import Link from 'next/link';
 import axiosClient from '../../src/api';
 import { GetServerSidePropsContext, GetServerSidePropsResult } from 'next';
 import { fetchUser } from '../../src/server/fetchUser';
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
+import { useTranslation } from 'next-i18next';
 
 interface IFormValues {
   readonly title: string;
@@ -43,20 +45,23 @@ export async function getServerSideProps(context: GetServerSidePropsContext): Pr
   }
 
   return {
-    props: { user },
+    props: { ...(await serverSideTranslations('de', ['common', 'topic-creation'])), user },
   };
 }
 
 function CreateTopic(): JSX.Element {
+  const { t: tCommon } = useTranslation('common');
+  const { t: tCreateTopic } = useTranslation('topic-creation');
+
   const validationSchema = yup.object({
-    title: yup.string().required('Titel ist ein Pflichtfeld'),
-    description: yup.string().required('Beschreibung ist ein Pflichtfeld'),
-    requirements: yup.string().required('Beschreibung ist ein Pflichtfeld'),
+    title: yup.string().required(tCreateTopic('messageTitleRequired')),
+    description: yup.string().required(tCreateTopic('messageDescriptionRequired')),
+    requirements: yup.string().required(tCreateTopic('messageRequirementsRequired')),
     start: yup.date().nullable(),
     deadline: yup.date().nullable(),
     tags: yup.array().ensure(),
     pages: yup.number().nullable(),
-    website: yup.string().nullable().url('Bitte eine gültige URL eingeben'),
+    website: yup.string().nullable().url(tCreateTopic('messageUrlInvalid')),
   });
 
   const submitForm = async (values: IFormValues): Promise<void> => {
@@ -87,10 +92,12 @@ function CreateTopic(): JSX.Element {
   return (
     <>
       <Head>
-        <title>Thema erstellen - Themenbörse</title>
+        <title>
+          {tCreateTopic('title')} - {tCommon('appName')}
+        </title>
       </Head>
       <Container>
-        <h1>Neues Thema erstellen</h1>
+        <h1>{tCreateTopic('headline')}</h1>
         <form
           noValidate
           onSubmit={(e) => {
@@ -99,7 +106,7 @@ function CreateTopic(): JSX.Element {
           }}
         >
           <TextField
-            label="Titel"
+            label={tCreateTopic('labelTitel')}
             name="title"
             fullWidth
             className={classes.formField}
@@ -111,7 +118,7 @@ function CreateTopic(): JSX.Element {
             required
           />
           <TextField
-            label="Beschreibung"
+            label={tCreateTopic('labelDescription')}
             name="description"
             fullWidth
             multiline
@@ -124,7 +131,7 @@ function CreateTopic(): JSX.Element {
             required
           />
           <TextField
-            label="Anforderungen"
+            label={tCreateTopic('labelRequirements')}
             name="requirements"
             fullWidth
             multiline
@@ -137,7 +144,7 @@ function CreateTopic(): JSX.Element {
             required
           />
           <TextField
-            label="Geschätzte Seitenzahl"
+            label={tCreateTopic('labelPages')}
             name="pages"
             fullWidth
             type="number"
@@ -149,7 +156,7 @@ function CreateTopic(): JSX.Element {
             onBlur={formik.handleBlur}
           />
           <TextField
-            label="Website"
+            label={tCreateTopic('labelWebsite')}
             name="website"
             fullWidth
             className={classes.formField}
@@ -165,7 +172,7 @@ function CreateTopic(): JSX.Element {
             variant="inline"
             format="dd.MM.yyyy"
             margin="normal"
-            label="Starttermin"
+            label={tCreateTopic('labelStartdate')}
             value={formik.values.start}
             onChange={(value) => formik.setFieldValue('start', value)}
             helperText={formik.touched.start && formik.errors.start}
@@ -179,7 +186,7 @@ function CreateTopic(): JSX.Element {
             variant="inline"
             format="dd.MM.yyyy"
             margin="normal"
-            label="Endtermin"
+            label={tCreateTopic('labelEnddate')}
             value={formik.values.deadline}
             onChange={(value) => formik.setFieldValue('deadline', value)}
             helperText={formik.touched.deadline && formik.errors.deadline}
@@ -201,18 +208,18 @@ function CreateTopic(): JSX.Element {
               <TextField
                 {...params}
                 variant="standard"
-                label="Tags"
+                label={tCreateTopic('labelTags')}
                 helperText={formik.touched.tags && formik.errors.tags}
                 error={formik.touched.tags && Boolean(formik.errors.tags)}
               />
             )}
           />
           <Button variant="contained" color="primary" type="submit">
-            Erstellen
+            {tCreateTopic('buttonSubmit')}
           </Button>
           <Link href="/">
             <Button className={classes.cancelButton} variant="contained" color="default" type="button">
-              Abbrechen
+              {tCreateTopic('buttonCancel')}
             </Button>
           </Link>
         </form>
