@@ -6,6 +6,7 @@ import { useFormik } from 'formik';
 import * as yup from 'yup';
 import React from 'react';
 import Head from 'next/head';
+import Link from 'next/link';
 import axiosClient from '../../src/api';
 import { GetServerSidePropsContext, GetServerSidePropsResult } from 'next';
 import { fetchUser } from '../../src/server/fetchUser';
@@ -27,6 +28,9 @@ const useStyles = makeStyles((theme) => ({
     marginBottom: theme.spacing(2),
   },
   deadlineField: {
+    marginLeft: theme.spacing(2),
+  },
+  cancelButton: {
     marginLeft: theme.spacing(2),
   },
 }));
@@ -206,6 +210,11 @@ function CreateTopic(): JSX.Element {
           <Button variant="contained" color="primary" type="submit">
             Erstellen
           </Button>
+          <Link href="/">
+            <Button className={classes.cancelButton} variant="contained" color="default" type="button">
+              Abbrechen
+            </Button>
+          </Link>
         </form>
       </Container>
     </>
