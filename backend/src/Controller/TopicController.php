@@ -5,6 +5,8 @@ namespace App\Controller;
 use App\Entity\StatusType;
 use App\Entity\Topic;
 use App\Repository\TopicRepository;
+use Carbon\Carbon;
+use Carbon\Exceptions\InvalidFormatException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
@@ -41,17 +43,18 @@ class TopicController extends AbstractController
             $topic->setDescription($request->get('description'));
             $topic->setRequirements($request->get('requirements'));
             $topic->setTags($request->get('tags'));
+            $topic->setWebsite($request->get('website'));
             $deadline = $request->get('deadline');
             if ($deadline) {
-                $topic->setDeadline(\DateTime::createFromFormat('Y-m-d', $deadline));
+                $topic->setDeadline(Carbon::parse($deadline)->toDate());
             }
             $start = $request->get('start');
             if ($start) {
-                $topic->setStart(\DateTime::createFromFormat('Y-m-d', $start));
+                $topic->setStart(Carbon::parse($start)->toDate());
             }
             $topic->setPages($request->get('pages'));
             $topic->setStatus($status);
-        } catch (\TypeError $e) {
+        } catch (\TypeError | InvalidFormatException $e) {
             return $this->json(['message' => 'Invalid topic received'], Response::HTTP_BAD_REQUEST);
         }
         $errors = $this->validator->validate($topic);

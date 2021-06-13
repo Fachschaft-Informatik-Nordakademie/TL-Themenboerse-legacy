@@ -1,143 +1,243 @@
-import { useState, useEffect, useCallback } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import Container from '@material-ui/core/Container';
-import Card from '@material-ui/core/Card';
-import CardActions from '@material-ui/core/CardActions';
-import CardContent from '@material-ui/core/CardContent';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
-import MuiAlert, {Color} from '@material-ui/lab/Alert';
+import MuiAlert, { Color } from '@material-ui/lab/Alert';
 import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
+import { CssBaseline } from '@material-ui/core';
+import AssignmentIndOutlinedIcon from '@material-ui/icons/AssignmentIndOutlined';
+import Avatar from '@material-ui/core/Avatar';
+import Grid from '@material-ui/core/Grid';
+import Link from '../src/components/MaterialNextLink';
+import Head from 'next/head';
+import axiosClient from '../src/api';
+import { AxiosResponse } from 'axios';
 
-function createNotification(message: string, type: Color) {
-    return <MuiAlert variant="standard" severity={type}>{message}</MuiAlert>;
+function createNotification(message: string, type: Color): JSX.Element {
+  return (
+    <MuiAlert variant="standard" severity={type}>
+      {message}
+    </MuiAlert>
+  );
 }
 
-const useStyles = makeStyles(() => ({
-    root: {
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center'
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
+import { useTranslation } from 'next-i18next';
+import { GetServerSidePropsContext, GetServerSidePropsResult } from 'next';
+import { fetchUser } from '../src/server/fetchUser';
+
+export async function getServerSideProps(
+  context: GetServerSidePropsContext,
+): Promise<GetServerSidePropsResult<unknown>> {
+  const user = await fetchUser(context.req.cookies);
+
+  if (user) {
+    return {
+      redirect: {
+        destination: '/',
+        permanent: false,
+      },
+    };
+  }
+
+  return {
+    props: {
+      ...(await serverSideTranslations('de', ['common', 'registration'])),
     },
-    content: {
-        flex: '1',
-        margin: '1rem 2rem 0'
-    },
-    form: {
-        display: 'flex',
-        flexDirection: 'column'
-    },
-    actions: {
-        margin: '0 2rem 1rem'
-    },
-    submit: {
-        marginLeft: 'auto'
+  };
+}
+
+const useStyles = makeStyles((theme) => ({
+  paper: {
+    marginTop: theme.spacing(8),
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+  },
+  avatar: {
+    margin: theme.spacing(1),
+    backgroundColor: theme.palette.warning.main,
+  },
+  form: {
+    width: '100%', // Fix IE 11 issue.
+    marginTop: theme.spacing(1),
+  },
+  submit: {
+    margin: theme.spacing(3, 0, 2),
+  },
+}));
+
+export default function Registration(): JSX.Element {
+  const { t: tRegistration } = useTranslation('registration');
+  const { t: tCommon } = useTranslation('common');
+
+  const [email, setEmail] = useState<string>('');
+  const [password, setPassword] = useState<string>('');
+  const [confirm, setConfirm] = useState<string>('');
+  const [confirmDirty, setConfirmDirty] = useState<boolean>(false);
+  const [passwordError, setPasswordError] = useState<string | undefined>('');
+  const [confirmError, setConfirmError] = useState<string | undefined>('');
+  const [emailError, setEmailError] = useState<string | undefined>('');
+  const [submitError, setSubmitError] = useState<string | undefined>('');
+  const [submit, setSubmit] = useState<boolean>(false);
+  const [successfulRegister, setSuccessfulRegister] = useState<boolean>(false);
+
+  const minPasswordLength = 8;
+
+  useEffect((): void => {
+    if (emailError && email.length > 0) {
+      setEmailError(null);
     }
-}))
+  }, [email]);
 
-export default function Registration() {
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [confirm, setConfirm] = useState('');
-    const [confirmDirty, setConfirmDirty] = useState(false);
-    const [passwordError, setPasswordError] = useState('');
-    const [confirmError, setConfirmError] = useState('');
-    const [emailError, setEmailError] = useState('');
-    const [submitError, setSubmitError] = useState('');
-    const [submit, setSubmit] = useState(false);
-    const [successfulRegister, setSuccessfulRegister] = useState(false);
+  useEffect((): void => {
+    const invalidPasswordLength: boolean = password.length < minPasswordLength && password.length > 0;
+    invalidPasswordLength ? setPasswordError(tRegistration('tooShortPassword')) : setPasswordError(null);
+  }, [password]);
 
-    const title: string = "Registierung";
-    const emailPlaceHolder = "E-Mail";
-    const passwordPlaceHolder: string = "Passwort";
-    const confirmPlaceHolder: string = "Passwort bestätigen";
-    const submitCaption: string = "Registrieren";
-    const tooShortPassword: string = "Das Passwort muss mindestens 8 Zeichen lang sein.";
-    const passwordsNotMatching: string = "Die Passwörter stimmen nicht überein.";
-    const emptyEmail: string = "Bitte geben Sie eine E-Mail-Adresse ein.";
-    const emptyPassword: string = "Bitte geben Sie ein Passwort ein.";
-    const successMessage: string = 'Registrierung erfolgreich';
+  useEffect((): void => {
+    password !== confirm && confirmDirty
+      ? setConfirmError(tRegistration('passwordsNotMatching'))
+      : setConfirmError(null);
+  }, [password, confirm]);
 
-    const minPasswordLength: number = 8;
+  useEffect((): void => {
+    const isEmptyPassword: boolean = password.length === 0;
+    const isEmptyEmail: boolean = email.length === 0;
+    if (isEmptyPassword && submit) {
+      setPasswordError(tRegistration('emptyPassword'));
+    }
+    if (isEmptyEmail && submit) {
+      setEmailError(tRegistration('emptyEmail'));
+    }
+    setSubmit(false);
+  }, [submit]);
 
-    useEffect(() => {
-        if (emailError && email.length > 0) {
-            setEmailError(null);
-        }
-    }, [email]);
+  const handleConfirmChange = (value: string): void => {
+    setConfirm(value);
+    setConfirmDirty(true);
+  };
 
-    useEffect(() => {
-        const invalidPasswordLength: boolean = password.length < minPasswordLength && password.length > 0;
-        invalidPasswordLength ? setPasswordError(tooShortPassword) : setPasswordError(null);
-    }, [password]);
+  const checkSubmitError = async (response: AxiosResponse): Promise<void> => {
+    const data = response.data;
 
-    useEffect(() => {
-        password !== confirm && confirmDirty ? setConfirmError(passwordsNotMatching) : setConfirmError(null);
-    }, [password, confirm]);
+    if (response.status === 400) {
+      setSubmitError(data.message);
+    } else {
+      setSuccessfulRegister(true);
+    }
+    return data;
+  };
 
-    useEffect(() => {
-        const isEmptyPassword: boolean = password.length === 0;
-        const isEmptyEmail: boolean = email.length === 0;
-        if (isEmptyPassword && submit) {
-            setPasswordError(emptyPassword);
-        }
-        if (isEmptyEmail && submit) {
-            setEmailError(emptyEmail);
-        }
-        setSubmit(false);
-    }, [submit]);
+  const onSubmit = useCallback(
+    async (e: React.FormEvent): Promise<void> => {
+      e.preventDefault();
+      setSubmit(true);
+      setPasswordError(undefined);
 
-    const handleConfirmChange = (value: string) => {
-        setConfirm(value);
-        setConfirmDirty(true);
-    };
+      setSubmitError(undefined);
+      setSuccessfulRegister(false);
 
-    const checkSubmitError = async (response: Response) => {
-        const json = await response.json();
-        if (response.status === 400) {
-            setSubmitError(json.message);
+      const hasBlankFields: boolean = email === '' || password === '' || confirmError === '';
+      const hasErrors: boolean = !!emailError || !!passwordError || !!confirmError;
+
+      if (hasBlankFields || hasErrors) {
+        return;
+      }
+      try {
+        const response = await axiosClient.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/register`, { email, password });
+        await checkSubmitError(response);
+      } catch (e) {
+        if (e.response && e.response.data && e.response.data.message) {
+          setSubmitError(e.response.data.message);
         } else {
-            setSuccessfulRegister(true);
+          setSubmitError(tCommon('unknownError'));
         }
-        return json;
-    };
+      }
+    },
+    [email, password, emailError, passwordError, confirmError],
+  );
 
-    const onSubmit = useCallback(async () => {
-        setSubmit(true);
-        setPasswordError(null);
-        const hasBlankFields: boolean = email === '' || password === '' || confirmError === '';
-        const hasErrors: boolean = !!emailError || !!passwordError || !!confirmError;
+  const classes = useStyles();
 
-        if (hasBlankFields || hasErrors) {
-            return;
-        }
-        const requestOptions = {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email, password })
-        };
-        const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/register`, requestOptions);
-        return await checkSubmitError(response);
-    }, [email, password, emailError, passwordError, confirmError]);
-
-    const classes = useStyles();
-
-    return <Container maxWidth="sm">
-        <Card variant="outlined">
-            <CardContent className={classes.content}>
-                <Typography variant="h4">{title}</Typography>
-                {submitError && createNotification(submitError, 'error')}
-                {successfulRegister && createNotification(successMessage, 'success')}
-                <form className={classes.form} noValidate>
-                    <TextField required id="email" type="email" error={!!emailError} value={email} onChange={e => setEmail(e.target.value)} label={emailPlaceHolder} helperText={emailError} autoComplete="email" spellCheck="false" />
-                    <TextField required id="password" type="password" error={!!passwordError} value={password} onChange={e => setPassword(e.target.value)} label={passwordPlaceHolder} helperText={passwordError} autoComplete="new-password" spellCheck="false" />
-                    <TextField required id="password-confirm" type="password" error={!!confirmError} value={confirm} onChange={e => handleConfirmChange(e.target.value)} label={confirmPlaceHolder} helperText={confirmError} autoComplete="new-password" spellCheck="false" />
-                </form>
-            </CardContent>
-            <CardActions className={classes.actions}>
-                <Button className={classes.submit} variant="contained" color="primary" type="submit" onClick={onSubmit}>{submitCaption}</Button>
-            </CardActions>
-        </Card>
-    </Container>
+  return (
+    <>
+      <Head>
+        <title>
+          {tRegistration('title')} - {tCommon('appName')}
+        </title>
+      </Head>
+      <Container component="main" maxWidth="xs">
+        <CssBaseline />
+        <div className={classes.paper}>
+          <Avatar className={classes.avatar}>
+            <AssignmentIndOutlinedIcon />
+          </Avatar>
+          <Typography component="h1" variant="h5">
+            {tRegistration('title')}
+          </Typography>
+          <form className={classes.form} onSubmit={onSubmit} noValidate>
+            {submitError && createNotification(submitError, 'error')}
+            {successfulRegister && createNotification(tRegistration('successMessage'), 'success')}
+            <TextField
+              variant="outlined"
+              margin="normal"
+              required
+              fullWidth
+              id="email"
+              type="email"
+              error={!!emailError}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              label={tRegistration('emailPlaceHolder')}
+              helperText={emailError}
+              autoComplete="email"
+              spellCheck="false"
+            />
+            <TextField
+              variant="outlined"
+              margin="normal"
+              required
+              fullWidth
+              id="password"
+              type="password"
+              error={!!passwordError}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              label={tRegistration('passwordPlaceHolder')}
+              helperText={passwordError}
+              autoComplete="new-password"
+              spellCheck="false"
+            />
+            <TextField
+              variant="outlined"
+              margin="normal"
+              required
+              fullWidth
+              id="password-confirm"
+              type="password"
+              error={!!confirmError}
+              value={confirm}
+              onChange={(e) => handleConfirmChange(e.target.value)}
+              label={tRegistration('confirmPlaceHolder')}
+              helperText={confirmError}
+              autoComplete="new-password"
+              spellCheck="false"
+            />
+            <Button type="submit" fullWidth variant="contained" color="primary" className={classes.submit}>
+              {tRegistration('submitCaption')}
+            </Button>
+            <Grid container>
+              <Grid item xs>
+                <Link href="/login" variant="body2">
+                  {tRegistration('linkLogin')}
+                </Link>
+              </Grid>
+            </Grid>
+          </form>
+        </div>
+      </Container>
+    </>
+  );
 }
-

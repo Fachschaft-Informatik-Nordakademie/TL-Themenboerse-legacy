@@ -33,10 +33,11 @@ class User implements UserInterface, EquatableInterface
     private ?string $ldapDn;
 
     #[ORM\Column(type: "string", name: '`password`', nullable: true)]
+    #[Ignore]
     private ?string $password;
 
-    #[Ignore]
     #[ORM\OneToMany(targetEntity: Topic::class, mappedBy: "author")]
+    #[Ignore]
     private PersistentCollection $topics;
 
     public function getRoles(): array
@@ -58,6 +59,7 @@ class User implements UserInterface, EquatableInterface
         return $this;
     }
 
+    #[Ignore]
     public function getSalt(): ?string
     {
         // Returning a salt is only needed, if you are not using a modern
@@ -65,6 +67,7 @@ class User implements UserInterface, EquatableInterface
         return null;
     }
 
+    #[Ignore]
     public function getUsername()
     {
         return $this->email;
@@ -131,6 +134,7 @@ class User implements UserInterface, EquatableInterface
 
     // we can not use default user comparison because some users don't have a password
     // see https://symfony.com/doc/current/security/user_provider.html#understanding-how-users-are-refreshed-from-the-session
+    #[Ignore]
     public function isEqualTo(UserInterface $user): bool
     {
 
