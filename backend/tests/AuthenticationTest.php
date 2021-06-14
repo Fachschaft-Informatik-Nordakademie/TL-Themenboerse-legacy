@@ -196,6 +196,8 @@ class AuthenticationTest extends ApiTestCase
         $user->setEmail("not-his-real-email@awesome-university.com");
         $user->setLdapUsername("10000");
         $user->setLdapDn("cn=10000,ou=students,ou=people,dc=awesome-university,dc=com");
+        $user->setFirstName("Test");
+        $user->setLastName("Test");
         $this->em->persist($user);
         $this->em->flush();
 

@@ -9,6 +9,9 @@ use Symfony\Component\Security\Core\User\EquatableInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Serializer\Annotation\Ignore;
 use Symfony\Component\Validator\Constraints\Email;
+use Symfony\Component\Validator\Constraints\Length;
+use Symfony\Component\Validator\Constraints\NotBlank;
+use Symfony\Component\Validator\Constraints\Unique;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: "`user`")]
@@ -23,7 +26,7 @@ class User implements UserInterface, EquatableInterface
     private string $type;
 
     #[ORM\Column(type: "string", length: 255, nullable: false, unique: true)]
-    #[Email]
+    #[Email(message: 'The e-mail address is not valid.')]
     private string $email;
 
     #[ORM\Column(type: "string", length: 255, nullable: true, unique: true)]
@@ -35,6 +38,16 @@ class User implements UserInterface, EquatableInterface
     #[ORM\Column(type: "string", name: '`password`', nullable: true)]
     #[Ignore]
     private ?string $password;
+
+    #[ORM\Column(type: "string", length: 255, nullable: false)]
+    #[NotBlank(message: 'The first name must contain at least 2 characters.')]
+    #[Length(min: 2, minMessage: 'The first name must contain at least 2 characters.')]
+    private string $firstName;
+
+    #[ORM\Column(type: "string", length: 255, nullable: false)]
+    #[NotBlank(message: 'The last name must contain at least 2 characters.')]
+    #[Length(min: 2, minMessage: 'The last name must contain at least 2 characters.')]
+    private string $lastName;
 
     #[ORM\OneToMany(targetEntity: Topic::class, mappedBy: "author")]
     #[Ignore]
@@ -129,6 +142,28 @@ class User implements UserInterface, EquatableInterface
     {
         $this->ldapDn = $ldapDn;
 
+        return $this;
+    }
+
+    public function getFirstName(): string
+    {
+        return $this->firstName;
+    }
+
+    public function setFirstName(string $firstName): self
+    {
+        $this->firstName = $firstName;
+        return $this;
+    }
+
+    public function getLastName(): string
+    {
+        return $this->lastName;
+    }
+
+    public function setLastName(string $lastName): self
+    {
+        $this->lastName = $lastName;
         return $this;
     }
 
