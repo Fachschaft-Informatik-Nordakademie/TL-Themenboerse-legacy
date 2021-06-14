@@ -70,7 +70,10 @@
             "@auto-scripts"
         ],
         "test": [
-            "./vendor/bin/phpunit"
+            "./vendor/bin/paratest"
+        ],
+        "test-ci": [
+            "./vendor/bin/paratest --coverage-text --log-junit=phpunit-report.xml"
         ]
     },
     "conflict": {
@@ -83,6 +86,7 @@
         }
     },
     "require-dev": {
+        "brianium/paratest": "^6.3",
         "hautelook/alice-bundle": "^2.9",
         "phpunit/phpunit": "^9",
         "symfony/css-selector": "^5.2",
