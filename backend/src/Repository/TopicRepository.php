@@ -12,4 +12,17 @@ class TopicRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, Topic::class);
     }
+
+    public function listTopics(int $page, int $pageSize, string $orderBy, string $orderDirection): array
+    {
+        $offset = $page * $pageSize;
+
+        return $this->createQueryBuilder('t')
+            ->orderBy('t.'. $orderBy, $orderDirection)
+            ->addOrderBy('t.id', 'asc')
+            ->setMaxResults($pageSize)
+            ->setFirstResult($offset)
+            ->getQuery()
+            ->getArrayResult();
+    }
 }

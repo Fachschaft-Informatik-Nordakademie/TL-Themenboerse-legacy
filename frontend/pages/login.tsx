@@ -42,12 +42,6 @@ export async function getServerSideProps(
 }
 
 const useStyles = makeStyles((theme) => ({
-  paper: {
-    marginTop: theme.spacing(8),
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-  },
   avatar: {
     margin: theme.spacing(1),
     backgroundColor: theme.palette.secondary.main,
@@ -109,70 +103,69 @@ export default function SignIn(): JSX.Element {
           {tLogin('title')} - {tCommon('appName')}
         </title>
       </Head>
-      <Container component="main" maxWidth="xs">
-        <CssBaseline />
-        <div className={classes.paper}>
-          <Avatar className={classes.avatar}>
-            <LockOutlinedIcon />
-          </Avatar>
-          <Typography component="h1" variant="h5">
-            {tLogin('title')} {isNakUser ? `(${tLogin('titleNakMode')})` : `(${tLogin('titleEmailMode')})`}
-          </Typography>
-          <form className={classes.form} onSubmit={login}>
-            <TextField
-              variant="outlined"
-              margin="normal"
-              required
-              fullWidth
-              id="username"
-              label={isNakUser ? tLogin('labelCisUsername') : tLogin('labelEmail')}
-              name="username"
-              autoComplete="email"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              error={!isUserValid()}
-            />
-            <TextField
-              variant="outlined"
-              margin="normal"
-              required
-              fullWidth
-              name="password"
-              label={tLogin('labelPassword')}
-              type="password"
-              id="password"
-              autoComplete="current-password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-            <Button type="submit" fullWidth variant="contained" color="primary" className={classes.submit}>
-              {tLogin('buttonLogin')}
-            </Button>
-            <Button
-              type="button"
-              fullWidth
-              variant="contained"
-              color="default"
-              className={classes.switchTypeButton}
-              onClick={() => setIsNakUser((currentValue) => !currentValue)}
-            >
-              {isNakUser ? tLogin('buttonLoginWithEmail') : tLogin('buttonLoginWithCis')}
-            </Button>
-            <Grid container>
-              <Grid item xs>
-                <Link href="/registration" variant="body2">
-                  {tLogin('linkPasswordReset')}
-                </Link>
-              </Grid>
-              <Grid item>
-                <Link href="/registration" variant="body2">
-                  {tLogin('linkRegister')}
-                </Link>
-              </Grid>
+      <>
+        <Avatar className={classes.avatar}>
+          <LockOutlinedIcon />
+        </Avatar>
+        <Typography component="h1" variant="h5">
+          {tLogin('title')} {isNakUser ? `(${tLogin('titleNakMode')})` : `(${tLogin('titleEmailMode')})`}
+        </Typography>
+        <form className={classes.form} onSubmit={login}>
+          <TextField
+            variant="outlined"
+            margin="normal"
+            required
+            fullWidth
+            id="username"
+            label={isNakUser ? tLogin('labelCisUsername') : tLogin('labelEmail')}
+            name="username"
+            autoComplete="email"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            error={!isUserValid()}
+          />
+          <TextField
+            variant="outlined"
+            margin="normal"
+            required
+            fullWidth
+            name="password"
+            label={tLogin('labelPassword')}
+            type="password"
+            id="password"
+            autoComplete="current-password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+          <Button type="submit" fullWidth variant="contained" color="primary" className={classes.submit}>
+            {tLogin('buttonLogin')}
+          </Button>
+          <Button
+            type="button"
+            fullWidth
+            variant="contained"
+            color="default"
+            className={classes.switchTypeButton}
+            onClick={() => setIsNakUser((currentValue) => !currentValue)}
+          >
+            {isNakUser ? tLogin('buttonLoginWithEmail') : tLogin('buttonLoginWithCis')}
+          </Button>
+          <Grid container>
+            <Grid item xs>
+              <Link href="/registration" variant="body2">
+                {tLogin('linkPasswordReset')}
+              </Link>
             </Grid>
-          </form>
-        </div>
-      </Container>
+            <Grid item>
+              <Link href="/registration" variant="body2">
+                {tLogin('linkRegister')}
+              </Link>
+            </Grid>
+          </Grid>
+        </form>
+      </>
     </>
   );
 }
+
+SignIn.layout = 'auth';

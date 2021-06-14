@@ -16,6 +16,8 @@ parameters:
     app.ldap_attribute_first_name: '%env(string:resolve:APP_LDAP_ATTRIBUTE_FIRST_NAME)%'
     app.ldap_attribute_last_name: '%env(string:resolve:APP_LDAP_ATTRIBUTE_LAST_NAME)%'
 
+    app.page_size: '%env(default:app.page_size_default:resolve:APP_PAGE_SIZE)%'
+    app.page_size_default: 15
 services:
     # default configuration for services in *this* file
     _defaults:

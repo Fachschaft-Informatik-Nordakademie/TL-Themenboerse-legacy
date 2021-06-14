@@ -49,12 +49,6 @@ export async function getServerSideProps(
 }
 
 const useStyles = makeStyles((theme) => ({
-  paper: {
-    marginTop: theme.spacing(8),
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-  },
   avatar: {
     margin: theme.spacing(1),
     backgroundColor: theme.palette.warning.main,
@@ -187,9 +181,7 @@ export default function Registration(): JSX.Element {
           {tRegistration('title')} - {tCommon('appName')}
         </title>
       </Head>
-      <Container component="main" maxWidth="xs">
-        <CssBaseline />
-        <div className={classes.paper}>
+        <>
           <Avatar className={classes.avatar}>
             <AssignmentIndOutlinedIcon />
           </Avatar>
@@ -285,8 +277,9 @@ export default function Registration(): JSX.Element {
               </Grid>
             </Grid>
           </form>
-        </div>
-      </Container>
+        </>
     </>
   );
 }
+
+Registration.layout = 'auth';

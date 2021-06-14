@@ -1,4 +1,4 @@
-import { Button, Container, TextField } from '@material-ui/core';
+import { Button, Container, TextField, Typography } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import { Autocomplete } from '@material-ui/lab';
 import { KeyboardDatePicker } from '@material-ui/pickers';
@@ -49,7 +49,7 @@ export async function getServerSideProps(context: GetServerSidePropsContext): Pr
   };
 }
 
-function CreateTopic(): JSX.Element {
+export default function CreateTopic(): JSX.Element {
   const { t: tCommon } = useTranslation('common');
   const { t: tCreateTopic } = useTranslation('topic-creation');
 
@@ -96,8 +96,10 @@ function CreateTopic(): JSX.Element {
           {tCreateTopic('title')} - {tCommon('appName')}
         </title>
       </Head>
-      <Container>
-        <h1>{tCreateTopic('headline')}</h1>
+      <>
+        <Typography gutterBottom variant="h4" component="h2">
+          {tCreateTopic('headline')}
+        </Typography>
         <form
           noValidate
           onSubmit={(e) => {
@@ -223,11 +225,11 @@ function CreateTopic(): JSX.Element {
             </Button>
           </Link>
         </form>
-      </Container>
+      </>
     </>
   );
 }
 
 const tagOptions: string[] = []; // TODO: hard coded defaults or values loaded from the backend?
 
-export default CreateTopic;
+CreateTopic.layout = 'main';
