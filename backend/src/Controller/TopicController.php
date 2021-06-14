@@ -8,6 +8,7 @@ use App\Repository\TopicRepository;
 use Carbon\Carbon;
 use Carbon\Exceptions\InvalidFormatException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
@@ -17,13 +18,36 @@ class TopicController extends AbstractController
 {
     private TopicRepository $topicRepository;
     private ValidatorInterface $validator;
+    private ParameterBagInterface $params;
 
-    public function __construct(TopicRepository $topicRepository, ValidatorInterface $validator)
+    public function __construct(TopicRepository $topicRepository, ValidatorInterface $validator, ParameterBagInterface $params)
     {
         $this->topicRepository = $topicRepository;
         $this->validator = $validator;
+        $this->params = $params;
     }
 
+    #[Route('/topic', name: 'topic_list', methods: ['get'])]
+    public function listTopics(Request $request): Response
+    {
+        $pageSize = $this->params->get('app.page_size');
+        $pageNumber = intval($request->get('page') ?? '0') ?? 0;
+
+        $orderBy = $request->get('orderBy') ?? 'deadline';
+        $orderDirection = $request->get('order') ?? 'asc';
+
+        $topics = $this->topicRepository->listTopics($pageNumber, $pageSize, $orderBy, $orderDirection);
+        $totalAmount = $this->topicRepository->count([]);
+        $totalPages = (int)ceil($totalAmount / $pageSize);
+
+        return $this->json([
+            "content" => $topics,
+            "total" => $totalAmount,
+            "pages" => max($totalPages, 1),
+            "last" => $pageNumber === ($totalPages - 1),
+            "perPage" => $pageSize,
+        ]);
+    }
 
     #[Route('/topic', name: 'topic_post', methods: ['post'])]
     public function postTopic(Request $request): Response

@@ -14,6 +14,8 @@ parameters:
     app.ldap_attribute_username: '%env(string:resolve:APP_LDAP_ATTRIBUTE_USERNAME)%'
     app.ldap_attribute_mail: '%env(string:resolve:APP_LDAP_ATTRIBUTE_MAIL)%'
 
+    app.page_size: '%env(default:app.page_size_default:resolve:APP_PAGE_SIZE)%'
+    app.page_size_default: 15
 services:
     # default configuration for services in *this* file
     _defaults:
