@@ -1,11 +1,9 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import Container from '@material-ui/core/Container';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
 import MuiAlert, { Color } from '@material-ui/lab/Alert';
 import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
-import { CssBaseline } from '@material-ui/core';
 import AssignmentIndOutlinedIcon from '@material-ui/icons/AssignmentIndOutlined';
 import Avatar from '@material-ui/core/Avatar';
 import Grid from '@material-ui/core/Grid';
@@ -152,14 +150,21 @@ export default function Registration(): JSX.Element {
       setSubmitError(undefined);
       setSuccessfulRegister(false);
 
-      const hasBlankFields: boolean = firstName === '' || lastName === '' || email === '' || password === '' || confirmError === '';
-      const hasErrors: boolean = !!firstNameError || !!lastNameError || !!emailError || !!passwordError || !!confirmError;
+      const hasBlankFields: boolean =
+        firstName === '' || lastName === '' || email === '' || password === '' || confirmError === '';
+      const hasErrors: boolean =
+        !!firstNameError || !!lastNameError || !!emailError || !!passwordError || !!confirmError;
 
       if (hasBlankFields || hasErrors) {
         return;
       }
       try {
-        const response = await axiosClient.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/register`, { firstName, lastName, email, password });
+        const response = await axiosClient.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/register`, {
+          firstName,
+          lastName,
+          email,
+          password,
+        });
         await checkSubmitError(response);
       } catch (e) {
         if (e.response && e.response.data && e.response.data.message) {
@@ -181,103 +186,103 @@ export default function Registration(): JSX.Element {
           {tRegistration('title')} - {tCommon('appName')}
         </title>
       </Head>
-        <>
-          <Avatar className={classes.avatar}>
-            <AssignmentIndOutlinedIcon />
-          </Avatar>
-          <Typography component="h1" variant="h5">
-            {tRegistration('title')}
-          </Typography>
-          <form className={classes.form} onSubmit={onSubmit} noValidate>
-            {submitError && createNotification(submitError, 'error')}
-            {successfulRegister && createNotification(tRegistration('successMessage'), 'success')}
-            <TextField
-              variant="outlined"
-              margin="normal"
-              required
-              fullWidth
-              id="firstName"
-              type="text"
-              error={!!firstNameError}
-              value={firstName}
-              onChange={(e) => setFirstName(e.target.value)}
-              label={tRegistration('firstNamePlaceHolder')}
-              helperText={firstNameError}
-              autoComplete="given-name"
-              spellCheck="false"
-            />
-            <TextField
-              variant="outlined"
-              margin="normal"
-              required
-              fullWidth
-              id="lastName"
-              type="text"
-              error={!!lastNameError}
-              value={lastName}
-              onChange={(e) => setLastName(e.target.value)}
-              label={tRegistration('lastNamePlaceHolder')}
-              helperText={lastNameError}
-              autoComplete="family-name"
-              spellCheck="false"
-            />
-            <TextField
-              variant="outlined"
-              margin="normal"
-              required
-              fullWidth
-              id="email"
-              type="email"
-              error={!!emailError}
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              label={tRegistration('emailPlaceHolder')}
-              helperText={emailError}
-              autoComplete="email"
-              spellCheck="false"
-            />
-            <TextField
-              variant="outlined"
-              margin="normal"
-              required
-              fullWidth
-              id="password"
-              type="password"
-              error={!!passwordError}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              label={tRegistration('passwordPlaceHolder')}
-              helperText={passwordError}
-              autoComplete="new-password"
-              spellCheck="false"
-            />
-            <TextField
-              variant="outlined"
-              margin="normal"
-              required
-              fullWidth
-              id="password-confirm"
-              type="password"
-              error={!!confirmError}
-              value={confirm}
-              onChange={(e) => handleConfirmChange(e.target.value)}
-              label={tRegistration('confirmPlaceHolder')}
-              helperText={confirmError}
-              autoComplete="new-password"
-              spellCheck="false"
-            />
-            <Button type="submit" fullWidth variant="contained" color="primary" className={classes.submit}>
-              {tRegistration('submitCaption')}
-            </Button>
-            <Grid container>
-              <Grid item xs>
-                <Link href="/login" variant="body2">
-                  {tRegistration('linkLogin')}
-                </Link>
-              </Grid>
+      <>
+        <Avatar className={classes.avatar}>
+          <AssignmentIndOutlinedIcon />
+        </Avatar>
+        <Typography component="h1" variant="h5">
+          {tRegistration('title')}
+        </Typography>
+        <form className={classes.form} onSubmit={onSubmit} noValidate>
+          {submitError && createNotification(submitError, 'error')}
+          {successfulRegister && createNotification(tRegistration('successMessage'), 'success')}
+          <TextField
+            variant="outlined"
+            margin="normal"
+            required
+            fullWidth
+            id="firstName"
+            type="text"
+            error={!!firstNameError}
+            value={firstName}
+            onChange={(e) => setFirstName(e.target.value)}
+            label={tRegistration('firstNamePlaceHolder')}
+            helperText={firstNameError}
+            autoComplete="given-name"
+            spellCheck="false"
+          />
+          <TextField
+            variant="outlined"
+            margin="normal"
+            required
+            fullWidth
+            id="lastName"
+            type="text"
+            error={!!lastNameError}
+            value={lastName}
+            onChange={(e) => setLastName(e.target.value)}
+            label={tRegistration('lastNamePlaceHolder')}
+            helperText={lastNameError}
+            autoComplete="family-name"
+            spellCheck="false"
+          />
+          <TextField
+            variant="outlined"
+            margin="normal"
+            required
+            fullWidth
+            id="email"
+            type="email"
+            error={!!emailError}
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            label={tRegistration('emailPlaceHolder')}
+            helperText={emailError}
+            autoComplete="email"
+            spellCheck="false"
+          />
+          <TextField
+            variant="outlined"
+            margin="normal"
+            required
+            fullWidth
+            id="password"
+            type="password"
+            error={!!passwordError}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            label={tRegistration('passwordPlaceHolder')}
+            helperText={passwordError}
+            autoComplete="new-password"
+            spellCheck="false"
+          />
+          <TextField
+            variant="outlined"
+            margin="normal"
+            required
+            fullWidth
+            id="password-confirm"
+            type="password"
+            error={!!confirmError}
+            value={confirm}
+            onChange={(e) => handleConfirmChange(e.target.value)}
+            label={tRegistration('confirmPlaceHolder')}
+            helperText={confirmError}
+            autoComplete="new-password"
+            spellCheck="false"
+          />
+          <Button type="submit" fullWidth variant="contained" color="primary" className={classes.submit}>
+            {tRegistration('submitCaption')}
+          </Button>
+          <Grid container>
+            <Grid item xs>
+              <Link href="/login" variant="body2">
+                {tRegistration('linkLogin')}
+              </Link>
             </Grid>
-          </form>
-        </>
+          </Grid>
+        </form>
+      </>
     </>
   );
 }
