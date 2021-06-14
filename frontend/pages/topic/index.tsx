@@ -170,6 +170,7 @@ export default function TopicList({ user }: Props): JSX.Element {
             rowsPerPage={data.perPage}
             labelRowsPerPage=""
             page={page}
+            rowsPerPageOptions={[{ value: data.perPage, label: data.perPage.toString() }]}
             labelDisplayedRows={(paginationInfo: LabelDisplayedRowsArgs) =>
               `Zeige Elemente ${paginationInfo.from}-${paginationInfo.to} (von insgesamt ${paginationInfo.count})`
             }
