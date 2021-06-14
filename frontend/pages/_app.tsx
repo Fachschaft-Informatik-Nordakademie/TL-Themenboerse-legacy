@@ -6,6 +6,7 @@ import '../styles/globals.css';
 import DateFnsUtils from '@date-io/date-fns';
 import Head from 'next/head';
 import { appWithTranslation } from 'next-i18next';
+import LayoutWrapper from '../src/layouts/LayoutWrapper';
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 function MyApp({ Component, pageProps }): JSX.Element {
@@ -27,7 +28,9 @@ function MyApp({ Component, pageProps }): JSX.Element {
         <MuiPickersUtilsProvider utils={DateFnsUtils}>
           {/* CssBaseline kickstart an elegant, consistent, and simple baseline to build upon. */}
           <CssBaseline />
-          <Component {...pageProps} />
+          <LayoutWrapper {...pageProps}>
+            <Component {...pageProps} />
+          </LayoutWrapper>
         </MuiPickersUtilsProvider>
       </ThemeProvider>
     </React.Fragment>
