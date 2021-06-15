@@ -37,7 +37,7 @@ test:
     APP_LDAP_PORT: 389
     XDEBUG_MODE: "coverage"
   script:
-    - cd backend && php ./vendor/bin/phpunit --coverage-text --colors=never --log-junit=phpunit-report.xml
+    - cd backend && composer test-ci
   artifacts:
     reports:
       junit: backend/phpunit-report.xml
