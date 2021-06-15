@@ -34,7 +34,9 @@ export default function MainLayout(props): JSX.Element {
           <Typography component="h1" variant="h6" color="inherit" noWrap className={classes.title}>
             Themenbörse
           </Typography>
-          <div>Eingeloggt als {props.user.email}</div>
+          <div>
+            Eingeloggt als {props.user.profile.firstName} {props.user.profile.lastName}
+          </div>
         </Toolbar>
       </AppBar>
       <main className={classes.content}>

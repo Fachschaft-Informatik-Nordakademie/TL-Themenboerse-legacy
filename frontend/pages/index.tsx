@@ -45,6 +45,9 @@ export default function Home({ user }: Props): JSX.Element {
             <Link href="/topic/create">
               <Button>Thema erstellen</Button>
             </Link>
+            <Link href={`/user/${user.id}`}>
+              <Button>Profil</Button>
+            </Link>
             <Button onClick={logout}>Logout</Button>
           </div>
         ) : (

@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\User;
+use App\Entity\UserProfile;
 use App\Entity\UserType;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -38,7 +39,10 @@ class RegistrationController extends AbstractController
         $lastName = $request->get('lastName', '');
 
         $user = new User();
-        $user->setEmail($email)->setFirstName($firstName)->setLastName($lastName)->setType(UserType::EXTERNAL);
+        $user->setProfile(new UserProfile());
+        $user->getProfile()->setUser($user);
+        $user->setEmail($email)->setType(UserType::EXTERNAL);
+        $user->getProfile()->setFirstName($firstName)->setLastName($lastName);
 
         $errors = $this->validator->validate($user);
 
