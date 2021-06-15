@@ -1,3 +1,5 @@
+import { UserProfile } from './userProfile';
+
 export type UserType = 'LDAP' | 'EXTERNAL';
 
 export type User = {
@@ -7,4 +9,5 @@ export type User = {
   ldapUsername?: string;
   ldapDn?: string;
   roles: string[];
+  profile: UserProfile;
 };

@@ -3,6 +3,7 @@
 namespace App\Security;
 
 use App\Entity\User;
+use App\Entity\UserProfile;
 use App\Entity\UserType;
 use LogicException;
 use Symfony\Component\HttpFoundation\Request;
@@ -118,6 +119,8 @@ class LdapJsonAuthenticator extends AbstractJsonAuthenticator
 
         if ($user === null) {
             $user = new User();
+            $user->setProfile(new UserProfile());
+            $user->getProfile()->setUser($user);
         } else if ($user->getType() !== UserType::LDAP) {
             throw new LogicException("User found in DB but it is external");
         }
@@ -126,8 +129,8 @@ class LdapJsonAuthenticator extends AbstractJsonAuthenticator
         $user->setLdapDn($entry->getDn());
         $user->setEmail($emailValue[0]);
         $user->setType(UserType::LDAP);
-        $user->setFirstName($firstNameValue[0]);
-        $user->setLastName($lastNameValue[0]);
+        $user->getProfile()->setFirstName($firstNameValue[0]);
+        $user->getProfile()->setLastName($lastNameValue[0]);
 
         $this->em->persist($user);
         $this->em->flush();

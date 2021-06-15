@@ -9,9 +9,7 @@ use Symfony\Component\Security\Core\User\EquatableInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Serializer\Annotation\Ignore;
 use Symfony\Component\Validator\Constraints\Email;
-use Symfony\Component\Validator\Constraints\Length;
-use Symfony\Component\Validator\Constraints\NotBlank;
-use Symfony\Component\Validator\Constraints\Unique;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: "`user`")]
@@ -39,19 +37,13 @@ class User implements UserInterface, EquatableInterface
     #[Ignore]
     private ?string $password;
 
-    #[ORM\Column(type: "string", length: 255, nullable: false)]
-    #[NotBlank(message: 'The first name must contain at least 2 characters.')]
-    #[Length(min: 2, minMessage: 'The first name must contain at least 2 characters.')]
-    private string $firstName;
-
-    #[ORM\Column(type: "string", length: 255, nullable: false)]
-    #[NotBlank(message: 'The last name must contain at least 2 characters.')]
-    #[Length(min: 2, minMessage: 'The last name must contain at least 2 characters.')]
-    private string $lastName;
-
     #[ORM\OneToMany(targetEntity: Topic::class, mappedBy: "author")]
     #[Ignore]
     private PersistentCollection $topics;
+
+    #[ORM\OneToOne(targetEntity: UserProfile::class, mappedBy: "user", fetch: 'EAGER', cascade: ['all'])]
+    #[Assert\Valid]
+    private UserProfile $profile;
 
     public function getRoles(): array
     {
@@ -145,28 +137,6 @@ class User implements UserInterface, EquatableInterface
         return $this;
     }
 
-    public function getFirstName(): string
-    {
-        return $this->firstName;
-    }
-
-    public function setFirstName(string $firstName): self
-    {
-        $this->firstName = $firstName;
-        return $this;
-    }
-
-    public function getLastName(): string
-    {
-        return $this->lastName;
-    }
-
-    public function setLastName(string $lastName): self
-    {
-        $this->lastName = $lastName;
-        return $this;
-    }
-
     // we can not use default user comparison because some users don't have a password
     // see https://symfony.com/doc/current/security/user_provider.html#understanding-how-users-are-refreshed-from-the-session
     #[Ignore]
@@ -196,27 +166,29 @@ class User implements UserInterface, EquatableInterface
         return true;
     }
 
-    /**
-     * Get the value of topics
-     *
-     * @return  ?PersistentCollection
-     */
-    public function getTopics()
+    public function getTopics(): ?PersistentCollection
     {
         return $this->topics;
     }
 
-    /**
-     * Set the value of topics
-     *
-     * @param  ?PersistentCollection  $topics
-     *
-     * @return  self
-     */
-    public function setTopics(?PersistentCollection $topics)
+    public function setTopics(?PersistentCollection $topics): self
     {
         $this->topics = $topics;
 
         return $this;
     }
+
+    public function getProfile(): UserProfile
+    {
+        return $this->profile;
+    }
+
+    public function setProfile(UserProfile $profile): self
+    {
+        $this->profile = $profile;
+
+        return $this;
+    }
+
+
 }

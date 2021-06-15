@@ -1,0 +1,12 @@
+{
+    "title": "Profil bearbeiten",
+    "firstName": "Vorname",
+    "lastName": "Nachname",
+    "biography": "Biographie",
+    "skills": "Fähigkeiten",
+    "references": "Referenzen (LinkedIn, GitHub, Zertifikate...)",
+    "buttonSubmit": "Speichern",
+    "buttonCancel": "Abbrechen",
+    "messageFirstNameRequired": "Vorname ist ein Pflichtfeld",
+    "messageLastNameRequired": "Nachname ist ein Pflichtfeld"
+  }

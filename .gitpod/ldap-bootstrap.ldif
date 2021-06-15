@@ -18,7 +18,7 @@ objectclass: inetOrgPerson
 cn: 10000
 displayName: Max Mustermann - A19a
 givenName: Max
-sn: Schimpfhauser
+sn: Mustermann
 mail: max.mustermann@awesome-university.com
 userPassword: secret
 
