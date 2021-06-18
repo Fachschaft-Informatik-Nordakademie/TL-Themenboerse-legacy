@@ -1,0 +1,18 @@
+{
+    "title": "Thema erstellen",
+    "headline": "Neues Thema erstellen",
+    "labelTitel": "Titel",
+    "labelDescription": "Beschreibung",
+    "labelRequirements": "Anforderungen",
+    "labelPages": "Geschätzte Seitenzahl",
+    "labelWebsite": "Website",
+    "labelStartdate":"Starttermin",
+    "labelEnddate": "Endtermin",
+    "labelTags": "Tags",
+    "buttonSubmit": "Erstellen",
+    "buttonCancel": "Abbrechen",
+    "messageTitleRequired": "Titel ist ein Pflichtfeld",
+    "messageDescriptionRequired": "Beschreibung ist ein Pflichtfeld",
+    "messageRequirementsRequired": "Anforderungen ist ein Pflichtfeld",
+    "messageUrlInvalid": "Bitte eine gültige Adresse eingeben"
+  }

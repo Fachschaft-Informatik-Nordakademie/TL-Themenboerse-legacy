@@ -128,6 +128,7 @@ class TopicController extends AbstractController
             empty($request->get('title')) ? true : $topic->setTitle($request->get('title'));
             empty($request->get('description')) ? true : $topic->setDescription($request->get('description'));
             empty($request->get('requirements')) ? true : $topic->setRequirements($request->get('requirements'));
+            empty($request->get('scope')) ? true : $topic->setScope($request->get('scope'));
             empty($request->get('tags')) ? true : $topic->setTags($request->get('tags'));
             empty($request->get('website')) ? true : $topic->setWebsite($request->get('website'));
             empty($request->get('deadline')) ? true : $deadline = $request->get('deadline');
