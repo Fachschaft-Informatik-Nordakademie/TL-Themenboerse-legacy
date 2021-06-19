@@ -17,6 +17,7 @@ interface IFormValues {
   readonly title: string;
   readonly description: string;
   readonly requirements: string;
+  readonly scope: string;
   readonly pages: number;
   readonly start: Date | null;
   readonly deadline: Date | null;
@@ -57,6 +58,7 @@ export default function CreateTopic(): JSX.Element {
     title: yup.string().required(tCreateTopic('messageTitleRequired')),
     description: yup.string().required(tCreateTopic('messageDescriptionRequired')),
     requirements: yup.string().required(tCreateTopic('messageRequirementsRequired')),
+    scope: yup.string().required(tCreateTopic('messageScopeRequired')),
     start: yup.date().nullable(),
     deadline: yup.date().nullable(),
     tags: yup.array().ensure(),
@@ -73,6 +75,7 @@ export default function CreateTopic(): JSX.Element {
     initialValues: {
       title: '',
       description: '',
+      scope: '',
       tags: [],
       start: null,
       deadline: null,
@@ -117,6 +120,19 @@ export default function CreateTopic(): JSX.Element {
             helperText={formik.touched.title && formik.errors.title}
             error={formik.touched.title && Boolean(formik.errors.title)}
             onBlur={formik.handleBlur}
+            required
+          />
+          <TextField
+            label={tCreateTopic('labelScope')}
+            name="scope"
+            fullWidth
+            className={classes.formField}
+            value={formik.values.scope}
+            onChange={formik.handleChange}
+            helperText={formik.touched.scope && formik.errors.scope}
+            error={formik.touched.scope && Boolean(formik.errors.scope)}
+            onBlur={formik.handleBlur}
+            multiline
             required
           />
           <TextField

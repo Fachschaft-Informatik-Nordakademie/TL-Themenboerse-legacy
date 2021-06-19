@@ -1,6 +1,7 @@
 {
   "title": "Thema erstellen",
   "headline": "Neues Thema erstellen",
+  "labelScope": "Kontext (Unternehmen, Projekt)",
   "labelTitel": "Titel",
   "labelDescription": "Beschreibung",
   "labelRequirements": "Anforderungen",
@@ -14,5 +15,6 @@
   "messageTitleRequired": "Titel ist ein Pflichtfeld",
   "messageDescriptionRequired": "Beschreibung ist ein Pflichtfeld",
   "messageRequirementsRequired": "Anforderungen ist ein Pflichtfeld",
+  "messageScopeRequired": "Kontext (Unternehmen, Projekt) ist ein Pflichtfeld",
   "messageUrlInvalid": "Bitte eine gültige Adresse eingeben"
 }

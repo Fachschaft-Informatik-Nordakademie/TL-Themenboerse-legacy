@@ -68,6 +68,7 @@ class TopicController extends AbstractController
             $topic->setRequirements($request->get('requirements'));
             $topic->setTags($request->get('tags'));
             $topic->setWebsite($request->get('website'));
+            $topic->setScope($request->get('scope'));
             $deadline = $request->get('deadline');
             if ($deadline) {
                 $topic->setDeadline(Carbon::parse($deadline)->toDate());
