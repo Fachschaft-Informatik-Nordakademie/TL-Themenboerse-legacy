@@ -1,4 +1,4 @@
-import { Button, Container, TextField, Typography } from '@material-ui/core';
+import { Button, TextField, Typography } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import { Autocomplete } from '@material-ui/lab';
 import { KeyboardDatePicker } from '@material-ui/pickers';
@@ -12,6 +12,9 @@ import { GetServerSidePropsContext, GetServerSidePropsResult } from 'next';
 import { fetchUser } from '../../src/server/fetchUser';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import { useTranslation } from 'next-i18next';
+import { useRouter } from 'next/router';
+import { PageComponent } from '../../src/types/PageComponent';
+import { User } from '../../src/types/user';
 
 interface IFormValues {
   readonly title: string;
@@ -37,7 +40,11 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export async function getServerSideProps(context: GetServerSidePropsContext): Promise<GetServerSidePropsResult<any>> {
+type Props = {
+  user: User;
+};
+
+export async function getServerSideProps(context: GetServerSidePropsContext): Promise<GetServerSidePropsResult<Props>> {
   const user = await fetchUser(context.req.cookies);
 
   if (user === null) {
@@ -49,9 +56,11 @@ export async function getServerSideProps(context: GetServerSidePropsContext): Pr
   };
 }
 
-export default function CreateTopic(): JSX.Element {
+const CreateTopic: PageComponent<Props> = (): JSX.Element => {
   const { t: tCommon } = useTranslation('common');
   const { t: tCreateTopic } = useTranslation('topic-creation');
+
+  const router = useRouter();
 
   const validationSchema = yup.object({
     title: yup.string().required(tCreateTopic('messageTitleRequired')),
@@ -65,8 +74,8 @@ export default function CreateTopic(): JSX.Element {
   });
 
   const submitForm = async (values: IFormValues): Promise<void> => {
-    await axiosClient.post(`/topic`, values);
-    // TODO: success message/back navigation? error handling?
+    const response = await axiosClient.post(`/topic`, values);
+    router.push('/topic/' + response.data.id);
   };
 
   const formik = useFormik<IFormValues>({
@@ -228,8 +237,9 @@ export default function CreateTopic(): JSX.Element {
       </>
     </>
   );
-}
+};
 
 const tagOptions: string[] = []; // TODO: hard coded defaults or values loaded from the backend?
 
 CreateTopic.layout = 'main';
+export default CreateTopic;

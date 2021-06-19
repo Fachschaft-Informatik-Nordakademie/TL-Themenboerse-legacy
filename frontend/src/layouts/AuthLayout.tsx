@@ -1,5 +1,6 @@
 import { Container } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
+import { PageComponent } from '../types/PageComponent';
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -10,7 +11,11 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function AuthLayout(props): JSX.Element {
+type Props = {
+  children: React.ReactElement<unknown, PageComponent<unknown>>;
+};
+
+export default function AuthLayout(props: Props): JSX.Element {
   const classes = useStyles();
 
   return (

@@ -24,6 +24,8 @@ import Link from 'next/link';
 import { format } from 'date-fns';
 import { Topic } from '../../src/types/topic';
 import { ApiResult } from '../../src/types/api-result';
+import { useRouter } from 'next/router';
+import { PageComponent } from '../../src/types/PageComponent';
 
 type Props = {
   user: User;
@@ -66,14 +68,19 @@ const useStyles = makeStyles((theme) => ({
     marginLeft: theme.spacing(-1),
   },
   tagItem: { marginLeft: theme.spacing(1) },
+  tableHover: {
+    cursor: 'pointer',
+  },
 }));
 
-export default function TopicList({ user }: Props): JSX.Element {
+const TopicList: PageComponent<Props> = (): JSX.Element => {
   const classes = useStyles();
   const [data, setData] = useState<ApiResult<Topic> | null>(null);
   const [page, setPage] = useState<number>(0);
   const [order, setOrder] = useState<'desc' | 'asc'>('asc');
   const [orderBy, setOrderBy] = useState<string>('deadline');
+
+  const router = useRouter();
 
   const fetchData = async (): Promise<void> => {
     const response = await axiosClient.get<ApiResult<Topic>>(`/topic?page=${page}&order=${order}&orderBy=${orderBy}`);
@@ -142,7 +149,12 @@ export default function TopicList({ user }: Props): JSX.Element {
             <TableBody>
               {data &&
                 data.content.map((row) => (
-                  <TableRow key={row.id}>
+                  <TableRow
+                    key={row.id}
+                    onClick={() => router.push('/topic/' + row.id)}
+                    hover
+                    classes={{ hover: classes.tableHover }}
+                  >
                     <TableCell component="th" scope="row">
                       {row.title}
                     </TableCell>
@@ -183,6 +195,7 @@ export default function TopicList({ user }: Props): JSX.Element {
       </div>
     </>
   );
-}
+};
 
 TopicList.layout = 'main';
+export default TopicList;

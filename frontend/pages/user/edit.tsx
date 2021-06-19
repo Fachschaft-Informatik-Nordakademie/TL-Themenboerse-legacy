@@ -10,12 +10,11 @@ import Link from 'next/link';
 import axiosClient from '../../src/api';
 import { GetServerSidePropsContext, GetServerSidePropsResult } from 'next';
 import { fetchUser } from '../../src/server/fetchUser';
-import { UserProfile } from '../../src/types/userProfile';
 import { useRouter } from 'next/router';
-import { fetchUserProfile } from '../../src/server/userProfile';
 import { useTranslation } from 'next-i18next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import { User } from '../../src/types/user';
+import { PageComponent } from '../../src/types/PageComponent';
 
 interface IFormValues {
   readonly firstName: string;
@@ -28,7 +27,6 @@ interface IFormValues {
 
 interface UserProfileEditProps {
   readonly user: User;
-  readonly userProfile: UserProfile;
   readonly cookies: Record<string, string>;
 }
 
@@ -51,30 +49,16 @@ export async function getServerSideProps(
     return { redirect: { destination: '/login', permanent: false } };
   }
 
-  let userProfile = await fetchUserProfile(user.id, context.req.cookies);
-
-  // TODO: user profile should be created during first login/registration
-  if (userProfile === null) {
-    userProfile = {
-      id: user.id,
-      firstName: '',
-      lastName: '',
-      skills: [],
-      references: [],
-    };
-  }
-
   return {
     props: {
       user,
       cookies: context.req.cookies,
-      userProfile,
       ...(await serverSideTranslations('de', ['common', 'user-edit'])),
     },
   };
 }
 
-export default function EditUserProfile({ user, userProfile }: UserProfileEditProps): JSX.Element {
+const EditUserProfile: PageComponent<UserProfileEditProps> = ({ user }: UserProfileEditProps): JSX.Element => {
   const { t: tCommon } = useTranslation('common');
   const { t: tUserEdit } = useTranslation('user-edit');
 
@@ -105,7 +89,7 @@ export default function EditUserProfile({ user, userProfile }: UserProfileEditPr
 
   const formik = useFormik<IFormValues>({
     initialValues: {
-      ...userProfile,
+      ...user.profile,
     },
     validationSchema: validationSchema,
     onSubmit: (values) => {
@@ -242,7 +226,7 @@ export default function EditUserProfile({ user, userProfile }: UserProfileEditPr
           <Button variant="contained" color="primary" type="submit">
             {tUserEdit('buttonSubmit')}
           </Button>
-          <Link href={`/user/${userProfile.id}`}>
+          <Link href={`/user/${user.id}`}>
             <Button className={classes.cancelButton} variant="contained" color="default" type="button">
               {tUserEdit('buttonCancel')}
             </Button>
@@ -251,6 +235,9 @@ export default function EditUserProfile({ user, userProfile }: UserProfileEditPr
       </Container>
     </>
   );
-}
+};
+
+EditUserProfile.layout = 'main';
 
 const skillsOptions: string[] = []; // TODO: hard coded defaults or values loaded from the backend?
+export default EditUserProfile;
