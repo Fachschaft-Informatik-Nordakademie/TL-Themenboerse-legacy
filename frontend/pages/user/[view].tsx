@@ -7,10 +7,11 @@ import { GetServerSidePropsContext, GetServerSidePropsResult } from 'next';
 import { fetchUser } from '../../src/server/fetchUser';
 import { User } from '../../src/types/user';
 import { UserProfile } from '../../src/types/userProfile';
-import { fetchUserProfile } from '../../src/server/userProfile';
+import { fetchUserProfile } from '../../src/server/fetchUserProfile';
 import { useTranslation } from 'next-i18next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import { useRouter } from 'next/router';
+import { PageComponent } from '../../src/types/PageComponent';
 
 interface UserProfileViewProps {
   readonly user: User;
@@ -20,10 +21,11 @@ interface UserProfileViewProps {
 const useStyles = makeStyles((theme) => ({
   header: {
     fontSize: theme.typography.fontSize,
+    color: theme.palette.grey.A700,
   },
   field: {
-    marginTop: theme.spacing(0),
-    marginBottom: theme.spacing(2),
+    marginTop: theme.spacing(-1),
+    marginBottom: theme.spacing(4),
     fontSize: theme.typography.fontSize * 1.2,
   },
   image: {
@@ -45,7 +47,7 @@ export async function getServerSideProps(
   const userProfile = await fetchUserProfile(id, context.req.cookies);
 
   if (userProfile === null) {
-    return { redirect: { destination: '/login', permanent: false } };
+    return { notFound: true };
   }
 
   return {
@@ -57,7 +59,10 @@ export async function getServerSideProps(
   };
 }
 
-export default function ViewUserProfile({ user, userProfile }: UserProfileViewProps): JSX.Element {
+const ViewUserProfile: PageComponent<UserProfileViewProps> = ({
+  user,
+  userProfile,
+}: UserProfileViewProps): JSX.Element => {
   const { t: tCommon } = useTranslation('common');
   const { t: tUserView } = useTranslation('user-view');
   const { t: tUserEdit } = useTranslation('user-edit');
@@ -94,7 +99,9 @@ export default function ViewUserProfile({ user, userProfile }: UserProfileViewPr
         <p className={classes.header}>{tUserEdit('lastName')}</p>
         <p className={classes.field}>{userProfile.lastName}</p>
         <p className={classes.header}>{tUserEdit('biography')}</p>
-        <p className={classes.field}>{userProfile.biography}</p>
+        <p className={classes.field}>
+          {userProfile.biography && userProfile.biography.length > 0 ? userProfile.biography : tUserView('noInput')}
+        </p>
         <p className={classes.header}>{tUserEdit('skills')}</p>
         <p className={classes.field}>
           {userProfile.skills.length > 0 ? userProfile.skills.join(' ') : tUserView('noInput')}
@@ -117,6 +124,7 @@ export default function ViewUserProfile({ user, userProfile }: UserProfileViewPr
       </>
     </>
   );
-}
+};
 
 ViewUserProfile.layout = 'main';
+export default ViewUserProfile;
