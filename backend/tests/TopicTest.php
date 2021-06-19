@@ -11,6 +11,7 @@ class TopicTest extends SecureApiTestCase
         $this->client->request('POST', '/topic', [
             'json' => [
                 'title' => 'test title',
+                'scope' => 'test scope',
                 'description' => 'This is a description.',
                 'requirements' => 'These are the requirements',
                 'tags' => array("PHP"),
@@ -30,6 +31,7 @@ class TopicTest extends SecureApiTestCase
         $resp = $this->client->request('POST', '/topic', [
             'json' => [
                 'title' => 'test title',
+                'scope' => 'test scope',
                 'description' => 'This is a description.',
                 'requirements' => 'These are the requirements',
                 'tags' => array("PHP"),
@@ -44,6 +46,7 @@ class TopicTest extends SecureApiTestCase
         $this->client->request('GET', '/topic/' . $id);
         $this->assertJsonContains([
             'title' => 'test title',
+            'scope' => 'test scope',
             'description' => 'This is a description.',
             'requirements' => 'These are the requirements',
             'tags' => array("PHP"),

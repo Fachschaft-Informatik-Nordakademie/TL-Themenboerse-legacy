@@ -24,6 +24,7 @@ import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import { useTranslation } from 'next-i18next';
 import { GetServerSidePropsContext, GetServerSidePropsResult } from 'next';
 import { fetchUser } from '../src/server/fetchUser';
+import { PageComponent } from '../src/types/PageComponent';
 
 export async function getServerSideProps(
   context: GetServerSidePropsContext,
@@ -60,7 +61,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function Registration(): JSX.Element {
+const Registration: PageComponent<void> = (): JSX.Element => {
   const { t: tRegistration } = useTranslation('registration');
   const { t: tCommon } = useTranslation('common');
 
@@ -285,6 +286,7 @@ export default function Registration(): JSX.Element {
       </>
     </>
   );
-}
+};
 
 Registration.layout = 'auth';
+export default Registration;

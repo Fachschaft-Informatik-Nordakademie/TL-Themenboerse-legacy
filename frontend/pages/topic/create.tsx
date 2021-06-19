@@ -1,4 +1,4 @@
-import { Button, Container, TextField, Typography } from '@material-ui/core';
+import { Button, TextField, Typography } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import { Autocomplete } from '@material-ui/lab';
 import { KeyboardDatePicker } from '@material-ui/pickers';
@@ -12,11 +12,15 @@ import { GetServerSidePropsContext, GetServerSidePropsResult } from 'next';
 import { fetchUser } from '../../src/server/fetchUser';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import { useTranslation } from 'next-i18next';
+import { useRouter } from 'next/router';
+import { PageComponent } from '../../src/types/PageComponent';
+import { User } from '../../src/types/user';
 
 interface IFormValues {
   readonly title: string;
   readonly description: string;
   readonly requirements: string;
+  readonly scope: string;
   readonly pages: number;
   readonly start: Date | null;
   readonly deadline: Date | null;
@@ -37,7 +41,11 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export async function getServerSideProps(context: GetServerSidePropsContext): Promise<GetServerSidePropsResult<any>> {
+type Props = {
+  user: User;
+};
+
+export async function getServerSideProps(context: GetServerSidePropsContext): Promise<GetServerSidePropsResult<Props>> {
   const user = await fetchUser(context.req.cookies);
 
   if (user === null) {
@@ -49,14 +57,17 @@ export async function getServerSideProps(context: GetServerSidePropsContext): Pr
   };
 }
 
-export default function CreateTopic(): JSX.Element {
+const CreateTopic: PageComponent<Props> = (): JSX.Element => {
   const { t: tCommon } = useTranslation('common');
   const { t: tCreateTopic } = useTranslation('topic-creation');
+
+  const router = useRouter();
 
   const validationSchema = yup.object({
     title: yup.string().required(tCreateTopic('messageTitleRequired')),
     description: yup.string().required(tCreateTopic('messageDescriptionRequired')),
     requirements: yup.string().required(tCreateTopic('messageRequirementsRequired')),
+    scope: yup.string().required(tCreateTopic('messageScopeRequired')),
     start: yup.date().nullable(),
     deadline: yup.date().nullable(),
     tags: yup.array().ensure(),
@@ -65,14 +76,15 @@ export default function CreateTopic(): JSX.Element {
   });
 
   const submitForm = async (values: IFormValues): Promise<void> => {
-    await axiosClient.post(`/topic`, values);
-    // TODO: success message/back navigation? error handling?
+    const response = await axiosClient.post(`/topic`, values);
+    router.push('/topic/' + response.data.id);
   };
 
   const formik = useFormik<IFormValues>({
     initialValues: {
       title: '',
       description: '',
+      scope: '',
       tags: [],
       start: null,
       deadline: null,
@@ -117,6 +129,19 @@ export default function CreateTopic(): JSX.Element {
             helperText={formik.touched.title && formik.errors.title}
             error={formik.touched.title && Boolean(formik.errors.title)}
             onBlur={formik.handleBlur}
+            required
+          />
+          <TextField
+            label={tCreateTopic('labelScope')}
+            name="scope"
+            fullWidth
+            className={classes.formField}
+            value={formik.values.scope}
+            onChange={formik.handleChange}
+            helperText={formik.touched.scope && formik.errors.scope}
+            error={formik.touched.scope && Boolean(formik.errors.scope)}
+            onBlur={formik.handleBlur}
+            multiline
             required
           />
           <TextField
@@ -228,8 +253,9 @@ export default function CreateTopic(): JSX.Element {
       </>
     </>
   );
-}
+};
 
 const tagOptions: string[] = []; // TODO: hard coded defaults or values loaded from the backend?
 
 CreateTopic.layout = 'main';
+export default CreateTopic;

@@ -5,6 +5,7 @@ namespace App\Tests;
 use ApiPlatform\Core\Bridge\Symfony\Bundle\Test\ApiTestCase;
 use ApiPlatform\Core\Bridge\Symfony\Bundle\Test\Client;
 use App\Entity\User;
+use App\Entity\UserProfile;
 use App\Entity\UserType;
 use Doctrine\ORM\EntityManagerInterface;
 use Hautelook\AliceBundle\PhpUnit\RecreateDatabaseTrait;
@@ -192,12 +193,14 @@ class AuthenticationTest extends ApiTestCase
     public function test_that_ldap_user_is_updated_on_login(): void
     {
         $user = new User();
+        $user->setProfile(new UserProfile());
+        $user->getProfile()->setUser($user);
         $user->setType(UserType::LDAP);
         $user->setEmail("not-his-real-email@awesome-university.com");
         $user->setLdapUsername("10000");
         $user->setLdapDn("cn=10000,ou=students,ou=people,dc=awesome-university,dc=com");
-        $user->setFirstName("Test");
-        $user->setLastName("Test");
+        $user->getProfile()->setFirstName("Test");
+        $user->getProfile()->setLastName("Test");
         $this->em->persist($user);
         $this->em->flush();
 

@@ -1,13 +1,11 @@
 import React, { useState } from 'react';
 import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
-import CssBaseline from '@material-ui/core/CssBaseline';
 import TextField from '@material-ui/core/TextField';
 import Grid from '@material-ui/core/Grid';
 import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
-import Container from '@material-ui/core/Container';
 import axiosClient from '../src/api';
 import { useRouter } from 'next/router';
 import isMail from 'isemail';
@@ -19,6 +17,7 @@ import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import { useTranslation } from 'next-i18next';
 import { GetServerSidePropsContext, GetServerSidePropsResult } from 'next';
 import { fetchUser } from '../src/server/fetchUser';
+import { PageComponent } from '../src/types/PageComponent';
 
 export async function getServerSideProps(
   context: GetServerSidePropsContext,
@@ -58,7 +57,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function SignIn(): JSX.Element {
+const SignIn: PageComponent<void> = (): JSX.Element => {
   const { t: tLogin } = useTranslation('login');
   const { t: tCommon } = useTranslation('common');
   const classes = useStyles();
@@ -166,6 +165,7 @@ export default function SignIn(): JSX.Element {
       </>
     </>
   );
-}
+};
 
 SignIn.layout = 'auth';
+export default SignIn;
