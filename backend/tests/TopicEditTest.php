@@ -52,7 +52,7 @@ class TopicEditTest extends SecureApiTestCase
         $changedTopic = $this->createTopic(start: Carbon::now()->addDays(2), end: Carbon::now()->addDays(25));
         $changedTopicId = $changedTopic->getId();
 
-        $resp = $this->client->request('PUT', '/topic/' . $changedTopicId,  [
+        $this->client->request('PUT', '/topic/' . $changedTopicId,  [
             'json' => [
                 'title' => 'New Title',
                 'description' => 'This is a different description.',
@@ -91,7 +91,7 @@ class TopicEditTest extends SecureApiTestCase
         $changedTopic = $this->createTopic(start: Carbon::now()->addDays(2), end: Carbon::now()->addDays(25));
         $changedTopicId = $changedTopic->getId();
 
-        $resp = $this->client->request('PUT', '/topic/' . $changedTopicId,  [
+        $this->client->request('PUT', '/topic/' . $changedTopicId,  [
             'json' => [
                 'title' => 'New Title',
                 'description' => 'This is a different description.',
@@ -122,5 +122,88 @@ class TopicEditTest extends SecureApiTestCase
         $this->assertEquals('ASSIGNED', $data["status"]);
         $this->assertEquals('2021-12-10T00:00:00+00:00', $data["deadline"]);
         $this->assertEquals('2021-10-04T00:00:00+00:00', $data["start"]);
+    }
+
+    public function test_empty_field_will_be_empty(): void
+    {
+        $this->ensureLogin();
+        $changedTopic = $this->createTopic(start: Carbon::now()->addDays(2), end: Carbon::now()->addDays(25));
+        $changedTopicId = $changedTopic->getId();
+
+        $this->client->request('PUT', '/topic/' . $changedTopicId,  [
+            'json' => [
+                'title' => 'a',
+                'description' => '',
+                'requirements' => '',
+                'tags' => [],
+                'deadline' => "",
+                'pages' => 0,
+                'start' => "",
+                'website' => '',
+                'scope' => '',
+                'status' => '',
+
+            ],
+        ]);
+
+
+        $response = $this->client->request('GET', '/topic/' . $changedTopicId);
+        $this->assertResponseStatusCodeSame(200);
+
+        $data = json_decode($response->getContent(), true);
+
+        $this->assertEquals('a', $data["title"]);
+        $this->assertEquals('', $data["description"]);
+        $this->assertEquals('', $data["requirements"]);
+        $this->assertEquals(0, $data["pages"]);
+        $this->assertEquals('', $data["website"]);
+        $this->assertEquals('', $data["scope"]);
+        $this->assertEquals('', $data["status"]);
+    }
+
+    public function test_title_not_submitted(): void
+    {
+        $this->ensureLogin();
+        $changedTopic = $this->createTopic(start: Carbon::now()->addDays(2), end: Carbon::now()->addDays(25));
+        $changedTopicId = $changedTopic->getId();
+
+        $this->client->request('PUT', '/topic/' . $changedTopicId,  [
+            'json' => [
+                'description' => '',
+                'requirements' => '',
+                'tags' => [],
+                'deadline' => "",
+                'pages' => 0,
+                'start' => "",
+                'website' => '',
+                'scope' => '',
+                'status' => '',
+            ],
+        ]);
+        $this->assertResponseStatusCodeSame(400);
+    }
+
+    public function test_validation_error_title_empty(): void
+    {
+        $this->ensureLogin();
+        $changedTopic = $this->createTopic(start: Carbon::now()->addDays(2), end: Carbon::now()->addDays(25));
+        $changedTopicId = $changedTopic->getId();
+
+        $this->client->request('PUT', '/topic/' . $changedTopicId,  [
+            'json' => [
+                'title' => '',
+                'description' => '',
+                'requirements' => '',
+                'tags' => [],
+                'deadline' => "",
+                'pages' => 0,
+                'start' => "",
+                'website' => '',
+                'scope' => '',
+                'status' => '',
+            ],
+        ]);
+
+        $this->assertResponseStatusCodeSame(400);
     }
 }
