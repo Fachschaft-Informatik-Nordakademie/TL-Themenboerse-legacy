@@ -7,14 +7,14 @@ import * as yup from 'yup';
 import React from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
-import axiosClient from '../../src/api';
+import axiosClient from '../../../src/api';
 import { GetServerSidePropsContext, GetServerSidePropsResult } from 'next';
-import { fetchUser } from '../../src/server/fetchUser';
+import { fetchUser } from '../../../src/server/fetchUser';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import { useTranslation } from 'next-i18next';
 import { useEffect, useState } from 'react';
-import { Topic } from '../../src/types/topic';
-import { User } from '../../src/types/user';
+import { Topic } from '../../../src/types/topic';
+import { User } from '../../../src/types/user';
 import { useRouter } from 'next/router';
 
 
@@ -62,26 +62,26 @@ const useStyles = makeStyles((theme) => ({
 export default function EditTopic({ user }: Props): JSX.Element {
   const { t: tCommon } = useTranslation('common');
   const { t: tEditTopic } = useTranslation('topic-edit');
-  //const [id, setId] = useState<number>(0);
+  
 
   const [data, setData] = useState<Topic>();
-  
+  const router = useRouter();
+  const id = router.query.id;
 
-  
-
+  console.log(id);
 
   const fetchData = async (): Promise<void> => {
-   // const response = await axiosClient.get<Topic>(`/topic/${id}`);
-   const response = await axiosClient.get<Topic>(`/topic/4`);
+   const response = await axiosClient.get<Topic>(`/topic/${id}`);
+   //const response = await axiosClient.get<Topic>(`/topic/4`);
 
     setData(response.data);
   };
 
-  const router = useRouter();
 
-  const id = router.query.id;
-
-  console.log(id);
+  useEffect(() => {
+    fetchData();
+  }, [id]);
+  
 
 
   const validationSchema = yup.object({
@@ -96,23 +96,41 @@ export default function EditTopic({ user }: Props): JSX.Element {
   });
 
   const submitForm = async (values: IFormValues): Promise<void> => {
-    await axiosClient.put(`/topic/{$id}`, values);
+    await axiosClient.put(`/topic/${id}`, values);
     // TODO: success message/back navigation? error handling?
   };
 
   const formik = useFormik<IFormValues>({
+
     initialValues: {
-        title: data.title,
-      description: data.description,
-      tags: data.tags,
-      start:  data.start,
-      deadline: data.deadline,
-     /* start: null,
+      title: data.title ?? "",
+      description: data.description ?? "",
+      tags: data.tags ? data.tags : null,
+      start:  data.start ? data.start : "",
+      deadline: data.deadline ? data.deadline : "",
+      /*start: null,
       deadline: null,*/
-      requirements: data.requirements,
-      pages: data.pages,
-      website: data.website,
+      requirements: data.requirements ? data.requirements : "",
+      pages: data.pages ? data.pages : 0,
+      website: data.website ? data.website : "",
     },
+    
+
+    /*const formik = useFormik<IFormValues>({
+      initialValues: {
+          title: '',
+        description: '',
+        tags: null,
+        start:  '',
+        deadline: '',
+       /* start: null,
+        deadline: null,
+        requirements: '',
+        pages: 0,
+        website: '',
+      },*/
+
+
     validationSchema: validationSchema,
     onSubmit: (values) => {
       console.log('submitting topic!');
@@ -126,7 +144,7 @@ export default function EditTopic({ user }: Props): JSX.Element {
     <>
       <Head>
         <title>
-          {data.title} - {tCommon('appName')}
+          {tEditTopic('title')} - {tCommon('appName')}
         </title>
       </Head>
       <>

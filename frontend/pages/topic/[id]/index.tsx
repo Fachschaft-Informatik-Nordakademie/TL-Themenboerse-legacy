@@ -1,14 +1,14 @@
-import { User } from '../../src/types/user';
+import { User } from '../../../src/types/user';
 import { GetServerSidePropsContext, GetServerSidePropsResult } from 'next';
-import { fetchUser } from '../../src/server/fetchUser';
+import { fetchUser } from '../../../src/server/fetchUser';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import { Chip, Typography } from '@material-ui/core';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
-import { Topic } from '../../src/types/topic';
-import axiosClient from '../../src/api';
+import { Topic } from '../../../src/types/topic';
+import axiosClient from '../../../src/api';
 import { makeStyles } from '@material-ui/core/styles';
-import { PageComponent } from '../../src/types/PageComponent';
+import { PageComponent } from '../../../src/types/PageComponent';
 
 type Props = {
   user: User;
@@ -39,7 +39,7 @@ const useStyles = makeStyles((theme) => ({
 const TopicDetail: PageComponent<void> = (): JSX.Element => {
   const router = useRouter();
   const classes = useStyles();
-  const topicId = router.query.view as string;
+  const topicId = router.query.id as string;
 
   const [topic, setTopic] = useState<Topic>();
   const [loading, setLoading] = useState<boolean>(true);
