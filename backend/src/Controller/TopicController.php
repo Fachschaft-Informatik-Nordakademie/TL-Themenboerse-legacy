@@ -36,7 +36,9 @@ class TopicController extends AbstractController
         $orderBy = $request->get('orderBy') ?? 'deadline';
         $orderDirection = $request->get('order') ?? 'asc';
 
-        $topics = $this->topicRepository->listTopics($pageNumber, $pageSize, $orderBy, $orderDirection);
+        $text = $request->get('text') ?? '';
+
+        $topics = $this->topicRepository->listTopics($pageNumber, $pageSize, $orderBy, $orderDirection, $text);
         $totalAmount = $this->topicRepository->count([]);
         $totalPages = (int)ceil($totalAmount / $pageSize);
 
@@ -103,5 +105,12 @@ class TopicController extends AbstractController
             return $this->json(['message' => 'Topic not found'], Response::HTTP_NOT_FOUND);
         }
         return $this->json($topic);
+    }
+
+    #[Route('/topic/search?text={text}', name: 'topic_search', methods: ['get'])]
+    public function searchTopic(string $text)
+    {
+        $result = $this->topicRepository->searchTopics($text);
+        return $this->json(["topics" => $result]);
     }
 }
