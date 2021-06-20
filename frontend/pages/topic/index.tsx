@@ -26,6 +26,7 @@ import { Topic } from '../../src/types/topic';
 import { ApiResult } from '../../src/types/api-result';
 import { useRouter } from 'next/router';
 import { PageComponent } from '../../src/types/PageComponent';
+import SearchBar from 'material-ui-search-bar';
 
 type Props = {
   user: User;
@@ -47,7 +48,7 @@ const useStyles = makeStyles((theme) => ({
   table: {
     minWidth: 650,
   },
-  createButton: {
+  controlItem: {
     marginBottom: theme.spacing(2),
   },
   tablePaginationSizeSelectRoot: {
@@ -79,11 +80,12 @@ const TopicList: PageComponent<Props> = (): JSX.Element => {
   const [page, setPage] = useState<number>(0);
   const [order, setOrder] = useState<'desc' | 'asc'>('asc');
   const [orderBy, setOrderBy] = useState<string>('deadline');
+  const [text, setText] = useState<string>('');
 
   const router = useRouter();
 
   const fetchData = async (): Promise<void> => {
-    const response = await axiosClient.get<ApiResult<Topic>>(`/topic?page=${page}&order=${order}&orderBy=${orderBy}`);
+    const response = await axiosClient.get<ApiResult<Topic>>(`/topic?page=${page}&order=${order}&orderBy=${orderBy}&text=${text}`);
     setData(response.data);
   };
 
@@ -104,10 +106,17 @@ const TopicList: PageComponent<Props> = (): JSX.Element => {
         Themenübersicht
       </Typography>
       <Link href="/topic/create">
-        <Button className={classes.createButton} variant="contained" color="primary">
+        <Button className={classes.controlItem} variant="contained" color="primary">
           Thema erstellen
         </Button>
       </Link>
+      <SearchBar
+        className={classes.controlItem}
+        value={text}
+        onChange={(newValue) => setText(newValue)}
+        onRequestSearch={() => fetchData()}
+        placeholder={'Suchen'}
+      />
       <div className={classes.table}>
         <TableContainer component={Paper} elevation={4}>
           <Table className={classes.table} aria-label="simple table">
