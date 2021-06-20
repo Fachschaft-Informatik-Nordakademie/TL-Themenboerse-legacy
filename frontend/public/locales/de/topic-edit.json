@@ -1,6 +1,6 @@
 {
-    "title": "Thema erstellen",
-    "headline": "Neues Thema erstellen",
+    "title": "Thema bearbeiten",
+    "headline": "Thema bearbeiten",
     "labelTitel": "Titel",
     "labelDescription": "Beschreibung",
     "labelRequirements": "Anforderungen",
@@ -9,7 +9,7 @@
     "labelStartdate":"Starttermin",
     "labelEnddate": "Endtermin",
     "labelTags": "Tags",
-    "buttonSubmit": "Erstellen",
+    "buttonSubmit": "Speichern",
     "buttonCancel": "Abbrechen",
     "messageTitleRequired": "Titel ist ein Pflichtfeld",
     "messageDescriptionRequired": "Beschreibung ist ein Pflichtfeld",

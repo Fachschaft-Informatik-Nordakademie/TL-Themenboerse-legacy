@@ -50,8 +50,7 @@ class Topic
     #[ORM\Column(type: "datetime", nullable: true)]
     private ?\DateTime $deadline;
 
-    #[Ignore]
-    #[ORM\ManyToOne(targetEntity: User::class, inversedBy: "topics")]
+    #[ORM\ManyToOne(targetEntity: User::class, inversedBy: "topics", fetch: 'EAGER', cascade: ['all'])]
     private ?User $author;
 
     /**

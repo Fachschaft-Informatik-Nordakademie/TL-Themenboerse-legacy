@@ -19,28 +19,30 @@ import { useRouter } from 'next/router';
 
 
 type Props = {
-    user: User;
-  };
+  user: User;
+};
 
-  export async function getServerSideProps(context: GetServerSidePropsContext): Promise<GetServerSidePropsResult<Props>> {
-    const user = await fetchUser(context.req.cookies);
-  
-    if (user === null) {
-      return { redirect: { destination: '/login', permanent: false } };
-    }
-  
-    return {
-      props: { user, ...(await serverSideTranslations('de', ['common', 'topic-edit'])) },
-    };
+export async function getServerSideProps(context: GetServerSidePropsContext): Promise<GetServerSidePropsResult<Props>> {
+  const user = await fetchUser(context.req.cookies);
+
+  if (user === null) {
+    return { redirect: { destination: '/login', permanent: false } };
   }
+
+
+  return {
+    props: { user, ...(await serverSideTranslations('de', ['common', 'topic-edit'])) },
+  };
+}
 
 interface IFormValues {
   readonly title: string;
   readonly description: string;
   readonly requirements: string;
+  readonly scope: string;
   readonly pages: number;
-  readonly start: String | '';
-  readonly deadline: String | '';
+  readonly start: Date | null;
+  readonly deadline: Date | null;
   readonly tags: string[];
   readonly website: string;
 }
@@ -62,26 +64,29 @@ const useStyles = makeStyles((theme) => ({
 export default function EditTopic({ user }: Props): JSX.Element {
   const { t: tCommon } = useTranslation('common');
   const { t: tEditTopic } = useTranslation('topic-edit');
-  
+
 
   const [data, setData] = useState<Topic>();
   const router = useRouter();
   const id = router.query.id;
 
-  console.log(id);
 
   const fetchData = async (): Promise<void> => {
-   const response = await axiosClient.get<Topic>(`/topic/${id}`);
-   //const response = await axiosClient.get<Topic>(`/topic/4`);
+    const response = await axiosClient.get<Topic>(`/topic/${id}`);
+    
 
     setData(response.data);
+
+    for (const [name, value] of Object.entries(response.data)) {
+      formik.setFieldValue(name, value)
+    }
   };
 
 
   useEffect(() => {
     fetchData();
   }, [id]);
-  
+
 
 
   const validationSchema = yup.object({
@@ -103,32 +108,16 @@ export default function EditTopic({ user }: Props): JSX.Element {
   const formik = useFormik<IFormValues>({
 
     initialValues: {
-      title: data.title ?? "",
-      description: data.description ?? "",
-      tags: data.tags ? data.tags : null,
-      start:  data.start ? data.start : "",
-      deadline: data.deadline ? data.deadline : "",
-      /*start: null,
-      deadline: null,*/
-      requirements: data.requirements ? data.requirements : "",
-      pages: data.pages ? data.pages : 0,
-      website: data.website ? data.website : "",
+      title: '',
+      description: '',
+      scope: '',
+      tags: [],
+      start: null,
+      deadline: null,
+      requirements: '',
+      pages: 0,
+      website: '',
     },
-    
-
-    /*const formik = useFormik<IFormValues>({
-      initialValues: {
-          title: '',
-        description: '',
-        tags: null,
-        start:  '',
-        deadline: '',
-       /* start: null,
-        deadline: null,
-        requirements: '',
-        pages: 0,
-        website: '',
-      },*/
 
 
     validationSchema: validationSchema,
