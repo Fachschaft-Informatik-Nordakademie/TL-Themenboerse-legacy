@@ -37,8 +37,9 @@ class TopicController extends AbstractController
         $orderDirection = $request->get('order') ?? 'asc';
 
         $text = $request->get('text') ?? '';
+        $tags = $request->get('tags') ?? '';
 
-        $topics = $this->topicRepository->listTopics($pageNumber, $pageSize, $orderBy, $orderDirection, $text);
+        $topics = $this->topicRepository->listTopics($pageNumber, $pageSize, $orderBy, $orderDirection, $text, $tags);
         $totalAmount = $this->topicRepository->count([]);
         $totalPages = (int)ceil($totalAmount / $pageSize);
 

@@ -14,13 +14,15 @@ class TopicRepository extends ServiceEntityRepository
         parent::__construct($registry, Topic::class);
     }
 
-    public function listTopics(int $page, int $pageSize, string $orderBy, string $orderDirection, $text): array
+    public function listTopics(int $page, int $pageSize, string $orderBy, string $orderDirection, string $text, string $tags): array
     {
         $offset = $page * $pageSize;
         $qb = $this->createQueryBuilder('t');
         return $qb
             ->andWhere($qb->expr()->like('t.title', ':text'))
+            ->andWhere($qb->expr()->like('t.tags', ':tags'))
             ->setParameter('text', '%' . $text . '%')
+            ->setParameter('tags', '%' . $tags . '%')
             ->orderBy('t.' . $orderBy, $orderDirection)
             ->addOrderBy('t.id', 'asc')
             ->setMaxResults($pageSize)
