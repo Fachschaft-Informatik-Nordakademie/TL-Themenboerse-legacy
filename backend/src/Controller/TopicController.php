@@ -111,38 +111,35 @@ class TopicController extends AbstractController
     {
         $user = $this->getUser();
 
-
         if (!$user) {
             return $this->json(['message' => 'Authentication failed. You have to call this endpoint with a json body either containing email + password or username (ldap) + password'], Response::HTTP_UNAUTHORIZED);
         }
 
         $topic = $this->topicRepository->find($id);
 
-
         if (!$topic) {
             return $this->json(['message' => 'Topic does not exist.'], Response::HTTP_UNAUTHORIZED);
         }
 
-
         try {
             /*$topic->setAuthor($user); */
-            empty($request->get('title')) ? true : $topic->setTitle($request->get('title'));
-            empty($request->get('description')) ? true : $topic->setDescription($request->get('description'));
-            empty($request->get('requirements')) ? true : $topic->setRequirements($request->get('requirements'));
-            empty($request->get('scope')) ? true : $topic->setScope($request->get('scope'));
-            empty($request->get('tags')) ? true : $topic->setTags($request->get('tags'));
-            empty($request->get('website')) ? true : $topic->setWebsite($request->get('website'));
-            empty($request->get('deadline')) ? true : $deadline = $request->get('deadline');
+            $topic->setTitle($request->get('title'));
+            $topic->setDescription($request->get('description'));
+            $topic->setRequirements($request->get('requirements'));
+            $topic->setScope($request->get('scope'));
+            $topic->setTags($request->get('tags'));
+            $topic->setWebsite($request->get('website'));
+            $deadline = $request->get('deadline');
 
             if ($deadline) {
                 $topic->setDeadline(Carbon::parse($deadline)->toDate());
             }
-            empty($request->get('start')) ? true : $start = $request->get('start');
+            $start = $request->get('start');
             if ($start) {
                 $topic->setStart(Carbon::parse($start)->toDate());
             }
-            empty($request->get('pages')) ? true : $topic->setPages($request->get('pages'));
-            empty($request->get('status')) ? true : $topic->setStatus($request->get('status'));
+            $topic->setPages($request->get('pages'));
+            $topic->setStatus($request->get('status'));
         } catch (\TypeError | InvalidFormatException $e) {
             return $this->json(['message' => 'Invalid topic received'], Response::HTTP_BAD_REQUEST);
         }
