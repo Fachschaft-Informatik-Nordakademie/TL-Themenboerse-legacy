@@ -17,10 +17,10 @@ class TopicRepository extends ServiceEntityRepository
     public function listTopics(int $page, int $pageSize, string $orderBy, string $orderDirection, $text): array
     {
         $offset = $page * $pageSize;
-
-        return $this->createQueryBuilder('t')
-            ->where("t.text like '%:text%'")
-            ->setParameter('text', $text)
+        $qb = $this->createQueryBuilder('t');
+        return $qb
+            ->andWhere($qb->expr()->like('t.title', ':text'))
+            ->setParameter('text', '%' . $text . '%')
             ->orderBy('t.' . $orderBy, $orderDirection)
             ->addOrderBy('t.id', 'asc')
             ->setMaxResults($pageSize)
