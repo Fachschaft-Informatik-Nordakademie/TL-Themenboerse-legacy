@@ -19,6 +19,14 @@ parameters:
 
     app.page_size: '%env(default:app.page_size_default:resolve:APP_PAGE_SIZE)%'
     app.page_size_default: 15
+
+    app.frontend_base_url: '%env(string:resolve:APP_FRONTEND_BASE_URL)%'
+
+    app.mail.sender_address: 'noreply@example.com'
+    app.mail.sender_name: 'Themenbörse'
+    app.mail.new_topic_recipient: 'transferleistungen@example.com'
+
+
 services:
     # default configuration for services in *this* file
     _defaults:

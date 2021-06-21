@@ -13,4 +13,5 @@ return [
     Fidry\AliceDataFixtures\Bridge\Symfony\FidryAliceDataFixturesBundle::class => ['dev' => true, 'test' => true],
     Hautelook\AliceBundle\HautelookAliceBundle::class => ['dev' => true, 'test' => true],
     SymfonyBundles\JsonRequestBundle\JsonRequestBundle::class => ['all' => true],
+    Twig\Extra\TwigExtraBundle\TwigExtraBundle::class => ['all' => true],
 ];

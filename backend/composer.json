@@ -34,7 +34,9 @@
         "symfony/serializer": "5.2.*",
         "symfony/twig-bundle": "5.2.*",
         "symfony/validator": "5.2.*",
-        "symfony/yaml": "5.2.*"
+        "symfony/yaml": "5.2.*",
+        "twig/cssinliner-extra": "^3.3",
+        "twig/extra-bundle": "^3.3"
     },
     "config": {
         "optimize-autoloader": true,
