@@ -1,0 +1,42 @@
+{% apply inline_css %}
+<style>
+    * {
+        font-family: Arial, sans-serif;
+    }
+
+    table, tr, td, th {
+        border-collapse: collapse;
+        border:0;
+        padding: 0;
+        margin: 0;
+        text-align: left;
+    }
+
+    th {
+        padding-right: 10px;
+    }
+</style>
+
+<p>Guten Tag,</p>
+<p>ein neues Thema wurde in der Themenbörse erstellt.</p>
+
+<table>
+    <tr>
+        <th>Titel:</th>
+        <td>{{ topic.title }}</td>
+    </tr>
+    <tr>
+        <th>Erstellt von:</th>
+        <td>{{ topic.author.profile.firstName }} {{ topic.author.profile.lastName }}</td>
+    </tr>
+</table>
+
+<p>
+    <a href="{{ base_url }}/topic/{{ topic.id }}">Hier klicken, um zum Thema zu gelangen.</a>
+</p>
+
+<br>
+<br>
+<hr>
+<p>Diese E-Mail wurde automatisch erzeugt.</p>
+{% endapply %}

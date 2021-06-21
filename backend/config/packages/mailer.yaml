@@ -1,3 +1,8 @@
 framework:
     mailer:
         dsn: '%env(MAILER_DSN)%'
+        envelope:
+            sender: '%app.mail.sender_address%'
+        headers:
+            From: '%app.mail.sender_name% <%app.mail.sender_address%>'
+            X-Auto-Response-Suppress: 'OOF, DR, RN, NRN, AutoReply' # disable auto-reply messages from recipients

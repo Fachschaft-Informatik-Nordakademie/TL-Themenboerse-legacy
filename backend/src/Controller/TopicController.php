@@ -7,24 +7,33 @@ use App\Entity\Topic;
 use App\Repository\TopicRepository;
 use Carbon\Carbon;
 use Carbon\Exceptions\InvalidFormatException;
+use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Mime\Address;
+use Symfony\Component\Mime\Email;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Twig\Environment;
 
 class TopicController extends AbstractController
 {
     private TopicRepository $topicRepository;
     private ValidatorInterface $validator;
     private ParameterBagInterface $params;
+    private MailerInterface $mailer;
+    private Environment $twig;
 
-    public function __construct(TopicRepository $topicRepository, ValidatorInterface $validator, ParameterBagInterface $params)
+    public function __construct(TopicRepository $topicRepository, ValidatorInterface $validator, ParameterBagInterface $params, MailerInterface $mailer, Environment $twig)
     {
         $this->topicRepository = $topicRepository;
         $this->validator = $validator;
         $this->params = $params;
+        $this->mailer = $mailer;
+        $this->twig = $twig;
     }
 
     #[Route('/topic', name: 'topic_list', methods: ['get'])]
@@ -90,6 +99,19 @@ class TopicController extends AbstractController
         $entityManager = $this->getDoctrine()->getManager();
         $entityManager->persist($topic);
         $entityManager->flush();
+
+        $mailContext = [
+            "topic" => $topic,
+            "base_url" => $this->params->get('app.frontend_base_url'),
+        ];
+
+        $email = (new TemplatedEmail())
+            ->to($this->params->get('app.mail.new_topic_recipient'))
+            ->subject('Neues Thema wurde eingereicht')
+            ->htmlTemplate('email/new-topic.html.twig')
+            ->text(str_replace("\n", "\r\n", $this->twig->render('email/new-topic.txt.twig', $mailContext)))
+            ->context($mailContext);
+        $this->mailer->send($email);
 
         return $this->json(['id' => $topic->getId()]);
     }
