@@ -115,17 +115,13 @@ const TopicDetail: PageComponent<Props> = ({ user }: Props): JSX.Element => {
           </span>
         </Typography>
       </div>
-      {(() => {
-        if (user.id === topic.author?.id) {
-          return (
-            <Link href={`/topic/${topicId}/edit`}>
-              <Button variant="contained" color="primary" type="submit">
-                {'bearbeiten'}
-              </Button>
-            </Link>
-          );
-        }
-      })()}
+      {user.id === topic.author?.id && (
+        <Link href={`/topic/${topicId}/edit`}>
+          <Button variant="contained" color="primary" type="submit">
+            Bearbeiten
+          </Button>
+        </Link>
+      )}
     </div>
   );
 };
