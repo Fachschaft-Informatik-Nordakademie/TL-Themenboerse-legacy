@@ -37,7 +37,7 @@ const useStyles = makeStyles((theme) => ({
   tagItem: { marginLeft: theme.spacing(1) },
 }));
 
-const TopicDetail: PageComponent<{user:User}> = ({ user }: {user:User}): JSX.Element => {
+const TopicDetail: PageComponent<Props> = ({ user }: Props): JSX.Element => {
   const router = useRouter();
   const classes = useStyles();
   const topicId = router.query.id as string;
@@ -54,6 +54,7 @@ const TopicDetail: PageComponent<{user:User}> = ({ user }: {user:User}): JSX.Ele
 
   useEffect(() => {
     fetchTopic();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   if (loading) {
@@ -114,8 +115,8 @@ const TopicDetail: PageComponent<{user:User}> = ({ user }: {user:User}): JSX.Ele
           </span>
         </Typography>
       </div>
-      {(()=>{ 
-        if(user.id === topic.author?.id){
+      {(() => {
+        if (user.id === topic.author?.id) {
           return (
             <Link href={`/topic/${topicId}/edit`}>
               <Button variant="contained" color="primary" type="submit">
