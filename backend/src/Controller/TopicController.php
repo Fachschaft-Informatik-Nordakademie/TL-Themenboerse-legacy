@@ -107,11 +107,4 @@ class TopicController extends AbstractController
         }
         return $this->json($topic);
     }
-
-    #[Route('/topic/search?text={text}', name: 'topic_search', methods: ['get'])]
-    public function searchTopic(string $text)
-    {
-        $result = $this->topicRepository->searchTopics($text);
-        return $this->json(["topics" => $result]);
-    }
 }
