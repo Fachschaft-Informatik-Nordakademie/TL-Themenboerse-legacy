@@ -36,8 +36,16 @@ class TopicController extends AbstractController
         $orderBy = $request->get('orderBy') ?? 'deadline';
         $orderDirection = $request->get('order') ?? 'asc';
 
-        $text = $request->get('text') ?? '';
-        $tags = $request->get('tags') ?? '';
+        $text = $request->get('text');
+        $tags = $request->get('tags');
+
+        if($tags !== null && empty(trim($tags))) {
+            $tags = null;
+        }
+
+        if($text !== null && empty(trim($text))) {
+            $text = null;
+        }
 
         $topics = $this->topicRepository->listTopics($pageNumber, $pageSize, $orderBy, $orderDirection, $text, $tags);
         $totalAmount = $this->topicRepository->count([]);
