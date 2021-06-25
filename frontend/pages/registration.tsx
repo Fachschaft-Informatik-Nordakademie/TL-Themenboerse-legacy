@@ -1,4 +1,6 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useState } from 'react';
+import { useFormik } from 'formik';
+import * as ValidationSchemaBuilder from 'yup';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
 import MuiAlert, { Color } from '@material-ui/lab/Alert';
@@ -11,6 +13,19 @@ import Link from '../src/components/MaterialNextLink';
 import Head from 'next/head';
 import axiosClient from '../src/api';
 import { AxiosResponse } from 'axios';
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
+import { useTranslation } from 'next-i18next';
+import { GetServerSidePropsContext, GetServerSidePropsResult } from 'next';
+import { fetchUser } from '../src/server/fetchUser';
+import { PageComponent } from '../src/types/PageComponent';
+
+interface RegistrationForm {
+  firstName: string;
+  lastName: string;
+  email: string;
+  password: string;
+  confirm: string;
+}
 
 function createNotification(message: string, type: Color): JSX.Element {
   return (
@@ -19,12 +34,6 @@ function createNotification(message: string, type: Color): JSX.Element {
     </MuiAlert>
   );
 }
-
-import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
-import { useTranslation } from 'next-i18next';
-import { GetServerSidePropsContext, GetServerSidePropsResult } from 'next';
-import { fetchUser } from '../src/server/fetchUser';
-import { PageComponent } from '../src/types/PageComponent';
 
 export async function getServerSideProps(
   context: GetServerSidePropsContext,
@@ -65,71 +74,55 @@ const Registration: PageComponent<void> = (): JSX.Element => {
   const { t: tRegistration } = useTranslation('registration');
   const { t: tCommon } = useTranslation('common');
 
-  const [firstName, setFirstName] = useState<string>('');
-  const [lastName, setLastName] = useState<string>('');
-  const [email, setEmail] = useState<string>('');
-  const [password, setPassword] = useState<string>('');
-  const [confirm, setConfirm] = useState<string>('');
-  const [confirmDirty, setConfirmDirty] = useState<boolean>(false);
-  const [passwordError, setPasswordError] = useState<string | undefined>('');
-  const [confirmError, setConfirmError] = useState<string | undefined>('');
-  const [firstNameError, setFirstNameError] = useState<string | undefined>('');
-  const [lastNameError, setLastNameError] = useState<string | undefined>('');
-  const [emailError, setEmailError] = useState<string | undefined>('');
   const [submitError, setSubmitError] = useState<string | undefined>('');
-  const [submit, setSubmit] = useState<boolean>(false);
   const [successfulRegister, setSuccessfulRegister] = useState<boolean>(false);
-
   const minPasswordLength = 8;
 
-  useEffect((): void => {
-    if (firstNameError && firstName.length > 0) {
-      setFirstNameError(null);
-    }
-    if (lastNameError && lastName.length > 0) {
-      setLastNameError(null);
-    }
-    if (emailError && email.length > 0) {
-      setEmailError(null);
-    }
-  }, [firstName, lastName, email]);
+  const validationSchema = ValidationSchemaBuilder.object().shape({
+    firstName: ValidationSchemaBuilder.string().required(tRegistration('emptyFirstName')),
+    lastName: ValidationSchemaBuilder.string().required(tRegistration('emptyLastName')),
+    email: ValidationSchemaBuilder.string().email().required(tRegistration('emptyEmail')),
+    password: ValidationSchemaBuilder.string().required(tRegistration('emptyPassword')).min(minPasswordLength, tRegistration('tooShortPassword')),
+    confirm: ValidationSchemaBuilder.string().oneOf([ValidationSchemaBuilder.ref('password'), null], tRegistration('passwordsNotMatching')),
+  });
 
-  useEffect((): void => {
-    const invalidPasswordLength: boolean = password.length < minPasswordLength && password.length > 0;
-    invalidPasswordLength ? setPasswordError(tRegistration('tooShortPassword')) : setPasswordError(null);
-  }, [password]);
-
-  useEffect((): void => {
-    password !== confirm && confirmDirty
-      ? setConfirmError(tRegistration('passwordsNotMatching'))
-      : setConfirmError(null);
-  }, [password, confirm]);
-
-  useEffect((): void => {
-    const isEmptyPassword: boolean = password.length === 0;
-    const isEmptyFirstName: boolean = firstName.length === 0;
-    const isEmptyLastName: boolean = lastName.length === 0;
-    const isEmptyEmail: boolean = email.length === 0;
-
-    if (isEmptyPassword && submit) {
-      setPasswordError(tRegistration('emptyPassword'));
+  const formSubmit = async ({firstName, lastName, email, password}: RegistrationForm) => {
+    try {
+      const response = await axiosClient.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/register`, {
+        firstName,
+        lastName,
+        email,
+        password,
+      });
+      await checkSubmitError(response);
+    } catch (e) {
+      if (e.response?.data?.message) {
+        setSubmitError(e.response.data.message);
+      } else {
+        setSubmitError(tCommon('unknownError'));
+      }
     }
-    if (isEmptyFirstName && submit) {
-      setFirstNameError(tRegistration('emptyFirstName'));
-    }
-    if (isEmptyLastName && submit) {
-      setLastNameError(tRegistration('emptyLastName'));
-    }
-    if (isEmptyEmail && submit) {
-      setEmailError(tRegistration('emptyEmail'));
-    }
-    setSubmit(false);
-  }, [submit]);
+  }
 
-  const handleConfirmChange = (value: string): void => {
-    setConfirm(value);
-    setConfirmDirty(true);
-  };
+  const form = useFormik<RegistrationForm>({
+    initialValues: {
+      firstName: '',
+      lastName: '',
+      email: '',
+      password: '',
+      confirm: '',
+    },
+    validationSchema,
+    onSubmit: formSubmit
+  });
+
+  const getFormFieldError = (field: string): string => {
+    return form.touched[field] && form.errors[field];
+  }
+
+  const hasFormFieldError = (field: string): boolean => {
+    return Boolean(getFormFieldError(field));
+  }
 
   const checkSubmitError = async (response: AxiosResponse): Promise<void> => {
     const data = response.data;
@@ -145,38 +138,8 @@ const Registration: PageComponent<void> = (): JSX.Element => {
   const onSubmit = useCallback(
     async (e: React.FormEvent): Promise<void> => {
       e.preventDefault();
-      setSubmit(true);
-      setPasswordError(undefined);
-
-      setSubmitError(undefined);
-      setSuccessfulRegister(false);
-
-      const hasBlankFields: boolean =
-        firstName === '' || lastName === '' || email === '' || password === '' || confirmError === '';
-      const hasErrors: boolean =
-        !!firstNameError || !!lastNameError || !!emailError || !!passwordError || !!confirmError;
-
-      if (hasBlankFields || hasErrors) {
-        return;
-      }
-      try {
-        const response = await axiosClient.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/register`, {
-          firstName,
-          lastName,
-          email,
-          password,
-        });
-        await checkSubmitError(response);
-      } catch (e) {
-        if (e.response && e.response.data && e.response.data.message) {
-          setSubmitError(e.response.data.message);
-        } else {
-          setSubmitError(tCommon('unknownError'));
-        }
-      }
-    },
-    [firstName, lastName, email, password, firstNameError, lastNameError, emailError, passwordError, confirmError],
-  );
+      form.submitForm();
+    }, []);
 
   const classes = useStyles();
 
@@ -204,11 +167,12 @@ const Registration: PageComponent<void> = (): JSX.Element => {
             fullWidth
             id="firstName"
             type="text"
-            error={!!firstNameError}
-            value={firstName}
-            onChange={(e) => setFirstName(e.target.value)}
+            error={hasFormFieldError('firstName')}
+            value={form.values.firstName}
+            onChange={form.handleChange}
+            onBlur={form.handleBlur}
             label={tRegistration('firstNamePlaceHolder')}
-            helperText={firstNameError}
+            helperText={getFormFieldError('firstName')}
             autoComplete="given-name"
             spellCheck="false"
           />
@@ -219,11 +183,12 @@ const Registration: PageComponent<void> = (): JSX.Element => {
             fullWidth
             id="lastName"
             type="text"
-            error={!!lastNameError}
-            value={lastName}
-            onChange={(e) => setLastName(e.target.value)}
+            error={hasFormFieldError('lastName')}
+            value={form.values.lastName}
+            onChange={form.handleChange}
+            onBlur={form.handleBlur}
             label={tRegistration('lastNamePlaceHolder')}
-            helperText={lastNameError}
+            helperText={getFormFieldError('lastName')}
             autoComplete="family-name"
             spellCheck="false"
           />
@@ -234,11 +199,12 @@ const Registration: PageComponent<void> = (): JSX.Element => {
             fullWidth
             id="email"
             type="email"
-            error={!!emailError}
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            error={hasFormFieldError('email')}
+            value={form.values.email}
+            onChange={form.handleChange}
+            onBlur={form.handleBlur}
             label={tRegistration('emailPlaceHolder')}
-            helperText={emailError}
+            helperText={getFormFieldError('email')}
             autoComplete="email"
             spellCheck="false"
           />
@@ -249,11 +215,12 @@ const Registration: PageComponent<void> = (): JSX.Element => {
             fullWidth
             id="password"
             type="password"
-            error={!!passwordError}
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            error={hasFormFieldError('password')}
+            value={form.values.password}
+            onChange={form.handleChange}
+            onBlur={form.handleBlur}
             label={tRegistration('passwordPlaceHolder')}
-            helperText={passwordError}
+            helperText={getFormFieldError('password')}
             autoComplete="new-password"
             spellCheck="false"
           />
@@ -262,13 +229,14 @@ const Registration: PageComponent<void> = (): JSX.Element => {
             margin="normal"
             required
             fullWidth
-            id="password-confirm"
+            id="confirm"
             type="password"
-            error={!!confirmError}
-            value={confirm}
-            onChange={(e) => handleConfirmChange(e.target.value)}
+            error={hasFormFieldError('confirm')}
+            value={form.values.confirm}
+            onChange={form.handleChange}
+            onBlur={form.handleBlur}
             label={tRegistration('confirmPlaceHolder')}
-            helperText={confirmError}
+            helperText={getFormFieldError('confirm')}
             autoComplete="new-password"
             spellCheck="false"
           />
