@@ -39,15 +39,20 @@ class TopicController extends AbstractController
         $text = $request->get('text');
         $tags = $request->get('tags');
 
-        if($tags !== null && empty(trim($tags))) {
+        $startUntil = $this->getDate($request, 'startUntil');
+        $startFrom = $this->getDate($request, 'startFrom');
+        $endUntil = $this->getDate($request, 'endUntil');
+        $endFrom = $this->getDate($request, 'endFrom');
+
+        if ($tags !== null && empty(trim($tags))) {
             $tags = null;
         }
 
-        if($text !== null && empty(trim($text))) {
+        if ($text !== null && empty(trim($text))) {
             $text = null;
         }
 
-        $topics = $this->topicRepository->listTopics($pageNumber, $pageSize, $orderBy, $orderDirection, $text, $tags);
+        $topics = $this->topicRepository->listTopics($pageNumber, $pageSize, $orderBy, $orderDirection, $text, $tags, $startUntil, $startFrom, $endUntil, $endFrom);
         $totalAmount = $this->topicRepository->count([]);
         $totalPages = (int)ceil($totalAmount / $pageSize);
 
@@ -114,5 +119,13 @@ class TopicController extends AbstractController
             return $this->json(['message' => 'Topic not found'], Response::HTTP_NOT_FOUND);
         }
         return $this->json($topic);
+    }
+
+    private function getDate(Request $request, string $dateName): ?Carbon
+    {
+        $date = $request->get($dateName);
+        if ($date === null) return null;
+        if ($date !== null && empty(trim($date))) return null;
+        return Carbon::parse($date);
     }
 }

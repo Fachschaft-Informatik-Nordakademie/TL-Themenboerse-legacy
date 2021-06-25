@@ -6,7 +6,7 @@ use App\Entity\Topic;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
-use ProxyManager\ProxyGenerator\LazyLoadingGhost\MethodGenerator\SetProxyInitializer;
+use Carbon\Carbon;
 
 class TopicRepository extends ServiceEntityRepository
 {
@@ -15,7 +15,7 @@ class TopicRepository extends ServiceEntityRepository
         parent::__construct($registry, Topic::class);
     }
 
-    public function listTopics(int $page, int $pageSize, string $orderBy, string $orderDirection, ?string $text, ?string $tags): array
+    public function listTopics(int $page, int $pageSize, string $orderBy, string $orderDirection, ?string $text, ?string $tags, ?Carbon $startUntil, ?Carbon $startFrom, ?Carbon $endUntil, ?Carbon $endFrom)
     {
         $offset = $page * $pageSize;
 
@@ -23,6 +23,7 @@ class TopicRepository extends ServiceEntityRepository
 
         $query = $this->addSearchTextToQuery($text, $query);
         $query = $this->addTagsToQuery($tags, $query);
+        $query = $this->addStartUntilToQuery($startUntil, $query);
 
         return $query
             ->orderBy('t.' . $orderBy, $orderDirection)
@@ -61,6 +62,19 @@ class TopicRepository extends ServiceEntityRepository
         }
 
         $query->andWhere($orX);
+        return $query;
+    }
+
+    private function addStartUntilToQuery(?Carbon $startUntil, QueryBuilder $query): QueryBuilder
+    {
+        if ($startUntil === null) return $query;
+        $query->andWhere(
+            $query->expr()->orX(
+                $query->expr()->lte('t.start', ':startUntil'),
+                $query->expr()->isNull('t.start')
+            )
+        )
+            ->setParameter('startUntil', $startUntil->toDateString());
         return $query;
     }
 }
