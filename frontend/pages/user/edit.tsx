@@ -21,6 +21,9 @@ interface IFormValues {
   readonly lastName: string;
   readonly image?: string;
   readonly biography?: string;
+  readonly company?: string;
+  readonly job?: string;
+  readonly courseOfStudy?: string;
   readonly skills: string[];
   readonly references: string[];
 }
@@ -68,6 +71,9 @@ const EditUserProfile: PageComponent<UserProfileEditProps> = ({ user }: UserProf
     firstName: yup.string().required(tUserEdit('messageFirstNameRequired')),
     lastName: yup.string().required(tUserEdit('messageLastNameRequired')),
     biography: yup.string().nullable(),
+    company: yup.string().nullable(),
+    job: yup.string().nullable(),
+    courseOfStudy: yup.string().nullable(),
     skills: yup.array().ensure(),
     references: yup.array().ensure(),
   });
@@ -151,6 +157,42 @@ const EditUserProfile: PageComponent<UserProfileEditProps> = ({ user }: UserProf
             onChange={formik.handleChange}
             helperText={formik.touched.biography && formik.errors.biography}
             error={formik.touched.biography && Boolean(formik.errors.biography)}
+            onBlur={formik.handleBlur}
+          />
+          <TextField
+            label={tUserEdit('company')}
+            name="company"
+            fullWidth
+            multiline
+            className={classes.formField}
+            value={formik.values.company}
+            onChange={formik.handleChange}
+            helperText={formik.touched.company && formik.errors.company}
+            error={formik.touched.company && Boolean(formik.errors.company)}
+            onBlur={formik.handleBlur}
+          />
+          <TextField
+            label={tUserEdit('job')}
+            name="job"
+            fullWidth
+            multiline
+            className={classes.formField}
+            value={formik.values.job}
+            onChange={formik.handleChange}
+            helperText={formik.touched.job && formik.errors.job}
+            error={formik.touched.job && Boolean(formik.errors.job)}
+            onBlur={formik.handleBlur}
+          />
+          <TextField
+            label={tUserEdit('courseOfStudy')}
+            name="courseOfStudy"
+            fullWidth
+            multiline
+            className={classes.formField}
+            value={formik.values.courseOfStudy}
+            onChange={formik.handleChange}
+            helperText={formik.touched.courseOfStudy && formik.errors.courseOfStudy}
+            error={formik.touched.courseOfStudy && Boolean(formik.errors.courseOfStudy)}
             onBlur={formik.handleBlur}
           />
           <Autocomplete

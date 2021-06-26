@@ -6,6 +6,6 @@ export type UserProfile = {
   company?: string;
   job?: string;
   courseOfStudy?: string;
-  skills?: string[];
-  references?: string[];
+  skills: string[];
+  references: string[];
 };
