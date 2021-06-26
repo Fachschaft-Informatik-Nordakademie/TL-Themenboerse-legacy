@@ -140,7 +140,7 @@ const TopicDetail: PageComponent<Props> = ({ user }: Props): JSX.Element => {
           </span>
         </Typography>
       </div>
-      {topic.author && user.id !== topic.author?.id && user.type === 'LDAP' && (
+      {topic.status === 'OPEN' && topic.author && user.id !== topic.author?.id && user.type === 'LDAP' && (
         <>
           <Button variant="contained" color="primary" onClick={handleOpen}>
             {tTopic('buttonApply')}
