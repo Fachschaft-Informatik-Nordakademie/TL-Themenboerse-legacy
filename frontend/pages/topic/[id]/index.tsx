@@ -2,11 +2,21 @@ import { User } from '../../../src/types/user';
 import { GetServerSidePropsContext, GetServerSidePropsResult } from 'next';
 import { fetchUser } from '../../../src/server/fetchUser';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
-import { Chip, Typography, Button } from '@material-ui/core';
+import {
+  Button,
+  Chip,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  TextField,
+  Typography,
+} from '@material-ui/core';
 import { useRouter } from 'next/router';
 import React, { useEffect, useState } from 'react';
-import { Topic } from '../../../src/types/topic';
-import axiosClient from '../../../src/api';
+import { Topic } from '../../src/types/topic';
+import axiosClient from '../../src/api';
 import { makeStyles } from '@material-ui/core/styles';
 import { PageComponent } from '../../../src/types/PageComponent';
 import Link from 'next/link';
@@ -23,7 +33,7 @@ export async function getServerSideProps(context: GetServerSidePropsContext): Pr
   }
 
   return {
-    props: { user, ...(await serverSideTranslations('de', ['common', 'topic-creation'])) },
+    props: { user, ...(await serverSideTranslations('de', ['common', 'topic'])) },
   };
 }
 
@@ -44,6 +54,18 @@ const TopicDetail: PageComponent<Props> = ({ user }: Props): JSX.Element => {
 
   const [topic, setTopic] = useState<Topic>();
   const [loading, setLoading] = useState<boolean>(true);
+  const [open, setOpen] = useState<boolean>(false);
+  const [content, setContent] = useState<string>('');
+  const handleOpen = (): void => setOpen(true);
+  const handleClose = (): void => setOpen(false);
+  const handleApplication = async (): Promise<void> => {
+    try {
+      await axiosClient.post('/application', { topic: topicId, content });
+      handleClose();
+    } catch (e) {
+      console.log(e); // TOOD: How do we handle error messages?
+    }
+  };
 
   const fetchTopic = async (): Promise<void> => {
     setLoading(true);
@@ -115,6 +137,34 @@ const TopicDetail: PageComponent<Props> = ({ user }: Props): JSX.Element => {
           </span>
         </Typography>
       </div>
+      <Button variant="contained" color="primary" onClick={handleOpen}>
+        Bewerben
+      </Button>
+      <Dialog open={open} onClose={handleClose} aria-labelledby="form-dialog-title">
+        <DialogTitle id="form-dialog-title">Bewerbung</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Überzeuge den Anbieter, dich für das Thema auszuwählen. Erkläre, wieso du dich für das Thema interessierst
+            und am besten geeignet bist.
+          </DialogContentText>
+          <TextField
+            margin="dense"
+            id="name"
+            label="Bewerbungsschreiben"
+            onChange={(e) => setContent(e.target.value)}
+            type="text"
+            fullWidth
+            multiline
+            rows={4}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClose}>Abbrechen</Button>
+          <Button onClick={handleApplication} variant="contained" color="primary">
+            Bewerben
+          </Button>
+        </DialogActions>
+      </Dialog>
       {user.id === topic.author?.id && (
         <Link href={`/topic/${topicId}/edit`}>
           <Button variant="contained" color="primary" type="submit">

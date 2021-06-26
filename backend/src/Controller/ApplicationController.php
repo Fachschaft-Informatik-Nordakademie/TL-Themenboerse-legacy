@@ -42,7 +42,7 @@ class ApplicationController extends AbstractController
         $user = $this->getUser();
 
         if (!$user->getLdapUsername()) {
-            return $this->json(['message' => 'Only LDAP users are allowed to apply for open topics']);
+            return $this->json(['message' => 'Only LDAP users are allowed to apply for open topics'], Response::HTTP_UNAUTHORIZED);
         }
 
         $topicId = $request->get('topic');
@@ -53,6 +53,8 @@ class ApplicationController extends AbstractController
             return $this->json(['message' => 'A topic with this ID does not exist.'], Response::HTTP_BAD_REQUEST);
         } else if ($topic->getStatus() !== StatusType::OPEN) {
             return $this->json(['message' => 'This topic is not open for applications.'], Response::HTTP_BAD_REQUEST);
+        } else if ($topic->getAuthor()->getId() === $user->getId()) {
+            return $this->json(['message' => 'You cannot apply for your own topic.'], Response::HTTP_BAD_REQUEST);
         } else if ($this->applicationRepository->hasCandidateForTopic($user->getId(), $topicId)) {
             return $this->json(['message' => 'You already applied for this topic.'], Response::HTTP_BAD_REQUEST);
         }
