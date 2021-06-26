@@ -18,7 +18,8 @@ import React, { useEffect, useState } from 'react';
 import { Topic } from '../../src/types/topic';
 import axiosClient from '../../src/api';
 import { makeStyles } from '@material-ui/core/styles';
-import { PageComponent } from '../../../src/types/PageComponent';
+import { PageComponent } from '../../src/types/PageComponent';
+import { useTranslation } from 'next-i18next';
 import Link from 'next/link';
 
 type Props = {
@@ -33,7 +34,7 @@ export async function getServerSideProps(context: GetServerSidePropsContext): Pr
   }
 
   return {
-    props: { user, ...(await serverSideTranslations('de', ['common', 'topic'])) },
+    props: { user, ...(await serverSideTranslations('de', ['topic'])) },
   };
 }
 
@@ -48,6 +49,8 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const TopicDetail: PageComponent<Props> = ({ user }: Props): JSX.Element => {
+  const { t: tTopic } = useTranslation('topic');
+
   const router = useRouter();
   const classes = useStyles();
   const topicId = router.query.id as string;
@@ -86,11 +89,11 @@ const TopicDetail: PageComponent<Props> = ({ user }: Props): JSX.Element => {
   return (
     <div>
       <Typography gutterBottom variant="h4" component="h2">
-        Thema #{topicId}: {topic.title}
+        {tTopic('topic')} #{topicId}: {topic.title}
       </Typography>
       <div>
         <Typography gutterBottom variant="h5" component="h3">
-          Beschreibung
+          {tTopic('labelDescription')}
         </Typography>
         <Typography variant="body1" component="p">
           {topic.description}
@@ -99,7 +102,7 @@ const TopicDetail: PageComponent<Props> = ({ user }: Props): JSX.Element => {
 
       <div className={classes.section}>
         <Typography gutterBottom variant="h5" component="h3">
-          Anforderungen
+          {tTopic('labelRequirements')}
         </Typography>
         <Typography variant="body1" component="p">
           {topic.requirements}
@@ -108,7 +111,7 @@ const TopicDetail: PageComponent<Props> = ({ user }: Props): JSX.Element => {
       {topic.website && topic.website.length > 0 && (
         <div className={classes.section}>
           <Typography gutterBottom variant="h5" component="h3">
-            Website
+            {tTopic('labelWebsite')}
           </Typography>
           <Typography variant="body1" component="p">
             <a href={topic.website} target="_blank" rel="noopener noreferrer">
@@ -119,7 +122,7 @@ const TopicDetail: PageComponent<Props> = ({ user }: Props): JSX.Element => {
       )}
       <div className={classes.section}>
         <Typography gutterBottom variant="h5" component="h3">
-          Anzahl Seiten
+          {tTopic('labelPages')}
         </Typography>
         <Typography variant="body1" component="p">
           {topic.pages}
@@ -127,7 +130,7 @@ const TopicDetail: PageComponent<Props> = ({ user }: Props): JSX.Element => {
       </div>
       <div className={classes.section}>
         <Typography gutterBottom variant="h5" component="h3">
-          Tags
+          {tTopic('labelTags')}
         </Typography>
         <Typography variant="body1" component="p">
           <span className={classes.tags}>
@@ -138,19 +141,16 @@ const TopicDetail: PageComponent<Props> = ({ user }: Props): JSX.Element => {
         </Typography>
       </div>
       <Button variant="contained" color="primary" onClick={handleOpen}>
-        Bewerben
+        {tTopic('buttonApply') /** We are waiting for another MR here */}
       </Button>
       <Dialog open={open} onClose={handleClose} aria-labelledby="form-dialog-title">
         <DialogTitle id="form-dialog-title">Bewerbung</DialogTitle>
         <DialogContent>
-          <DialogContentText>
-            Überzeuge den Anbieter, dich für das Thema auszuwählen. Erkläre, wieso du dich für das Thema interessierst
-            und am besten geeignet bist.
-          </DialogContentText>
+          <DialogContentText>{tTopic('applicationDialog')}</DialogContentText>
           <TextField
             margin="dense"
             id="name"
-            label="Bewerbungsschreiben"
+            label={tTopic('applicationContentLabel')}
             onChange={(e) => setContent(e.target.value)}
             type="text"
             fullWidth
@@ -159,9 +159,9 @@ const TopicDetail: PageComponent<Props> = ({ user }: Props): JSX.Element => {
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleClose}>Abbrechen</Button>
+          <Button onClick={handleClose}>{tTopic('buttonCancel')}</Button>
           <Button onClick={handleApplication} variant="contained" color="primary">
-            Bewerben
+            {tTopic('buttonApply')}
           </Button>
         </DialogActions>
       </Dialog>
