@@ -23,8 +23,8 @@ class Application
     #[ORM\Column(type: "integer")]
     private ?int $id;
 
-    #[ORM\Column(type: "string", length: 1000, nullable: false)]
-    private string $content;
+    #[ORM\Column(type: "string", length: 1000, nullable: true)]
+    private ?string $content;
 
     #[Ignore]
     #[ORM\ManyToOne(targetEntity: User::class)]
@@ -110,9 +110,19 @@ class Application
     }
 
     /**
+     * Get the value of id
+     *
+     * @return  ?int
+     */
+    public function getId()
+    {
+        return $this->id;
+    }
+
+    /**
      * Get the value of content
      *
-     * @return  string
+     * @return  ?string
      */
     public function getContent()
     {
@@ -122,24 +132,14 @@ class Application
     /**
      * Set the value of content
      *
-     * @param  string  $content
+     * @param  ?string  $content
      *
      * @return  self
      */
-    public function setContent(string $content)
+    public function setContent(?string $content)
     {
         $this->content = $content;
 
         return $this;
-    }
-
-    /**
-     * Get the value of id
-     *
-     * @return  ?int
-     */
-    public function getId()
-    {
-        return $this->id;
     }
 }

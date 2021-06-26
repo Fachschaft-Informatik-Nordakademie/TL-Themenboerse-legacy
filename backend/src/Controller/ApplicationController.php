@@ -40,12 +40,15 @@ class ApplicationController extends AbstractController
     {
         /** @var User $user */
         $user = $this->getUser();
-
         if (!$user->getLdapUsername()) {
-            return $this->json(['message' => 'Only LDAP users are allowed to apply for open topics'], Response::HTTP_UNAUTHORIZED);
+            return $this->json(['message' => 'Only LDAP users are allowed to apply for open topics', 'user' => $user], Response::HTTP_UNAUTHORIZED);
         }
 
         $topicId = $request->get('topic');
+        if (!$topicId) {
+            return $this->json(['message' => 'No topic ID received.'], Response::HTTP_BAD_REQUEST);
+        }
+
         /** @var Topic $topic */
         $topic = $this->topicRepository->find($topicId);
 
