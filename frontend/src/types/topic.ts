@@ -1,3 +1,5 @@
+import { User } from "./user";
+
 export type Topic = {
   id: number;
   title: string;
@@ -10,4 +12,5 @@ export type Topic = {
   deadline?: string;
   pages?: number;
   status: string;
+  author: User;
 };

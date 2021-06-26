@@ -61,24 +61,46 @@ class TopicController extends AbstractController
     #[Route('/topic', name: 'topic_post', methods: ['post'])]
     public function postTopic(Request $request): Response
     {
-        $user = $this->getUser();
-
-        $status = StatusType::OPEN;
-
-        if (!$user) {
-            return $this->json(['message' => 'Authentication failed. You have to call this endpoint with a json body either containing email + password or username (ldap) + password'], Response::HTTP_UNAUTHORIZED);
-        }
-
         $topic = new Topic();
+        $user = $this->getUser();
+        $topic->setAuthor($user);
+        return $this->fillAndSaveTopic($topic, $request);
+    }
+
+    #[Route('/topic/{id}', name: 'topic_get', methods: ['get'])]
+    public function getTopic(int $id): Response
+    {
+        $topic = $this->topicRepository->find($id);
+
+        if (!$topic) {
+            return $this->json(['message' => 'Topic not found'], Response::HTTP_NOT_FOUND);
+        }
+        return $this->json($topic);
+    }
+
+
+    #[Route('/topic/{id}', name: 'topic_put', methods: ['put'])]
+    public function updateTopic(Request $request, int $id): Response
+    {
+        $user = $this->getUser();
+        $topic = $this->topicRepository->find($id);
+        if ($topic->getAuthor()->getId() !== $user->getId()) {
+            return $this->json(['message' => 'You are not allowed to edit this topic'], Response::HTTP_NOT_FOUND);
+        }
+        return $this->fillAndSaveTopic($topic, $request);
+    }
+
+    function fillAndSaveTopic(Topic $topic, Request $request): Response
+    {
         try {
-            $topic->setAuthor($user);
             $topic->setTitle($request->get('title'));
             $topic->setDescription($request->get('description'));
             $topic->setRequirements($request->get('requirements'));
+            $topic->setScope($request->get('scope'));
             $topic->setTags($request->get('tags'));
             $topic->setWebsite($request->get('website'));
-            $topic->setScope($request->get('scope'));
             $deadline = $request->get('deadline');
+
             if ($deadline) {
                 $topic->setDeadline(Carbon::parse($deadline)->toDate());
             }
@@ -87,7 +109,7 @@ class TopicController extends AbstractController
                 $topic->setStart(Carbon::parse($start)->toDate());
             }
             $topic->setPages($request->get('pages'));
-            $topic->setStatus($status);
+            $topic->setStatus($request->get('status') ?? StatusType::OPEN);
         } catch (\TypeError | InvalidFormatException $e) {
             return $this->json(['message' => 'Invalid topic received'], Response::HTTP_BAD_REQUEST);
         }
@@ -114,16 +136,5 @@ class TopicController extends AbstractController
         $this->mailer->send($email);
 
         return $this->json(['id' => $topic->getId()]);
-    }
-
-    #[Route('/topic/{id}', name: 'topic_get', methods: ['get'])]
-    public function getTopic(int $id): Response
-    {
-        $topic = $this->topicRepository->find($id);
-
-        if (!$topic) {
-            return $this->json(['message' => 'Topic not found'], Response::HTTP_NOT_FOUND);
-        }
-        return $this->json($topic);
     }
 }
