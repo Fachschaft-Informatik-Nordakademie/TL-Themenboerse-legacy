@@ -3,6 +3,9 @@ export type UserProfile = {
   lastName: string;
   image?: string;
   biography?: string;
-  skills: string[];
-  references: string[];
+  company?: string;
+  job?: string;
+  courseOfStudy?: string;
+  skills?: string[];
+  references?: string[];
 };
