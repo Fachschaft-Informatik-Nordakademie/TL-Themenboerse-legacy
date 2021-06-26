@@ -77,7 +77,7 @@ class TopicRepository extends ServiceEntityRepository
                 $query->expr()->isNull('t.start')
             )
         )
-            ->setParameter('startUntil', $startUntil->addDay()->toDateString());
+            ->setParameter('startUntil', $startUntil->endOfDay());
         return $query;
     }
 
@@ -90,7 +90,7 @@ class TopicRepository extends ServiceEntityRepository
                 $query->expr()->isNull('t.start')
             )
         )
-            ->setParameter('startFrom', $startFrom->toDateString());
+            ->setParameter('startFrom', $startFrom->startOfDay());
         return $query;
     }
 
@@ -103,7 +103,7 @@ class TopicRepository extends ServiceEntityRepository
                 $query->expr()->isNull('t.deadline')
             )
         )
-            ->setParameter('endUntil', $endUntil->addDay()->toDateString());
+            ->setParameter('endUntil', $endUntil->endOfDay());
         return $query;
     }
 
@@ -116,7 +116,7 @@ class TopicRepository extends ServiceEntityRepository
                 $query->expr()->isNull('t.deadline')
             )
         )
-            ->setParameter('endFrom', $endFrom->toDateString());
+            ->setParameter('endFrom', $endFrom->startOfDay());
         return $query;
     }
 }
