@@ -35,6 +35,9 @@ class UserProfileController extends AbstractController
                 ->setLastName($request->get('lastName'))
                 ->setImage($request->get('image'))
                 ->setBiography($request->get('biography'))
+                ->setCompany($request->get('company'))
+                ->setJob($request->get('job'))
+                ->setCourseOfStudy($request->get('courseOfStudy'))
                 ->setSkills($request->get('skills'))
                 ->setReferences($request->get('references'));
         } catch (\TypeError $e) {

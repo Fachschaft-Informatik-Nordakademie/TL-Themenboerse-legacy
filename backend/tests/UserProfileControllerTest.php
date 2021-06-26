@@ -13,6 +13,9 @@ class UserProfileControllerTest extends SecureApiTestCase
                 'firstName' => 'First',
                 'lastName' => 'Last',
                 'biography' => 'Some biography',
+                'company' => 'Awesome Company AG',
+                'job' => 'Developer',
+                'courseOfStudy' => 'Computer science',
                 'skills' => array('none'),
                 'references' => array('none')
             ],
@@ -30,6 +33,9 @@ class UserProfileControllerTest extends SecureApiTestCase
                 'firstName' => 'First',
                 'lastName' => 'Last',
                 'biography' => 'Some biography',
+                'company' => 'Awesome Company AG',
+                'job' => 'Developer',
+                'courseOfStudy' => 'Computer science',
                 'skills' => array('none'),
                 'references' => array('none')
             ],
@@ -42,6 +48,9 @@ class UserProfileControllerTest extends SecureApiTestCase
             'firstName' => 'First',
             'lastName' => 'Last',
             'biography' => 'Some biography',
+            'company' => 'Awesome Company AG',
+            'job' => 'Developer',
+            'courseOfStudy' => 'Computer science',
             'skills' => array('none'),
             'references' => array('none')
         ]);
