@@ -14,12 +14,10 @@ ports:
     onOpen: ignore
     visibility: public
 tasks:
-  - before: export NEXT_PUBLIC_BACKEND_URL=`gp url 8000`
-    init: cd frontend && yarn
-    command: cd frontend && yarn dev
-  - before: export APP_FRONTEND_BASE_URL=`gp url 3000`
-    init: cd backend && composer install 
-    command: cd backend && php -S 0.0.0.0:8000 -t public
+  - init: cd frontend && yarn
+    command: export NEXT_PUBLIC_BACKEND_URL=`gp url 8000` && cd frontend && yarn dev
+  - init: cd backend && composer install 
+    command: export APP_FRONTEND_BASE_URL=`gp url 3000` && cd backend && php -S 0.0.0.0:8000 -t public
   - init: |-
       docker container create \
         --name ldap \
@@ -44,6 +42,7 @@ tasks:
       && sudo mysql -e "CREATE USER 'app'@'localhost' IDENTIFIED BY 'secret';GRANT ALL ON *.* TO 'app'@'localhost';flush privileges;"
     command: |-
       gp await-port 3306 && gp await-port 8000 \
+      && export APP_FRONTEND_BASE_URL=`gp url 3000`
       && php backend/bin/console doctrine:database:create --if-not-exists \
       && php backend/bin/console doctrine:schema:update --force \
       && php backend/bin/console hautelook:fixtures:load --no-interaction

@@ -15,12 +15,12 @@ import {
 } from '@material-ui/core';
 import { useRouter } from 'next/router';
 import React, { useEffect, useState } from 'react';
-import { Topic } from '../../src/types/topic';
-import axiosClient from '../../src/api';
 import { makeStyles } from '@material-ui/core/styles';
-import { PageComponent } from '../../src/types/PageComponent';
 import { useTranslation } from 'next-i18next';
 import Link from 'next/link';
+import { PageComponent } from '../../../src/types/PageComponent';
+import { Topic } from '../../../src/types/topic';
+import axiosClient from '../../../src/api';
 
 type Props = {
   user: User;
@@ -140,35 +140,39 @@ const TopicDetail: PageComponent<Props> = ({ user }: Props): JSX.Element => {
           </span>
         </Typography>
       </div>
-      <Button variant="contained" color="primary" onClick={handleOpen}>
-        {tTopic('buttonApply') /** We are waiting for another MR here */}
-      </Button>
-      <Dialog open={open} onClose={handleClose} aria-labelledby="form-dialog-title">
-        <DialogTitle id="form-dialog-title">Bewerbung</DialogTitle>
-        <DialogContent>
-          <DialogContentText>{tTopic('applicationDialog')}</DialogContentText>
-          <TextField
-            margin="dense"
-            id="name"
-            label={tTopic('applicationContentLabel')}
-            onChange={(e) => setContent(e.target.value)}
-            type="text"
-            fullWidth
-            multiline
-            rows={4}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleClose}>{tTopic('buttonCancel')}</Button>
-          <Button onClick={handleApplication} variant="contained" color="primary">
+      {topic.author && user.id !== topic.author?.id && user.type === 'LDAP' && (
+        <>
+          <Button variant="contained" color="primary" onClick={handleOpen}>
             {tTopic('buttonApply')}
           </Button>
-        </DialogActions>
-      </Dialog>
-      {user.id === topic.author?.id && (
+          <Dialog open={open} onClose={handleClose} aria-labelledby="form-dialog-title">
+            <DialogTitle id="form-dialog-title">Bewerbung</DialogTitle>
+            <DialogContent>
+              <DialogContentText>{tTopic('applicationDialog')}</DialogContentText>
+              <TextField
+                margin="dense"
+                id="name"
+                label={tTopic('applicationContentLabel')}
+                onChange={(e) => setContent(e.target.value)}
+                type="text"
+                fullWidth
+                multiline
+                rows={4}
+              />
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={handleClose}>{tTopic('buttonCancel')}</Button>
+              <Button onClick={handleApplication} variant="contained" color="primary">
+                {tTopic('buttonApply')}
+              </Button>
+            </DialogActions>
+          </Dialog>
+        </>
+      )}
+      {topic.author && user.id === topic.author.id && (
         <Link href={`/topic/${topicId}/edit`}>
           <Button variant="contained" color="primary" type="submit">
-            Bearbeiten
+            {tTopic('buttonEdit')}
           </Button>
         </Link>
       )}

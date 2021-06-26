@@ -15,11 +15,13 @@ export async function getServerSideProps(
   }
 
   return {
-    props: { ...(await serverSideTranslations('de', ['common', 'topic-edit'])), user },
+    props: { ...(await serverSideTranslations('de', ['common', 'topic'])), user },
   };
 }
 
 const CreateTopic: PageComponent<void> = topicForm(
+  'headlineCreate',
+  'buttonCreate',
   () => {
     // Nothing
   },
