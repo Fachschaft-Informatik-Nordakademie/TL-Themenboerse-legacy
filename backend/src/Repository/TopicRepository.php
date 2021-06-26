@@ -24,6 +24,9 @@ class TopicRepository extends ServiceEntityRepository
         $query = $this->addSearchTextToQuery($text, $query);
         $query = $this->addTagsToQuery($tags, $query);
         $query = $this->addStartUntilToQuery($startUntil, $query);
+        $query = $this->addStartFromToQuery($startFrom, $query);
+        $query = $this->addEndUntilToQuery($endUntil, $query);
+        $query = $this->addEndFromToQuery($endFrom, $query);
 
         return $query
             ->orderBy('t.' . $orderBy, $orderDirection)
@@ -74,7 +77,46 @@ class TopicRepository extends ServiceEntityRepository
                 $query->expr()->isNull('t.start')
             )
         )
-            ->setParameter('startUntil', $startUntil->toDateString());
+            ->setParameter('startUntil', $startUntil->addDay()->toDateString());
+        return $query;
+    }
+
+    private function addStartFromToQuery(?Carbon $startFrom, QueryBuilder $query): QueryBuilder
+    {
+        if ($startFrom === null) return $query;
+        $query->andWhere(
+            $query->expr()->orX(
+                $query->expr()->gte('t.start', ':startFrom'),
+                $query->expr()->isNull('t.start')
+            )
+        )
+            ->setParameter('startFrom', $startFrom->toDateString());
+        return $query;
+    }
+
+    private function addEndUntilToQuery(?Carbon $endUntil, QueryBuilder $query): QueryBuilder
+    {
+        if ($endUntil === null) return $query;
+        $query->andWhere(
+            $query->expr()->orX(
+                $query->expr()->lte('t.deadline', ':endUntil'),
+                $query->expr()->isNull('t.deadline')
+            )
+        )
+            ->setParameter('endUntil', $endUntil->addDay()->toDateString());
+        return $query;
+    }
+
+    private function addEndFromToQuery(?Carbon $endFrom, QueryBuilder $query): QueryBuilder
+    {
+        if ($endFrom === null) return $query;
+        $query->andWhere(
+            $query->expr()->orX(
+                $query->expr()->gte('t.deadline', ':endFrom'),
+                $query->expr()->isNull('t.deadline')
+            )
+        )
+            ->setParameter('endFrom', $endFrom->toDateString());
         return $query;
     }
 }
