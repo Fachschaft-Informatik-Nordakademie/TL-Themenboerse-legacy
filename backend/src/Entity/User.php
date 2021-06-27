@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\UserRepository;
+use DateTime;
+use DateTimeImmutable;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\PersistentCollection;
 use Symfony\Component\Security\Core\User\EquatableInterface;
@@ -12,6 +14,7 @@ use Symfony\Component\Validator\Constraints\Email;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
+#[ORM\HasLifecycleCallbacks()]
 #[ORM\Table(name: "`user`")]
 class User implements UserInterface, EquatableInterface
 {
@@ -22,6 +25,9 @@ class User implements UserInterface, EquatableInterface
 
     #[ORM\Column(type: "string", name: '`type`', length: 50, nullable: false)]
     private string $type;
+
+    #[ORM\Column(type: "datetime", name: '`createdAt`', nullable: false)]
+    private ?DateTime $createdAt;
 
     #[ORM\Column(type: "string", length: 255, nullable: false, unique: true)]
     #[Email(message: 'The e-mail address is not valid.')]
@@ -99,6 +105,17 @@ class User implements UserInterface, EquatableInterface
         $this->type = $type;
 
         return $this;
+    }
+
+    public function getCreatedAt(): DateTime
+    {
+        return $this->createdAt;
+    }
+
+    #[ORM\PrePersist]
+    public function setCreatedAt(): void
+    {
+        $this->createdAt = new DateTime('now');
     }
 
     public function getEmail(): string

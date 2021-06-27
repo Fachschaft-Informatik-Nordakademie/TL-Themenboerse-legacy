@@ -33,6 +33,15 @@ class UserProfile
     #[ORM\Column(type: "string", length: 2000, nullable: true)]
     private ?string $biography;
 
+    #[ORM\Column(type: "string", length: 255, nullable: true)]
+    private ?string $company;
+
+    #[ORM\Column(type: "string", length: 255, nullable: true)]
+    private ?string $job;
+
+    #[ORM\Column(type: "string", length: 255, nullable: true)]
+    private ?string $courseOfStudy;
+
     #[ORM\Column(type: "simple_array", nullable: true)]
     private ?array $skills;
 
@@ -83,6 +92,42 @@ class UserProfile
     public function setBiography(?string $biography): self
     {
         $this->biography = $biography;
+
+        return $this;
+    }
+
+    public function getCompany(): ?string
+    {
+        return $this->company;
+    }
+
+    public function setCompany(?string $company): self
+    {
+        $this->company = $company;
+
+        return $this;
+    }
+
+    public function getJob(): ?string
+    {
+        return $this->job;
+    }
+
+    public function setJob(?string $job): self
+    {
+        $this->job = $job;
+
+        return $this;
+    }
+
+    public function getCourseOfStudy(): ?string
+    {
+        return $this->courseOfStudy;
+    }
+
+    public function setCourseOfStudy(?string $courseOfStudy): self
+    {
+        $this->courseOfStudy = $courseOfStudy;
 
         return $this;
     }

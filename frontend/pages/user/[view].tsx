@@ -99,9 +99,13 @@ const ViewUserProfile: PageComponent<UserProfileViewProps> = ({
         <p className={classes.header}>{tUserEdit('lastName')}</p>
         <p className={classes.field}>{userProfile.lastName}</p>
         <p className={classes.header}>{tUserEdit('biography')}</p>
-        <p className={classes.field}>
-          {userProfile.biography && userProfile.biography.length > 0 ? userProfile.biography : tUserView('noInput')}
-        </p>
+        <p className={classes.field}>{userProfile.biography || tUserView('noInput')}</p>
+        <p className={classes.header}>{tUserEdit('company')}</p>
+        <p className={classes.field}>{userProfile.company || tUserView('noInput')}</p>
+        <p className={classes.header}>{tUserEdit('job')}</p>
+        <p className={classes.field}>{userProfile.job || tUserView('noInput')}</p>
+        <p className={classes.header}>{tUserEdit('courseOfStudy')}</p>
+        <p className={classes.field}>{userProfile.courseOfStudy || tUserView('noInput')}</p>
         <p className={classes.header}>{tUserEdit('skills')}</p>
         <p className={classes.field}>
           {userProfile.skills.length > 0 ? userProfile.skills.join(' ') : tUserView('noInput')}
