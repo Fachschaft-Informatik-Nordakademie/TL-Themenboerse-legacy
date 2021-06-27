@@ -26,10 +26,22 @@
         <th>Name:</th>
         <td>{{ application.candidate.profile.firstName }} {{ application.candidate.profile.lastName }}</td>
     </tr>
-    {% if application.candidate.profile.biography %}
+    {% if application.candidate.profile.courseOfStudy %}
     <tr>
-        <th>Biographie:</th>
-        <td>{{ application.candidate.profile.biography }}</td>
+        <th>Studiengang:</th>
+        <td>{{ application.candidate.profile.courseOfStudy }}</td>
+    </tr>
+    {% endif %}
+    {% if application.candidate.profile.company %}
+    <tr>
+        <th>Unternehmen:</th>
+        <td>{{ application.candidate.profile.company }}</td>
+    </tr>
+    {% endif %}
+    {% if application.candidate.profile.job %}
+    <tr>
+        <th>Position:</th>
+        <td>{{ application.candidate.profile.job }}</td>
     </tr>
     {% endif %}
     {% if application.candidate.profile.skills %}
@@ -42,6 +54,12 @@
     <tr>
         <th>Referenzen:</th>
         <td>{{ application.candidate.profile.references|join(', ') }}</td>
+    </tr>
+    {% endif %}
+    {% if application.candidate.profile.biography %}
+    <tr>
+        <th>Biographie:</th>
+        <td>{{ application.candidate.profile.biography }}</td>
     </tr>
     {% endif %}
 </table>

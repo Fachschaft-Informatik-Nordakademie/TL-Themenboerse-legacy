@@ -59,7 +59,10 @@ const TopicDetail: PageComponent<Props> = ({ user }: Props): JSX.Element => {
   const [loading, setLoading] = useState<boolean>(true);
   const [open, setOpen] = useState<boolean>(false);
   const [content, setContent] = useState<string>('');
-  const handleOpen = (): void => setOpen(true);
+  const handleOpen = (): void => {
+    setContent('');
+    setOpen(true);
+  };
   const handleClose = (): void => setOpen(false);
   const handleApplication = async (): Promise<void> => {
     try {
@@ -85,6 +88,10 @@ const TopicDetail: PageComponent<Props> = ({ user }: Props): JSX.Element => {
   if (loading) {
     return <div>Wird geladen</div>;
   }
+
+  const lengths = {
+    application: 1000,
+  };
 
   return (
     <div>
@@ -158,6 +165,10 @@ const TopicDetail: PageComponent<Props> = ({ user }: Props): JSX.Element => {
                 fullWidth
                 multiline
                 rows={4}
+                inputProps={{
+                  maxLength: lengths.application,
+                }}
+                helperText={`${content.length}/${lengths.application}`}
               />
             </DialogContent>
             <DialogActions>
