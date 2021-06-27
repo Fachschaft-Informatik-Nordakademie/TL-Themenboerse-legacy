@@ -27,8 +27,8 @@ class TopicSearchTest extends SecureApiTestCase
         $this->topic6 = $this->createTopic(title: 'Nutzwert', tags: ['nutzwert']);
         $this->topic7 = $this->createTopic(title: 'Themenbörse Masterprojekt', start: $date1->addDay());
         $this->topic8 = $this->createTopic(title: 'Künstliche Intelligenz');
-        $this->topic9 = $this->createTopic(title: 'Management Bewertung');
-        $this->topic10 = $this->createTopic(title: '');
+        $this->topic9 = $this->createTopic(title: 'Management Bewertung', status: StatusType::LOCKED);
+        $this->topic10 = $this->createTopic(title: '', status: StatusType::ASSIGNED);
     }
 
     private function createTopic(string $title = "Lorem ipsum", string $status = StatusType::OPEN, ?Carbon $start = null, ?Carbon $end = null, ?array $tags = null): Topic
@@ -211,6 +211,30 @@ class TopicSearchTest extends SecureApiTestCase
     {
         $this->ensureLogin();
         $response = $this->client->request('GET', '/topic?startFrom=2021-01-02&startUntil=2021-06-01&endUntil=2021-04-15&endFrom=1999-04-01');
+        $this->assertResponseStatusCodeSame(200);
+
+        $data = json_decode($response->getContent(), true);
+
+        $this->assertEquals(10, $data["total"]);
+        $this->assertEquals(8, count($data["content"]));
+    }
+
+    public function test_topic_list_search_only_open_false(): void
+    {
+        $this->ensureLogin();
+        $response = $this->client->request('GET', '/topic?onlyOpen=false');
+        $this->assertResponseStatusCodeSame(200);
+
+        $data = json_decode($response->getContent(), true);
+
+        $this->assertEquals(10, $data["total"]);
+        $this->assertEquals(10, count($data["content"]));
+    }
+
+    public function test_topic_list_search_only_open_true(): void
+    {
+        $this->ensureLogin();
+        $response = $this->client->request('GET', '/topic?onlyOpen=true');
         $this->assertResponseStatusCodeSame(200);
 
         $data = json_decode($response->getContent(), true);

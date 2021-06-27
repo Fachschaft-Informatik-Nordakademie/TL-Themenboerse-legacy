@@ -2,6 +2,7 @@
 
 namespace App\Repository;
 
+use App\Entity\StatusType;
 use App\Entity\Topic;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\QueryBuilder;
@@ -15,7 +16,7 @@ class TopicRepository extends ServiceEntityRepository
         parent::__construct($registry, Topic::class);
     }
 
-    public function listTopics(int $page, int $pageSize, string $orderBy, string $orderDirection, ?string $text, ?string $tags, ?Carbon $startUntil, ?Carbon $startFrom, ?Carbon $endUntil, ?Carbon $endFrom)
+    public function listTopics(int $page, int $pageSize, string $orderBy, string $orderDirection, ?string $text, ?string $tags, bool $onlyOpen, ?Carbon $startUntil, ?Carbon $startFrom, ?Carbon $endUntil, ?Carbon $endFrom)
     {
         $offset = $page * $pageSize;
 
@@ -23,6 +24,7 @@ class TopicRepository extends ServiceEntityRepository
 
         $query = $this->addSearchTextToQuery($text, $query);
         $query = $this->addTagsToQuery($tags, $query);
+        $query = $this->addOnlyOpenToQuery($onlyOpen, $query);
         $query = $this->addStartUntilToQuery($startUntil, $query);
         $query = $this->addStartFromToQuery($startFrom, $query);
         $query = $this->addEndUntilToQuery($endUntil, $query);
@@ -65,6 +67,14 @@ class TopicRepository extends ServiceEntityRepository
         }
 
         $query->andWhere($orX);
+        return $query;
+    }
+
+    private function addOnlyOpenToQuery(bool $onlyOpen, QueryBuilder $query): QueryBuilder
+    {
+        if (!$onlyOpen) return $query;
+        $query->andWhere('t.status = :status')
+            ->setParameter('status', StatusType::OPEN);
         return $query;
     }
 

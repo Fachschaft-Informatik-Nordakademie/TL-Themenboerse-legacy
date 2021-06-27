@@ -38,6 +38,8 @@ class TopicController extends AbstractController
 
         $text = $request->get('text');
         $tags = $request->get('tags');
+        $onlyOpen = $request->get('onlyOpen');
+        $onlyOpenBool = filter_var($onlyOpen, FILTER_VALIDATE_BOOLEAN);
 
         $startUntil = $this->getDate($request, 'startUntil');
         $startFrom = $this->getDate($request, 'startFrom');
@@ -52,7 +54,7 @@ class TopicController extends AbstractController
             $text = null;
         }
 
-        $topics = $this->topicRepository->listTopics($pageNumber, $pageSize, $orderBy, $orderDirection, $text, $tags, $startUntil, $startFrom, $endUntil, $endFrom);
+        $topics = $this->topicRepository->listTopics($pageNumber, $pageSize, $orderBy, $orderDirection, $text, $tags, $onlyOpenBool, $startUntil, $startFrom, $endUntil, $endFrom);
         $totalAmount = $this->topicRepository->count([]);
         $totalPages = (int)ceil($totalAmount / $pageSize);
 
