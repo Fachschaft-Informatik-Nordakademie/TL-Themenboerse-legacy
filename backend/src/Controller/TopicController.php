@@ -45,7 +45,25 @@ class TopicController extends AbstractController
         $orderBy = $request->get('orderBy') ?? 'deadline';
         $orderDirection = $request->get('order') ?? 'asc';
 
-        $topics = $this->topicRepository->listTopics($pageNumber, $pageSize, $orderBy, $orderDirection);
+        $text = $request->get('text');
+        $tags = $request->get('tags');
+        $onlyOpen = $request->get('onlyOpen');
+        $onlyOpenBool = filter_var($onlyOpen, FILTER_VALIDATE_BOOLEAN);
+
+        $startUntil = $this->getDate($request, 'startUntil');
+        $startFrom = $this->getDate($request, 'startFrom');
+        $endUntil = $this->getDate($request, 'endUntil');
+        $endFrom = $this->getDate($request, 'endFrom');
+
+        if ($tags !== null && empty(trim($tags))) {
+            $tags = null;
+        }
+
+        if ($text !== null && empty(trim($text))) {
+            $text = null;
+        }
+
+        $topics = $this->topicRepository->listTopics($pageNumber, $pageSize, $orderBy, $orderDirection, $text, $tags, $onlyOpenBool, $startUntil, $startFrom, $endUntil, $endFrom);
         $totalAmount = $this->topicRepository->count([]);
         $totalPages = (int)ceil($totalAmount / $pageSize);
 
@@ -136,5 +154,13 @@ class TopicController extends AbstractController
         $this->mailer->send($email);
 
         return $this->json(['id' => $topic->getId()]);
+    }
+
+    private function getDate(Request $request, string $dateName): ?Carbon
+    {
+        $date = $request->get($dateName);
+        if ($date === null) return null;
+        if ($date !== null && empty(trim($date))) return null;
+        return Carbon::parse($date);
     }
 }

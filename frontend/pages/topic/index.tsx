@@ -1,6 +1,12 @@
 import {
+  Accordion,
+  AccordionActions,
+  AccordionDetails,
+  AccordionSummary,
   Button,
   Chip,
+  Divider,
+  FormControlLabel,
   LabelDisplayedRowsArgs,
   makeStyles,
   Paper,
@@ -12,6 +18,7 @@ import {
   TablePagination,
   TableRow,
   TableSortLabel,
+  TextField,
   Typography,
 } from '@material-ui/core';
 import { GetServerSidePropsContext, GetServerSidePropsResult } from 'next';
@@ -26,6 +33,9 @@ import { Topic } from '../../src/types/topic';
 import { ApiResult } from '../../src/types/api-result';
 import { useRouter } from 'next/router';
 import { PageComponent } from '../../src/types/PageComponent';
+import SearchBar from 'material-ui-search-bar';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import { Autocomplete } from '@material-ui/lab';
 
 type Props = {
   user: User;
@@ -47,7 +57,7 @@ const useStyles = makeStyles((theme) => ({
   table: {
     minWidth: 650,
   },
-  createButton: {
+  controlItem: {
     marginBottom: theme.spacing(2),
   },
   tablePaginationSizeSelectRoot: {
@@ -79,11 +89,13 @@ const TopicList: PageComponent<Props> = (): JSX.Element => {
   const [page, setPage] = useState<number>(0);
   const [order, setOrder] = useState<'desc' | 'asc'>('asc');
   const [orderBy, setOrderBy] = useState<string>('deadline');
+  const [text, setText] = useState<string>('');
+  const [tags, setTags] = useState<string[]>([]);
 
   const router = useRouter();
 
   const fetchData = async (): Promise<void> => {
-    const response = await axiosClient.get<ApiResult<Topic>>(`/topic?page=${page}&order=${order}&orderBy=${orderBy}`);
+    const response = await axiosClient.get<ApiResult<Topic>>(`/topic?page=${page}&order=${order}&orderBy=${orderBy}&text=${text}&tags=${tags}`);
     setData(response.data);
   };
 
@@ -104,10 +116,54 @@ const TopicList: PageComponent<Props> = (): JSX.Element => {
         Themenübersicht
       </Typography>
       <Link href="/topic/create">
-        <Button className={classes.createButton} variant="contained" color="primary">
+        <Button className={classes.controlItem} variant="contained" color="primary">
           Thema erstellen
         </Button>
       </Link>
+      <Accordion className={classes.controlItem}>
+        <AccordionSummary expandIcon={<ExpandMoreIcon />}
+          aria-label="Expand">
+          <FormControlLabel
+            aria-label="Erweiterte Suche"
+            onClick={(event) => event.stopPropagation()}
+            onFocus={(event) => event.stopPropagation()}
+            control={
+              <SearchBar
+                value={text}
+                onChange={(newValue) => setText(newValue)}
+                onRequestSearch={() => fetchData()}
+                placeholder={'Suchen'}
+              />
+            }
+            label=""
+          />
+        </AccordionSummary>
+        <AccordionDetails>
+          <Autocomplete
+            id="tags"
+            multiple
+            freeSolo
+            value={tags}
+            onChange={(e, values) => setTags(values)}
+            options={tagOptions}
+            getOptionLabel={(option) => option}
+            defaultValue={[]}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                variant="standard"
+                label={"Tags"}
+              />
+            )}
+          />
+        </AccordionDetails>
+        <Divider />
+        <AccordionActions>
+          <Button size="small" color="primary" onClick={() => fetchData()}>
+            Suchen
+          </Button>
+        </AccordionActions>
+      </Accordion>
       <div className={classes.table}>
         <TableContainer component={Paper} elevation={4}>
           <Table className={classes.table} aria-label="simple table">
@@ -196,6 +252,8 @@ const TopicList: PageComponent<Props> = (): JSX.Element => {
     </>
   );
 };
+
+const tagOptions: string[] = []; // TODO: hard coded defaults or values loaded from the backend?
 
 TopicList.layout = 'main';
 export default TopicList;
