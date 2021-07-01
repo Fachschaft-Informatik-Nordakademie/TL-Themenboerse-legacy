@@ -4,6 +4,7 @@ für Ihr Thema '{{ application.topic.title }}' wurde eine neue Bewerbung eingere
 
 Bewerber
 Name: {{ application.candidate.profile.firstName }} {{ application.candidate.profile.lastName }}
+Email-Adresse: {{ application.candidate.email }}
 {% if application.candidate.profile.courseOfStudy %}
 Studiengang: {{ application.candidate.profile.courseOfStudy }}
 {% endif %}

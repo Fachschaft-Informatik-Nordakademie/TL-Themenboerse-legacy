@@ -26,6 +26,10 @@
         <th>Name:</th>
         <td>{{ application.candidate.profile.firstName }} {{ application.candidate.profile.lastName }}</td>
     </tr>
+    <tr>
+        <th>Email-Adresse:</th>
+        <td><a href="mailto:{{ application.candidate.email }}">{{ application.candidate.email }}</a></td>
+    </tr>
     {% if application.candidate.profile.courseOfStudy %}
     <tr>
         <th>Studiengang:</th>
