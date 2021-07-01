@@ -3,15 +3,13 @@ image:
 ports:
   - port: 3000 # React Frontend
   - port: 8000 # API-Platform Backend
+    visibility: public
   - port: 3389 # LDAP server (private)
     onOpen: ignore
-    visibility: private
   - port: 3306 # MySQL server (private)
     onOpen: ignore
-    visibility: private
   - port: 1025 # Mailhog SMTP (private)
     onOpen: ignore
-    visibility: private
   - port: 8025 # Mailhog Web UI (private)
     onOpen: ignore
     visibility: public
