@@ -19,11 +19,13 @@ export async function getServerSideProps(context: GetServerSidePropsContext): Pr
   }
 
   return {
-    props: { user, ...(await serverSideTranslations('de', ['common', 'topic-edit'])) },
+    props: { user, ...(await serverSideTranslations('de', ['common', 'topic'])) },
   };
 }
 
 const EditTopic: PageComponent<void> = topicForm(
+  'headlineEdit',
+  'buttonEdit',
   async (router, formik) => {
     const id = router.query.id;
     const response = await axiosClient.get<Topic>(`/topic/${id}`);

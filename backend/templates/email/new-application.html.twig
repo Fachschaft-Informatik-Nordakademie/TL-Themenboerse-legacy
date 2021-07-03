@@ -1,0 +1,85 @@
+{% apply inline_css %}
+<style>
+    * {
+        font-family: Arial, sans-serif;
+    }
+
+    table, tr, td, th {
+        border-collapse: collapse;
+        border:0;
+        padding: 0;
+        margin: 0;
+        text-align: left;
+    }
+
+    th {
+        padding-right: 10px;
+    }
+</style>
+
+<p>Guten Tag,</p>
+<p>für Ihr Thema '{{ application.topic.title }}' wurde eine neue Bewerbung eingereicht.</p>
+
+<h4>Bewerber</h4>
+<table>
+    <tr>
+        <th>Name:</th>
+        <td>{{ application.candidate.profile.firstName }} {{ application.candidate.profile.lastName }}</td>
+    </tr>
+    <tr>
+        <th>Email-Adresse:</th>
+        <td><a href="mailto:{{ application.candidate.email }}">{{ application.candidate.email }}</a></td>
+    </tr>
+    {% if application.candidate.profile.courseOfStudy %}
+    <tr>
+        <th>Studiengang:</th>
+        <td>{{ application.candidate.profile.courseOfStudy }}</td>
+    </tr>
+    {% endif %}
+    {% if application.candidate.profile.company %}
+    <tr>
+        <th>Unternehmen:</th>
+        <td>{{ application.candidate.profile.company }}</td>
+    </tr>
+    {% endif %}
+    {% if application.candidate.profile.job %}
+    <tr>
+        <th>Position:</th>
+        <td>{{ application.candidate.profile.job }}</td>
+    </tr>
+    {% endif %}
+    {% if application.candidate.profile.skills %}
+    <tr>
+        <th>Fähigkeiten:</th>
+        <td>{{ application.candidate.profile.skills|join(', ') }}</td>
+    </tr>
+    {% endif %}
+    {% if application.candidate.profile.references %}
+    <tr>
+        <th>Referenzen:</th>
+        <td>{{ application.candidate.profile.references|join(', ') }}</td>
+    </tr>
+    {% endif %}
+    {% if application.candidate.profile.biography %}
+    <tr>
+        <th>Biographie:</th>
+        <td>{{ application.candidate.profile.biography }}</td>
+    </tr>
+    {% endif %}
+</table>
+
+{% if application.content %}
+    <p>Die bewerbende Person hat ein Bewerbungsschreiben hinterlassen:</p>
+
+    <p>{{ application.content|escape }}</p>
+{% endif %}
+
+<p>
+    <a href="{{ base_url }}/user/{{ application.candidate.id }}">Hier klicken, um zum Profil der bewerbenden Person zu gelangen.</a>
+</p>
+
+<br>
+<br>
+<hr>
+<p>Diese E-Mail wurde automatisch erzeugt.</p>
+{% endapply %}

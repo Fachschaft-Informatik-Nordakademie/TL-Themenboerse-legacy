@@ -2,14 +2,25 @@ import { User } from '../../../src/types/user';
 import { GetServerSidePropsContext, GetServerSidePropsResult } from 'next';
 import { fetchUser } from '../../../src/server/fetchUser';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
-import { Chip, Typography, Button } from '@material-ui/core';
+import {
+  Button,
+  Chip,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  TextField,
+  Typography,
+} from '@material-ui/core';
 import { useRouter } from 'next/router';
 import React, { useEffect, useState } from 'react';
+import { makeStyles } from '@material-ui/core/styles';
+import { useTranslation } from 'next-i18next';
+import Link from 'next/link';
+import { PageComponent } from '../../../src/types/PageComponent';
 import { Topic } from '../../../src/types/topic';
 import axiosClient from '../../../src/api';
-import { makeStyles } from '@material-ui/core/styles';
-import { PageComponent } from '../../../src/types/PageComponent';
-import Link from 'next/link';
 
 type Props = {
   user: User;
@@ -23,7 +34,7 @@ export async function getServerSideProps(context: GetServerSidePropsContext): Pr
   }
 
   return {
-    props: { user, ...(await serverSideTranslations('de', ['common', 'topic-creation'])) },
+    props: { user, ...(await serverSideTranslations('de', ['topic'])) },
   };
 }
 
@@ -38,12 +49,29 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const TopicDetail: PageComponent<Props> = ({ user }: Props): JSX.Element => {
+  const { t: tTopic } = useTranslation('topic');
+
   const router = useRouter();
   const classes = useStyles();
   const topicId = router.query.id as string;
 
   const [topic, setTopic] = useState<Topic>();
   const [loading, setLoading] = useState<boolean>(true);
+  const [open, setOpen] = useState<boolean>(false);
+  const [content, setContent] = useState<string>('');
+  const handleOpen = (): void => {
+    setContent('');
+    setOpen(true);
+  };
+  const handleClose = (): void => setOpen(false);
+  const handleApplication = async (): Promise<void> => {
+    try {
+      await axiosClient.post('/application', { topic: topicId, content });
+      handleClose();
+    } catch (e) {
+      console.log(e); // TOOD: How do we handle error messages?
+    }
+  };
 
   const fetchTopic = async (): Promise<void> => {
     setLoading(true);
@@ -61,14 +89,18 @@ const TopicDetail: PageComponent<Props> = ({ user }: Props): JSX.Element => {
     return <div>Wird geladen</div>;
   }
 
+  const lengths = {
+    application: 1000,
+  };
+
   return (
     <div>
       <Typography gutterBottom variant="h4" component="h2">
-        Thema #{topicId}: {topic.title}
+        {tTopic('topic')} #{topicId}: {topic.title}
       </Typography>
       <div>
         <Typography gutterBottom variant="h5" component="h3">
-          Beschreibung
+          {tTopic('labelDescription')}
         </Typography>
         <Typography variant="body1" component="p">
           {topic.description}
@@ -77,7 +109,7 @@ const TopicDetail: PageComponent<Props> = ({ user }: Props): JSX.Element => {
 
       <div className={classes.section}>
         <Typography gutterBottom variant="h5" component="h3">
-          Anforderungen
+          {tTopic('labelRequirements')}
         </Typography>
         <Typography variant="body1" component="p">
           {topic.requirements}
@@ -86,7 +118,7 @@ const TopicDetail: PageComponent<Props> = ({ user }: Props): JSX.Element => {
       {topic.website && topic.website.length > 0 && (
         <div className={classes.section}>
           <Typography gutterBottom variant="h5" component="h3">
-            Website
+            {tTopic('labelWebsite')}
           </Typography>
           <Typography variant="body1" component="p">
             <a href={topic.website} target="_blank" rel="noopener noreferrer">
@@ -97,7 +129,7 @@ const TopicDetail: PageComponent<Props> = ({ user }: Props): JSX.Element => {
       )}
       <div className={classes.section}>
         <Typography gutterBottom variant="h5" component="h3">
-          Anzahl Seiten
+          {tTopic('labelPages')}
         </Typography>
         <Typography variant="body1" component="p">
           {topic.pages}
@@ -105,7 +137,7 @@ const TopicDetail: PageComponent<Props> = ({ user }: Props): JSX.Element => {
       </div>
       <div className={classes.section}>
         <Typography gutterBottom variant="h5" component="h3">
-          Tags
+          {tTopic('labelTags')}
         </Typography>
         <Typography variant="body1" component="p">
           <span className={classes.tags}>
@@ -115,10 +147,43 @@ const TopicDetail: PageComponent<Props> = ({ user }: Props): JSX.Element => {
           </span>
         </Typography>
       </div>
-      {user.id === topic.author?.id && (
+      {topic.status === 'OPEN' && topic.author && user.id !== topic.author?.id && user.type === 'LDAP' && (
+        <>
+          <Button variant="contained" color="primary" onClick={handleOpen}>
+            {tTopic('buttonApply')}
+          </Button>
+          <Dialog open={open} onClose={handleClose} aria-labelledby="form-dialog-title">
+            <DialogTitle id="form-dialog-title">Bewerbung</DialogTitle>
+            <DialogContent>
+              <DialogContentText>{tTopic('applicationDialog')}</DialogContentText>
+              <TextField
+                margin="dense"
+                id="name"
+                label={tTopic('applicationContentLabel')}
+                onChange={(e) => setContent(e.target.value)}
+                type="text"
+                fullWidth
+                multiline
+                rows={4}
+                inputProps={{
+                  maxLength: lengths.application,
+                }}
+                helperText={`${content.length}/${lengths.application}`}
+              />
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={handleClose}>{tTopic('buttonCancel')}</Button>
+              <Button onClick={handleApplication} variant="contained" color="primary">
+                {tTopic('buttonApply')}
+              </Button>
+            </DialogActions>
+          </Dialog>
+        </>
+      )}
+      {topic.author && user.id === topic.author.id && (
         <Link href={`/topic/${topicId}/edit`}>
           <Button variant="contained" color="primary" type="submit">
-            Bearbeiten
+            {tTopic('buttonEdit')}
           </Button>
         </Link>
       )}

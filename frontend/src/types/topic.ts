@@ -1,4 +1,4 @@
-import { User } from "./user";
+import { User } from './user';
 
 export type Topic = {
   id: number;
@@ -11,6 +11,6 @@ export type Topic = {
   start?: string;
   deadline?: string;
   pages?: number;
-  status: string;
+  status: 'OPEN' | 'ASSIGNED' | 'LOCKED';
   author: User;
 };

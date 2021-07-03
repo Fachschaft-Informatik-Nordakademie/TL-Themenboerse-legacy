@@ -37,24 +37,26 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 export function topicForm(
+  headerId: string,
+  submitId: string,
   effect: (router: NextRouter, formik: { setFieldValue: (field: string, value: unknown) => void }) => void,
   submit: (router: NextRouter, values: IFormValues) => void,
 ): () => JSX.Element {
   return () => {
     const { t: tCommon } = useTranslation('common');
-    const { t: tEditTopic } = useTranslation('topic-edit');
+    const { t: tTopic } = useTranslation('topic');
 
     const router = useRouter();
 
     const validationSchema = yup.object({
-      title: yup.string().required(tEditTopic('messageTitleRequired')),
-      description: yup.string().required(tEditTopic('messageDescriptionRequired')),
-      requirements: yup.string().required(tEditTopic('messageRequirementsRequired')),
+      title: yup.string().required(tTopic('messageTitleRequired')),
+      description: yup.string().required(tTopic('messageDescriptionRequired')),
+      requirements: yup.string().required(tTopic('messageRequirementsRequired')),
       start: yup.date().nullable(),
       deadline: yup.date().nullable(),
       tags: yup.array().ensure(),
       pages: yup.number().nullable(),
-      website: yup.string().nullable().url(tEditTopic('messageUrlInvalid')),
+      website: yup.string().nullable().url(tTopic('messageUrlInvalid')),
     });
 
     const formik = useFormik<IFormValues>({
@@ -87,12 +89,12 @@ export function topicForm(
       <>
         <Head>
           <title>
-            {tEditTopic('title')} - {tCommon('appName')}
+            {tTopic(headerId)} - {tCommon('appName')}
           </title>
         </Head>
         <>
           <Typography gutterBottom variant="h4" component="h2">
-            {tEditTopic('headline')}
+            {tTopic(headerId)}
           </Typography>
           <form
             noValidate
@@ -102,7 +104,7 @@ export function topicForm(
             }}
           >
             <TextField
-              label={tEditTopic('labelTitel')}
+              label={tTopic('labelTitel')}
               name="title"
               fullWidth
               className={classes.formField}
@@ -114,7 +116,7 @@ export function topicForm(
               required
             />
             <TextField
-              label={tEditTopic('labelDescription')}
+              label={tTopic('labelDescription')}
               name="description"
               fullWidth
               multiline
@@ -127,7 +129,7 @@ export function topicForm(
               required
             />
             <TextField
-              label={tEditTopic('labelRequirements')}
+              label={tTopic('labelRequirements')}
               name="requirements"
               fullWidth
               multiline
@@ -140,7 +142,7 @@ export function topicForm(
               required
             />
             <TextField
-              label={tEditTopic('labelPages')}
+              label={tTopic('labelPages')}
               name="pages"
               fullWidth
               type="number"
@@ -152,7 +154,7 @@ export function topicForm(
               onBlur={formik.handleBlur}
             />
             <TextField
-              label={tEditTopic('labelWebsite')}
+              label={tTopic('labelWebsite')}
               name="website"
               fullWidth
               className={classes.formField}
@@ -168,7 +170,7 @@ export function topicForm(
               variant="inline"
               format="dd.MM.yyyy"
               margin="normal"
-              label={tEditTopic('labelStartdate')}
+              label={tTopic('labelStartdate')}
               value={formik.values.start}
               onChange={(value) => formik.setFieldValue('start', value)}
               helperText={formik.touched.start && formik.errors.start}
@@ -182,7 +184,7 @@ export function topicForm(
               variant="inline"
               format="dd.MM.yyyy"
               margin="normal"
-              label={tEditTopic('labelEnddate')}
+              label={tTopic('labelEnddate')}
               value={formik.values.deadline}
               onChange={(value) => formik.setFieldValue('deadline', value)}
               helperText={formik.touched.deadline && formik.errors.deadline}
@@ -204,18 +206,18 @@ export function topicForm(
                 <TextField
                   {...params}
                   variant="standard"
-                  label={tEditTopic('labelTags')}
+                  label={tTopic('labelTags')}
                   helperText={formik.touched.tags && formik.errors.tags}
                   error={formik.touched.tags && Boolean(formik.errors.tags)}
                 />
               )}
             />
             <Button variant="contained" color="primary" type="submit">
-              {tEditTopic('buttonSubmit')}
+              {tTopic(submitId)}
             </Button>
             <Link href="/">
               <Button className={classes.cancelButton} variant="contained" color="default" type="button">
-                {tEditTopic('buttonCancel')}
+                {tTopic('buttonCancel')}
               </Button>
             </Link>
           </form>

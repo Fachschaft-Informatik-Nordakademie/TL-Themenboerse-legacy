@@ -1,0 +1,37 @@
+Guten Tag,
+
+für Ihr Thema '{{ application.topic.title }}' wurde eine neue Bewerbung eingereicht.
+
+Bewerber
+Name: {{ application.candidate.profile.firstName }} {{ application.candidate.profile.lastName }}
+Email-Adresse: {{ application.candidate.email }}
+{% if application.candidate.profile.courseOfStudy %}
+Studiengang: {{ application.candidate.profile.courseOfStudy }}
+{% endif %}
+{% if application.candidate.profile.company %}
+Unternehmen: {{ application.candidate.profile.company }}
+{% endif %}
+{% if application.candidate.profile.job %}
+Position: {{ application.candidate.profile.job }}
+{% endif %}
+{% if application.candidate.profile.skills %}
+Fähigkeiten: {{ application.candidate.profile.skills|join(', ') }}
+{% endif %}
+{% if application.candidate.profile.references %}
+Referenzen: {{ application.candidate.profile.references|join(', ') }}
+{% endif %}
+{% if application.candidate.profile.biography %}
+Biographie: {{ application.candidate.profile.biography }}
+{% endif %}
+
+{% if application.content %}
+    Die bewerbende Person hat ein Bewerbungsschreiben hinterlassen:
+
+    {{ application.content }}
+{% endif %}
+
+Hier klicken, um zum Profil der bewerbenden Person zu gelangen.
+{{ base_url }}/user/{{ application.candidate.id }}
+
+------------------
+Diese E-Mail wurde automatisch erzeugt.

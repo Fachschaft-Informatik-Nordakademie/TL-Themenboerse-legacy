@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\StatusType;
 use App\Entity\Topic;
+use App\Entity\User;
 use App\Repository\TopicRepository;
 use Carbon\Carbon;
 use Carbon\Exceptions\InvalidFormatException;

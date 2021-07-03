@@ -23,16 +23,35 @@ abstract class SecureApiTestCase extends ApiTestCase
 
     protected function ensureLogin(): void
     {
+        $this->ensureLogout();
+        $this->ensureLoginExternal();
+    }
+
+    protected function ensureLoginLDAP(string $username = '10000', string $password = 'secret'): void
+    {
+        $this->ensureLogout();
         $this->client->request('POST', '/login', [
             'json' => [
-                'type' => 'external',
-                'email' => 'dummy@example.com',
-                'password' => 'password',
+                'type' => 'ldap',
+                'username' => $username,
+                'password' => $password,
             ],
         ]);
     }
 
-    protected function ensureLogout(): void 
+    protected function ensureLoginExternal(string $email = 'dummy@example.com', string $password = 'password'): void
+    {
+        $this->ensureLogout();
+        $this->client->request('POST', '/login', [
+            'json' => [
+                'type' => 'external',
+                'email' => $email,
+                'password' => $password,
+            ],
+        ]);
+    }
+
+    protected function ensureLogout(): void
     {
         $this->client->request('POST', '/logout');
     }

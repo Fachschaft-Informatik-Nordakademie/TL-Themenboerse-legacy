@@ -49,7 +49,7 @@ export async function getServerSideProps(context: GetServerSidePropsContext): Pr
   }
 
   return {
-    props: { user, ...(await serverSideTranslations('de', ['common', 'topic-creation'])) },
+    props: { user, ...(await serverSideTranslations('de', ['common', 'topic'])) },
   };
 }
 
