@@ -151,4 +151,25 @@ class ApplicationControllerTest extends SecureApiTestCase
         $this->client->request('POST', '/application');
         $this->assertResponseStatusCodeSame(401);
     }
+
+    public function test_application_delete(): void
+    {
+        $this->ensureLoginExternal();
+        $id = $this->postDummyTopic();
+        $this->ensureLoginLDAP();
+
+        $response = $this->client->request('POST', '/application', [
+            'json' => [
+                'topic' => $id
+            ],
+        ]);
+
+        $this->assertResponseStatusCodeSame(200);
+        $applicationId = json_decode($response->getContent())->{'id'};
+
+        $this->client->request('DELETE', '/application/' . $id);
+
+        $application = $this->em->getRepository(Application::class)->find($applicationId);
+        $this->assertNull($application);
+    }
 }

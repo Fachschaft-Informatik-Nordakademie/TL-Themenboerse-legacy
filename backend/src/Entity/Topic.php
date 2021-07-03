@@ -4,7 +4,6 @@ namespace App\Entity;
 
 use App\Entity\User;
 use App\Repository\TopicRepository;
-use Symfony\Component\Serializer\Annotation\Ignore;
 use Symfony\Component\Validator\Constraints as Assert;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -52,6 +51,8 @@ class Topic
 
     #[ORM\ManyToOne(targetEntity: User::class, inversedBy: "topics", fetch: 'EAGER', cascade: ['all'])]
     private ?User $author;
+
+    private bool $hasApplied;
 
     /**
      * Get the value of id
@@ -319,6 +320,30 @@ class Topic
     public function setStatus(string $status)
     {
         $this->status = $status;
+
+        return $this;
+    }
+
+    /**
+     * Get the value of hasApplied
+     *
+     * @return  bool
+     */
+    public function getHasApplied()
+    {
+        return $this->hasApplied;
+    }
+
+    /**
+     * Set the value of hasApplied
+     *
+     * @param  bool  $hasApplied
+     *
+     * @return  self
+     */
+    public function setHasApplied(bool $hasApplied)
+    {
+        $this->hasApplied = $hasApplied;
 
         return $this;
     }

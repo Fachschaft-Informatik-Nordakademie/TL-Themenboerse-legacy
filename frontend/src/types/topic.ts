@@ -13,4 +13,5 @@ export type Topic = {
   pages?: number;
   status: 'OPEN' | 'ASSIGNED' | 'LOCKED';
   author: User;
+  hasApplied: boolean;
 };

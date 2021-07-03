@@ -11,6 +11,7 @@ import {
   DialogContentText,
   DialogTitle,
   TextField,
+  Tooltip,
   Typography,
 } from '@material-ui/core';
 import { useRouter } from 'next/router';
@@ -46,11 +47,20 @@ const useStyles = makeStyles((theme) => ({
     marginLeft: theme.spacing(-1),
   },
   tagItem: { marginLeft: theme.spacing(1) },
+  withdraw: {
+    color: theme.palette.getContrastText(theme.palette.error.main),
+    background: theme.palette.error.main,
+  },
 }));
+
+function useForceUpdate(): () => void {
+  const [, setValue] = useState(0); // integer state
+  return () => setValue((value) => value + 1); // update the state to force render
+}
 
 const TopicDetail: PageComponent<Props> = ({ user }: Props): JSX.Element => {
   const { t: tTopic } = useTranslation('topic');
-
+  const forceUpdate = useForceUpdate();
   const router = useRouter();
   const classes = useStyles();
   const topicId = router.query.id as string;
@@ -67,10 +77,30 @@ const TopicDetail: PageComponent<Props> = ({ user }: Props): JSX.Element => {
   const handleApplication = async (): Promise<void> => {
     try {
       await axiosClient.post('/application', { topic: topicId, content });
+      topic.hasApplied = true;
+      setTopic(topic);
       handleClose();
     } catch (e) {
       console.log(e); // TOOD: How do we handle error messages?
     }
+  };
+  const handleWithdraw = async (): Promise<void> => {
+    try {
+      await axiosClient.delete(`/application/${topicId}`);
+      topic.hasApplied = false;
+      setTopic(topic);
+      forceUpdate();
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
+  const showApplyButton = (): boolean => {
+    return topic.status === 'OPEN' && topic.author && user.id !== topic.author?.id;
+  };
+
+  const canApply = (): boolean => {
+    return showApplyButton() && user.type === 'LDAP';
   };
 
   const fetchTopic = async (): Promise<void> => {
@@ -147,11 +177,15 @@ const TopicDetail: PageComponent<Props> = ({ user }: Props): JSX.Element => {
           </span>
         </Typography>
       </div>
-      {topic.status === 'OPEN' && topic.author && user.id !== topic.author?.id && user.type === 'LDAP' && (
+      {showApplyButton() && !topic.hasApplied && (
         <>
-          <Button variant="contained" color="primary" onClick={handleOpen}>
-            {tTopic('buttonApply')}
-          </Button>
+          <Tooltip title={canApply() ? '' : tTopic('tooltipCisOnly')}>
+            <span>
+              <Button disabled={!canApply()} variant="contained" color="primary" onClick={handleOpen}>
+                {tTopic('buttonApply')}
+              </Button>
+            </span>
+          </Tooltip>
           <Dialog open={open} onClose={handleClose} aria-labelledby="form-dialog-title">
             <DialogTitle id="form-dialog-title">Bewerbung</DialogTitle>
             <DialogContent>
@@ -179,6 +213,11 @@ const TopicDetail: PageComponent<Props> = ({ user }: Props): JSX.Element => {
             </DialogActions>
           </Dialog>
         </>
+      )}
+      {showApplyButton() && topic.hasApplied && (
+        <Button variant="contained" className={classes.withdraw} onClick={handleWithdraw}>
+          {tTopic('buttonWithdraw')}
+        </Button>
       )}
       {topic.author && user.id === topic.author.id && (
         <Link href={`/topic/${topicId}/edit`}>

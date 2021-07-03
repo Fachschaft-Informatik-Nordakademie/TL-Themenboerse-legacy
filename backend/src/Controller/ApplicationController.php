@@ -35,6 +35,14 @@ class ApplicationController extends AbstractController
         $this->twig = $twig;
     }
 
+    #[Route('/application/{id}', name: 'application_delete', methods: ['delete'])]
+    public function deleteApplication(int $id): Response
+    {
+        $user = $this->getUser();
+        $this->applicationRepository->delete($user->getId(), $id);
+        return $this->json([]);
+    }
+
     #[Route('/application', name: 'application_post', methods: ['post'])]
     public function postApplication(Request $request): Response
     {
