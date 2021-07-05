@@ -1,0 +1,21 @@
+{% apply inline_css %}
+<style>
+    * {
+        font-family: Arial, sans-serif;
+    }
+</style>
+
+<p>Hallo {{ user.profile.firstName }},</p>
+<p>wir heißen dich in unserer Themenbörse herzlich willkommen. Um deine Registrierung abzuschließen, klicke bitte auf den folgenden Link:</p>
+
+<p>
+    <a href="{{ base_url }}/verify-email/{{ user.verificationToken }}">E-Mail-Adresse bestätigen</a>
+</p>
+
+<p>Der Link ist für 24 Stunden gültig.</p>
+
+<br>
+<br>
+<hr>
+<p>Diese E-Mail wurde automatisch erzeugt.</p>
+{% endapply %}

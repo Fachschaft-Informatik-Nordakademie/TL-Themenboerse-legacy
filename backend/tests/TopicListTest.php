@@ -37,7 +37,7 @@ class TopicListTest extends SecureApiTestCase
         $topic->setDescription("Lorem ipsum dolor sit amet");
         $topic->setRequirements("Requirements");
         $topic->setScope("Scope");
-        $topic->setWebsite("https::nordakademie.de");
+        $topic->setWebsite("https://nordakademie.de");
         $topic->setStatus($status);
         if ($start) {
             $topic->setStart($start->toDate());

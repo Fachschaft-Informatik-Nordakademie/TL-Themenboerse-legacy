@@ -18,6 +18,7 @@ import { useTranslation } from 'next-i18next';
 import { GetServerSidePropsContext, GetServerSidePropsResult } from 'next';
 import { fetchUser } from '../src/server/fetchUser';
 import { PageComponent } from '../src/types/PageComponent';
+import createNotification from '../src/components/createNotification';
 
 export async function getServerSideProps(
   context: GetServerSidePropsContext,
@@ -73,11 +74,13 @@ const SignIn: PageComponent<void> = (): JSX.Element => {
       return isMailUserValid();
     }
   };
-  const [isNakUser, setIsNakUser] = useState(true);
+  const [isNakUser, setIsNakUser] = useState<boolean>(true);
+  const [submitError, setSubmitError] = useState<string | React.ReactNode>(undefined);
 
   const login = (e: React.FormEvent): void => {
     e.preventDefault();
     if (isUserValid()) {
+      setSubmitError(undefined);
       let req;
       if (isNakUser) {
         req = { type: 'ldap', username: username, password: password };
@@ -88,7 +91,26 @@ const SignIn: PageComponent<void> = (): JSX.Element => {
         .post(`/login`, req)
         .then(() => router.push('/'))
         .catch((error) => {
-          console.log(error);
+          if (error.response?.data?.code) {
+            const messageCode = error.response.data.code;
+            const messageContent = tCommon('responseCodes.' + messageCode);
+            if (messageCode === 'email_not_verified') {
+              setSubmitError(
+                <>
+                  {messageContent}
+                  <br />
+
+                  <Link href="/verify-email" variant="body2">
+                    Re-send link
+                  </Link>
+                </>,
+              );
+            } else {
+              setSubmitError(messageContent);
+            }
+          } else {
+            setSubmitError(tCommon('unknownError'));
+          }
         });
     } else {
       console.log('Eingaben waren nicht valide');
@@ -110,6 +132,7 @@ const SignIn: PageComponent<void> = (): JSX.Element => {
           {tLogin('title')} {isNakUser ? `(${tLogin('titleNakMode')})` : `(${tLogin('titleEmailMode')})`}
         </Typography>
         <form className={classes.form} onSubmit={login}>
+          {submitError && createNotification(submitError, 'error')}
           <TextField
             variant="outlined"
             margin="normal"

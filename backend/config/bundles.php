@@ -14,4 +14,5 @@ return [
     Hautelook\AliceBundle\HautelookAliceBundle::class => ['dev' => true, 'test' => true],
     SymfonyBundles\JsonRequestBundle\JsonRequestBundle::class => ['all' => true],
     Twig\Extra\TwigExtraBundle\TwigExtraBundle::class => ['all' => true],
+    Symfony\Bundle\MonologBundle\MonologBundle::class => ['all' => true],
 ];

@@ -3,7 +3,6 @@ import { useFormik } from 'formik';
 import * as ValidationSchemaBuilder from 'yup';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
-import MuiAlert, { Color } from '@material-ui/lab/Alert';
 import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
 import AssignmentIndOutlinedIcon from '@material-ui/icons/AssignmentIndOutlined';
@@ -19,20 +18,14 @@ import { GetServerSidePropsContext, GetServerSidePropsResult } from 'next';
 import { fetchUser } from '../src/server/fetchUser';
 import { PageComponent } from '../src/types/PageComponent';
 
+import createNotification from '../src/components/createNotification';
+
 interface RegistrationForm {
   firstName: string;
   lastName: string;
   email: string;
   password: string;
   confirm: string;
-}
-
-function createNotification(message: string, type: Color): JSX.Element {
-  return (
-    <MuiAlert variant="standard" severity={type}>
-      {message}
-    </MuiAlert>
-  );
 }
 
 export async function getServerSideProps(
@@ -82,11 +75,16 @@ const Registration: PageComponent<void> = (): JSX.Element => {
     firstName: ValidationSchemaBuilder.string().required(tRegistration('emptyFirstName')),
     lastName: ValidationSchemaBuilder.string().required(tRegistration('emptyLastName')),
     email: ValidationSchemaBuilder.string().email().required(tRegistration('emptyEmail')),
-    password: ValidationSchemaBuilder.string().required(tRegistration('emptyPassword')).min(minPasswordLength, tRegistration('tooShortPassword')),
-    confirm: ValidationSchemaBuilder.string().oneOf([ValidationSchemaBuilder.ref('password'), null], tRegistration('passwordsNotMatching')),
+    password: ValidationSchemaBuilder.string()
+      .required(tRegistration('emptyPassword'))
+      .min(minPasswordLength, tRegistration('tooShortPassword')),
+    confirm: ValidationSchemaBuilder.string().oneOf(
+      [ValidationSchemaBuilder.ref('password'), null],
+      tRegistration('passwordsNotMatching'),
+    ),
   });
 
-  const formSubmit = async ({firstName, lastName, email, password}: RegistrationForm) => {
+  const formSubmit = async ({ firstName, lastName, email, password }: RegistrationForm) => {
     try {
       const response = await axiosClient.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/register`, {
         firstName,
@@ -96,13 +94,13 @@ const Registration: PageComponent<void> = (): JSX.Element => {
       });
       await checkSubmitError(response);
     } catch (e) {
-      if (e.response?.data?.message) {
-        setSubmitError(e.response.data.message);
+      if (e.response?.data?.code) {
+        setSubmitError(tCommon('responseCodes.' + e.response.data.code));
       } else {
         setSubmitError(tCommon('unknownError'));
       }
     }
-  }
+  };
 
   const form = useFormik<RegistrationForm>({
     initialValues: {
@@ -113,33 +111,32 @@ const Registration: PageComponent<void> = (): JSX.Element => {
       confirm: '',
     },
     validationSchema,
-    onSubmit: formSubmit
+    onSubmit: formSubmit,
   });
 
   const getFormFieldError = (field: string): string => {
     return form.touched[field] && form.errors[field];
-  }
+  };
 
   const hasFormFieldError = (field: string): boolean => {
     return Boolean(getFormFieldError(field));
-  }
+  };
 
   const checkSubmitError = async (response: AxiosResponse): Promise<void> => {
     const data = response.data;
 
     if (response.status === 400) {
-      setSubmitError(data.message);
+      setSubmitError(tCommon('responseCodes.' + data.code));
     } else {
       setSuccessfulRegister(true);
     }
     return data;
   };
 
-  const onSubmit = useCallback(
-    async (e: React.FormEvent): Promise<void> => {
-      e.preventDefault();
-      form.submitForm();
-    }, []);
+  const onSubmit = useCallback(async (e: React.FormEvent): Promise<void> => {
+    e.preventDefault();
+    form.submitForm();
+  }, []);
 
   const classes = useStyles();
 

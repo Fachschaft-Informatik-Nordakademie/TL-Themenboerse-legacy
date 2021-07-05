@@ -1,0 +1,11 @@
+Hallo {{ user.profile.firstName }},
+
+wir heißen dich in unserer Themenbörse herzlich willkommen. Um deine Registrierung abzuschließen, klicke bitte auf den folgenden Link:
+
+{{ base_url }}/verify-email/{{ user.verificationToken }}
+
+Der Link ist für 24 Stunden gültig.
+
+
+------------------
+Diese E-Mail wurde automatisch erzeugt.

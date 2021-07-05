@@ -36,13 +36,14 @@ class UserProfileControllerTest extends SecureApiTestCase
                 'company' => 'Awesome Company AG',
                 'job' => 'Developer',
                 'courseOfStudy' => 'Computer science',
-                'skills' => array('none'),
-                'references' => array('none')
+                'skills' => ['none'],
+                'references' => ['none']
             ],
         ]);
 
         $this->assertResponseStatusCodeSame(200);
-        $id = json_decode($resp->getContent())->{'id'};
+        $id = json_decode($resp->getContent(), true)['id'];
+
         $this->client->request('GET', '/user_profile/' . $id);
         $this->assertJsonContains([
             'firstName' => 'First',
@@ -51,8 +52,8 @@ class UserProfileControllerTest extends SecureApiTestCase
             'company' => 'Awesome Company AG',
             'job' => 'Developer',
             'courseOfStudy' => 'Computer science',
-            'skills' => array('none'),
-            'references' => array('none')
+            'skills' => ['none'],
+            'references' => ['none']
         ]);
     }
 

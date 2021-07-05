@@ -34,14 +34,26 @@ class User implements UserInterface, EquatableInterface
     private string $email;
 
     #[ORM\Column(type: "string", length: 255, nullable: true, unique: true)]
-    private ?string $ldapUsername;
+    private ?string $ldapUsername = null;
 
     #[ORM\Column(type: "string", length: 500, nullable: true, unique: true)]
-    private ?string $ldapDn;
+    private ?string $ldapDn = null;
 
     #[ORM\Column(type: "string", name: '`password`', nullable: true)]
     #[Ignore]
     private ?string $password;
+
+    #[ORM\Column(type: "boolean", nullable: false)]
+    #[Ignore]
+    private bool $emailVerified;
+
+    #[ORM\Column(type: "string", nullable: true)]
+    #[Ignore]
+    private ?string $verificationToken;
+
+    #[ORM\Column(type: "datetime", nullable: true)]
+    #[Ignore]
+    private ?DateTime $verficationTokenExpires;
 
     #[ORM\OneToMany(targetEntity: Topic::class, mappedBy: "author")]
     #[Ignore]
@@ -159,7 +171,6 @@ class User implements UserInterface, EquatableInterface
     #[Ignore]
     public function isEqualTo(UserInterface $user): bool
     {
-
         if (!($user instanceof User)) {
             return false;
         }
@@ -204,6 +215,39 @@ class User implements UserInterface, EquatableInterface
     {
         $this->profile = $profile;
 
+        return $this;
+    }
+
+    public function isEmailVerified(): bool
+    {
+        return $this->emailVerified;
+    }
+
+    public function setEmailVerified(bool $emailVerified): self
+    {
+        $this->emailVerified = $emailVerified;
+        return $this;
+    }
+
+    public function getVerificationToken(): ?string
+    {
+        return $this->verificationToken;
+    }
+
+    public function setVerificationToken(?string $verificationToken): self
+    {
+        $this->verificationToken = $verificationToken;
+        return $this;
+    }
+
+    public function getVerficationTokenExpires(): ?DateTime
+    {
+        return $this->verficationTokenExpires;
+    }
+
+    public function setVerficationTokenExpires(?DateTime $verficationTokenExpires): User
+    {
+        $this->verficationTokenExpires = $verficationTokenExpires;
         return $this;
     }
 

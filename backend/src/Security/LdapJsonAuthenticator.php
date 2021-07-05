@@ -5,12 +5,14 @@ namespace App\Security;
 use App\Entity\User;
 use App\Entity\UserProfile;
 use App\Entity\UserType;
+use App\ResponseCodes;
 use LogicException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\Ldap\Entry;
 use Symfony\Component\Ldap\Exception\ConnectionException;
 use Symfony\Component\Ldap\LdapInterface;
+use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Component\Security\Core\Exception\AuthenticationServiceException;
 use Symfony\Component\Security\Core\Exception\BadCredentialsException;
 use Symfony\Component\Security\Http\Authenticator\Passport\Badge\UserBadge;
@@ -52,7 +54,7 @@ class LdapJsonAuthenticator extends AbstractJsonAuthenticator
             throw $e;
         }
 
-        // Connect with readonly account to lookup provided username 
+        // Connect with readonly account to lookup provided username
         $this->ldap->bind($bindDn, $bindPassword);
         $username = $this->ldap->escape($credentials['username'], '', LdapInterface::ESCAPE_FILTER);
         $query = str_replace('{username}', $username, $userQuery);
@@ -60,7 +62,7 @@ class LdapJsonAuthenticator extends AbstractJsonAuthenticator
 
         // Only continue when exactly 1 user is found
         if (count($result) !== 1) {
-            throw new BadCredentialsException();
+            throw AppAuthenticationException::withMessageCode(ResponseCodes::$INVALID_CREDENTIALS, 401);
         }
 
         // Import the user into db
@@ -70,7 +72,7 @@ class LdapJsonAuthenticator extends AbstractJsonAuthenticator
             $user = $this->userRepository->loadUserByLdapUsername($username);
 
             if (!$user instanceof User) {
-                throw new AuthenticationServiceException('The user provider must return a User object.');
+                throw AppAuthenticationException::withMessageCode(ResponseCodes::$INVALID_CREDENTIALS, 401);
             }
 
             // Only allow LDAP users
@@ -84,7 +86,7 @@ class LdapJsonAuthenticator extends AbstractJsonAuthenticator
                 try {
                     $this->ldap->bind($user->getLdapDn(), $credentials);
                 } catch (ConnectionException $e) {
-                    return false;
+                    throw AppAuthenticationException::withMessageCode(ResponseCodes::$INVALID_CREDENTIALS, 401);
                 }
                 return true;
             },
@@ -121,7 +123,8 @@ class LdapJsonAuthenticator extends AbstractJsonAuthenticator
             $user = new User();
             $user->setProfile(new UserProfile());
             $user->getProfile()->setUser($user);
-        } else if ($user->getType() !== UserType::LDAP) {
+            $user->setEmailVerified(true);
+        } elseif ($user->getType() !== UserType::LDAP) {
             throw new LogicException("User found in DB but it is external");
         }
 

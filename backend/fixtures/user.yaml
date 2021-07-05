@@ -4,6 +4,7 @@ App\Entity\User:
         type: EXTERNAL
         password: <hashPassword('password')>
         profile: '@dummy_profile_0'
+        emailVerified: true
 
 
 App\Entity\UserProfile:

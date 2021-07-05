@@ -4,8 +4,10 @@ namespace App\Security;
 
 use App\Entity\User;
 use App\Entity\UserType;
+use App\ResponseCodes;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Component\Security\Core\Exception\AuthenticationServiceException;
 use Symfony\Component\Security\Http\Authenticator\Passport\Badge\UserBadge;
 use Symfony\Component\Security\Http\Authenticator\Passport\Credentials\PasswordCredentials;
@@ -46,12 +48,16 @@ class ExternalJsonAuthenticator extends AbstractJsonAuthenticator
             $user = $this->userRepository->loadUserByUsername($email);
 
             if (!$user instanceof User) {
-                throw new AuthenticationServiceException('The user provider must return a User object.');
+                throw AppAuthenticationException::withMessageCode(ResponseCodes::$INVALID_CREDENTIALS, 401);
             }
 
             // Only allow external (non-ldap) users
             if ($user->getType() !== UserType::EXTERNAL) {
                 return null;
+            }
+
+            if(!$user->isEmailVerified()) {
+                throw AppAuthenticationException::withMessageCode(ResponseCodes::$EMAIL_NOT_VERIFIED, 401);
             }
 
             return $user;

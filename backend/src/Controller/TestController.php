@@ -11,6 +11,18 @@ use Symfony\Component\Routing\Annotation\Route;
 class TestController extends AbstractController
 {
 
+    #[Route('/test', name: 'test', methods: ['get'])]
+    public function test(): Response
+    {
+        $user = $this->getUser();
+
+        if (!$user) {
+            return $this->json(['message' => 'User is not set']);
+        }
+
+        return $this->json(['message' => 'You are logged in as ' . $user->getUsername()]);
+    }
+
     #[Route(path: "/test-email")]
     public function sendEmail(MailerInterface $mailer): Response
     {

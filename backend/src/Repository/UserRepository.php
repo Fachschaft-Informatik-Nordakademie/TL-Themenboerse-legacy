@@ -40,4 +40,13 @@ class UserRepository extends ServiceEntityRepository implements UserLoaderInterf
             ->getQuery()
             ->getOneOrNullResult();
     }
+
+    public function loadUserByVerificationToken(string $token): ?User
+    {
+        return $this->createQueryBuilder('u')
+            ->andWhere('u.verificationToken = :token')
+            ->setParameter('token', $token)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
 }

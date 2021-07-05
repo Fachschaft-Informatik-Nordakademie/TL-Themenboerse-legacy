@@ -4,6 +4,9 @@ namespace App\Tests;
 
 use ApiPlatform\Core\Bridge\Symfony\Bundle\Test\ApiTestCase;
 use ApiPlatform\Core\Bridge\Symfony\Bundle\Test\Client;
+use App\Entity\User;
+use App\ResponseCodes;
+use Doctrine\ORM\EntityManagerInterface;
 use Hautelook\AliceBundle\PhpUnit\RecreateDatabaseTrait;
 
 class RegistrationControllerTest extends ApiTestCase
@@ -98,11 +101,19 @@ class RegistrationControllerTest extends ApiTestCase
 
         $this->assertResponseStatusCodeSame(200);
         $this->assertJsonContains([
-            'message' => 'Registered user user1@example.com',
+            'code' => ResponseCodes::$SUCCESS,
         ]);
+
+        /** @var EntityManagerInterface $em */
+        $em = self::$container->get(EntityManagerInterface::class);
+        /** @var User $user */
+        $user = $em->createQuery("select u from App\Entity\User u where u.email = 'user1@example.com'")->getSingleResult();
+        $this->assertFalse($user->isEmailVerified());
+        $this->assertNotNull($user->getVerificationToken());
+        $this->assertNotNull($user->getVerficationTokenExpires());
     }
 
-    public function test_that_registered_user_can_login(): void
+    public function test_that_registered_user_cannot_login_because_email_is_not_verified(): void
     {
         $this->client->request('POST', '/register', [
             'json' => [
@@ -122,7 +133,10 @@ class RegistrationControllerTest extends ApiTestCase
             ],
         ]);
 
-        $this->assertResponseStatusCodeSame(200);
+        $this->assertResponseStatusCodeSame(401);
+        $this->assertJsonContains([
+            'code' => ResponseCodes::$EMAIL_NOT_VERIFIED,
+        ]);
     }
 
     public function test_that_register_throws_error_when_password_is_too_short(): void
@@ -137,7 +151,7 @@ class RegistrationControllerTest extends ApiTestCase
         ]);
 
         $this->assertResponseStatusCodeSame(400);
-        $this->assertJsonContains(['message' => 'The password must contain at least 8 characters.']);
+        $this->assertJsonContains(['code' => ResponseCodes::$PASSWORD_TOO_SHORT]);
     }
 
     public function test_that_register_throws_error_when_email_is_used(): void
@@ -162,7 +176,7 @@ class RegistrationControllerTest extends ApiTestCase
         ]);
 
         $this->assertResponseStatusCodeSame(400);
-        $this->assertStringContainsString('The e-mail address is already in use.', $response->getContent(false));
+        $this->assertJsonContains(['code' => ResponseCodes::$EMAIL_ALREADY_IN_USE]);
     }
 
     public function test_that_register_throws_error_when_email_is_not_valid(): void

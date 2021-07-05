@@ -5,11 +5,14 @@ namespace App\Controller;
 use App\Entity\User;
 use App\Entity\UserProfile;
 use App\Entity\UserType;
+use App\Event\SendConfirmationLinkEvent;
 use App\Repository\UserRepository;
+use App\ResponseCodes;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
@@ -17,17 +20,14 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 class RegistrationController extends AbstractController
 {
 
-    private EntityManagerInterface $em;
-    private UserPasswordEncoderInterface $pwEncoder;
-    private UserRepository $userRepository;
-    private ValidatorInterface $validator;
+    public function __construct(
+        private EntityManagerInterface $em,
+        private UserPasswordEncoderInterface $pwEncoder,
+        private UserRepository $userRepository,
+        private ValidatorInterface $validator,
+        private EventDispatcherInterface $dispatcher,
+    ) {
 
-    public function __construct(EntityManagerInterface $em, UserPasswordEncoderInterface $pwEncoder, UserRepository $userRepository, ValidatorInterface $validator)
-    {
-        $this->em = $em;
-        $this->pwEncoder = $pwEncoder;
-        $this->userRepository = $userRepository;
-        $this->validator = $validator;
     }
 
     #[Route('/register', name: 'register', methods: ['post'])]
@@ -47,18 +47,22 @@ class RegistrationController extends AbstractController
         $errors = $this->validator->validate($user);
 
         if (count($errors) > 0) {
-            return $this->json(['message' => (string) $errors], Response::HTTP_BAD_REQUEST);
+            return $this->json(ResponseCodes::makeResponse(ResponseCodes::$VALIDATION_FAILED, ["validation_errors" => $errors]), Response::HTTP_BAD_REQUEST);
         }
         if ($this->userRepository->loadUserByEmail($email)) {
-            return $this->json(['message' => 'The e-mail address is already in use.'], Response::HTTP_BAD_REQUEST);
+            return $this->json(ResponseCodes::makeResponse(ResponseCodes::$EMAIL_ALREADY_IN_USE), Response::HTTP_BAD_REQUEST);
         }
         if (strlen($password) < 8) {
-            return $this->json(['message' => 'The password must contain at least 8 characters.'], Response::HTTP_BAD_REQUEST);
+            return $this->json(ResponseCodes::makeResponse(ResponseCodes::$PASSWORD_TOO_SHORT), Response::HTTP_BAD_REQUEST);
         }
         $password = $this->pwEncoder->encodePassword($user, $password);
         $user->setPassword($password);
+        $user->setEmailVerified(false);
         $this->em->persist($user);
         $this->em->flush();
-        return $this->json(['message' => 'Registered user ' . $email]);
+
+        $this->dispatcher->dispatch(new SendConfirmationLinkEvent($user));
+
+        return $this->json(ResponseCodes::makeResponse(ResponseCodes::$SUCCESS));
     }
 }
