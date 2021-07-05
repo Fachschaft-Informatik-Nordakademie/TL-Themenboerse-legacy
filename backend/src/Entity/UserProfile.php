@@ -28,25 +28,25 @@ class UserProfile
     private string $lastName;
 
     #[ORM\Column(type: "string", length: 255, nullable: true)]
-    private ?string $image;
+    private ?string $image = null;
 
     #[ORM\Column(type: "string", length: 2000, nullable: true)]
-    private ?string $biography;
+    private ?string $biography = null;
 
     #[ORM\Column(type: "string", length: 255, nullable: true)]
-    private ?string $company;
+    private ?string $company = null;
 
     #[ORM\Column(type: "string", length: 255, nullable: true)]
-    private ?string $job;
+    private ?string $job = null;
 
     #[ORM\Column(type: "string", length: 255, nullable: true)]
-    private ?string $courseOfStudy;
+    private ?string $courseOfStudy = null;
 
     #[ORM\Column(type: "simple_array", nullable: true)]
-    private ?array $skills;
+    private ?array $skills = null;
 
     #[ORM\Column(type: "simple_array", name: '`references`', nullable: true)]
-    private ?array $references;
+    private ?array $references = null;
 
     public function getUser(): User
     {

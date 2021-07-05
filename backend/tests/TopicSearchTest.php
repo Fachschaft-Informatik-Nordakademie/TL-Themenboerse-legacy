@@ -42,7 +42,7 @@ class TopicSearchTest extends SecureApiTestCase
         $topic->setDescription("Lorem ipsum dolor sit amet");
         $topic->setRequirements("Requirements");
         $topic->setScope("Scope");
-        $topic->setWebsite("https::nordakademie.de");
+        $topic->setWebsite("https://nordakademie.de");
         $topic->setStatus($status);
         $topic->setTags($tags);
         if ($start) {

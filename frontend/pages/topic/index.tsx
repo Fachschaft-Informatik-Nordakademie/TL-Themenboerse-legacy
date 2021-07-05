@@ -95,7 +95,9 @@ const TopicList: PageComponent<Props> = (): JSX.Element => {
   const router = useRouter();
 
   const fetchData = async (): Promise<void> => {
-    const response = await axiosClient.get<ApiResult<Topic>>(`/topic?page=${page}&order=${order}&orderBy=${orderBy}&text=${text}&tags=${tags}`);
+    const response = await axiosClient.get<ApiResult<Topic>>(
+      `/topic?page=${page}&order=${order}&orderBy=${orderBy}&text=${text}&tags=${tags}`,
+    );
     setData(response.data);
   };
 
@@ -121,8 +123,7 @@ const TopicList: PageComponent<Props> = (): JSX.Element => {
         </Button>
       </Link>
       <Accordion className={classes.controlItem}>
-        <AccordionSummary expandIcon={<ExpandMoreIcon />}
-          aria-label="Expand">
+        <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-label="Expand">
           <FormControlLabel
             aria-label="Erweiterte Suche"
             onClick={(event) => event.stopPropagation()}
@@ -148,13 +149,7 @@ const TopicList: PageComponent<Props> = (): JSX.Element => {
             options={tagOptions}
             getOptionLabel={(option) => option}
             defaultValue={[]}
-            renderInput={(params) => (
-              <TextField
-                {...params}
-                variant="standard"
-                label={"Tags"}
-              />
-            )}
+            renderInput={(params) => <TextField {...params} variant="standard" label={'Tags'} />}
           />
         </AccordionDetails>
         <Divider />

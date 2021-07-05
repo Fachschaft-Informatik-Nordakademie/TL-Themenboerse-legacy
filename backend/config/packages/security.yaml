@@ -21,7 +21,7 @@ security:
             custom_authenticators:
                 - App\Security\ExternalJsonAuthenticator
                 - App\Security\LdapJsonAuthenticator
-            entry_point: App\Security\UnauthanticatedEntryPoint
+            entry_point: App\Security\UnauthenticatedEntryPoint
             logout:
                 path:   logout
 
@@ -36,5 +36,6 @@ security:
     access_control:
         - { path: ^/login, roles: PUBLIC_ACCESS }
         - { path: ^/register, roles: PUBLIC_ACCESS }
+        - { path: ^/verify-email, roles: PUBLIC_ACCESS }
         - { path: ^/test-email, roles: PUBLIC_ACCESS }
         - { path: ^/, roles: ROLE_USER }

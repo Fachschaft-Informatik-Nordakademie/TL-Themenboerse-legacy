@@ -67,5 +67,9 @@ services:
         tags:
             - { name: kernel.event_listener, event: Symfony\Component\Security\Http\Event\LogoutEvent, method: onLogout }
 
+    App\EventListener\SendConfirmationLinkEventListener:
+        tags:
+            - { name: kernel.event_listener, event: App\Event\SendConfirmationLinkEvent, method: onSend }
+
     App\DataFixtures\Providers\HashPasswordProvider:
         tags: [ { name: nelmio_alice.faker.provider } ]

@@ -7,6 +7,7 @@ use ApiPlatform\Core\Bridge\Symfony\Bundle\Test\Client;
 use App\Entity\User;
 use App\Entity\UserProfile;
 use App\Entity\UserType;
+use App\ResponseCodes;
 use Doctrine\ORM\EntityManagerInterface;
 use Hautelook\AliceBundle\PhpUnit\RecreateDatabaseTrait;
 
@@ -32,7 +33,7 @@ class AuthenticationTest extends ApiTestCase
         $this->client->request('GET', '/test');
 
         $this->assertResponseStatusCodeSame(401);
-        $this->assertJsonContains(['message' => 'You need to be authenticated to view this resource']);
+        $this->assertJsonContains(['code' => ResponseCodes::$UNAUTHENTICATED]);
     }
 
     public function test_that_login_throws_error_when_no_json_is_submitted(): void
@@ -40,7 +41,7 @@ class AuthenticationTest extends ApiTestCase
         $this->client->request('POST', '/login');
 
         $this->assertResponseStatusCodeSame(401);
-        $this->assertJsonContains(['message' => 'Authentication failed. You have to call this endpoint with a json body either containing email + password or username (ldap) + password']);
+        $this->assertJsonContains(['code' => ResponseCodes::$AUTHENTICATION_FAILED]);
     }
 
     public function test_that_login_works_with_external_user(): void
@@ -55,7 +56,9 @@ class AuthenticationTest extends ApiTestCase
 
         $this->assertResponseStatusCodeSame(200);
         $this->assertJsonContains([
-            'message' => 'Welcome dummy@example.com',
+            'user' => [
+                'email' => 'dummy@example.com',
+            ],
         ]);
 
         $this->client->request('GET', '/test');
@@ -77,7 +80,9 @@ class AuthenticationTest extends ApiTestCase
 
         $this->assertResponseStatusCodeSame(200);
         $this->assertJsonContains([
-            'message' => 'Welcome max.mustermann@awesome-university.com',
+            'user' => [
+                'email' => 'max.mustermann@awesome-university.com',
+            ],
         ]);
 
         $this->client->request('GET', '/test');
@@ -100,12 +105,12 @@ class AuthenticationTest extends ApiTestCase
 
         $this->assertResponseStatusCodeSame(401);
         $this->assertJsonContains([
-            'message' => 'Authentication failed.',
+            'code' => ResponseCodes::$INVALID_CREDENTIALS,
         ]);
 
         $this->client->request('GET', '/test');
         $this->assertResponseStatusCodeSame(401);
-        $this->assertJsonContains(['message' => 'You need to be authenticated to view this resource']);
+        $this->assertJsonContains(['code' => ResponseCodes::$UNAUTHENTICATED]);
     }
 
     public function test_that_login_throws_error_on_wrong_password_ldap(): void
@@ -120,12 +125,12 @@ class AuthenticationTest extends ApiTestCase
 
         $this->assertResponseStatusCodeSame(401);
         $this->assertJsonContains([
-            'message' => 'Authentication failed.',
+            'code' => ResponseCodes::$INVALID_CREDENTIALS,
         ]);
 
         $this->client->request('GET', '/test');
         $this->assertResponseStatusCodeSame(401);
-        $this->assertJsonContains(['message' => 'You need to be authenticated to view this resource']);
+        $this->assertJsonContains(['code' => ResponseCodes::$UNAUTHENTICATED]);
     }
 
     public function test_that_correct_user_is_set_after_logging_in_again(): void
@@ -140,7 +145,9 @@ class AuthenticationTest extends ApiTestCase
 
         $this->assertResponseStatusCodeSame(200);
         $this->assertJsonContains([
-            'message' => 'Welcome max.mustermann@awesome-university.com',
+            'user' => [
+                'email' => 'max.mustermann@awesome-university.com',
+            ],
         ]);
 
         $this->client->request('POST', '/login', [
@@ -153,7 +160,9 @@ class AuthenticationTest extends ApiTestCase
 
         $this->assertResponseStatusCodeSame(200);
         $this->assertJsonContains([
-            'message' => 'Welcome mareike.musterfrau@awesome-university.com',
+            'user' => [
+                'email' => 'mareike.musterfrau@awesome-university.com',
+            ],
         ]);
 
         $this->client->request('GET', '/test');
@@ -184,7 +193,9 @@ class AuthenticationTest extends ApiTestCase
 
         $this->assertResponseStatusCodeSame(200);
         $this->assertJsonContains([
-            'message' => 'Welcome max.mustermann@awesome-university.com',
+            'user' => [
+                'email' => 'max.mustermann@awesome-university.com',
+            ],
         ]);
 
         $this->assertEquals(1, $countQuery->getSingleScalarResult());
@@ -201,6 +212,7 @@ class AuthenticationTest extends ApiTestCase
         $user->setLdapDn("cn=10000,ou=students,ou=people,dc=awesome-university,dc=com");
         $user->getProfile()->setFirstName("Test");
         $user->getProfile()->setLastName("Test");
+        $user->setEmailVerified(true);
         $this->em->persist($user);
         $this->em->flush();
 
@@ -214,7 +226,9 @@ class AuthenticationTest extends ApiTestCase
 
         $this->assertResponseStatusCodeSame(200);
         $this->assertJsonContains([
-            'message' => 'Welcome max.mustermann@awesome-university.com',
+            'user' => [
+                'email' => 'max.mustermann@awesome-university.com',
+            ],
         ]);
 
         $this->em->refresh($user);
@@ -233,7 +247,9 @@ class AuthenticationTest extends ApiTestCase
 
         $this->assertResponseStatusCodeSame(200);
         $this->assertJsonContains([
-            'message' => 'Welcome max.mustermann@awesome-university.com',
+            'user' => [
+                'email' => 'max.mustermann@awesome-university.com',
+            ],
         ]);
 
         $this->client->request('GET', '/test');
@@ -248,6 +264,6 @@ class AuthenticationTest extends ApiTestCase
         $this->client->request('GET', '/test');
 
         $this->assertResponseStatusCodeSame(401);
-        $this->assertJsonContains(['message' => 'You need to be authenticated to view this resource']);
+        $this->assertJsonContains(['code' => ResponseCodes::$UNAUTHENTICATED]);
     }
 }

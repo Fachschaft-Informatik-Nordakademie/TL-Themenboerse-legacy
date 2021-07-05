@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\ResponseCodes;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Filesystem\Filesystem;
@@ -23,11 +24,6 @@ class FileUploadController extends AbstractController
     #[Route('/file', name: 'file_post', methods: ['post'])]
     public function postFile(Request $request): Response
     {
-        $user = $this->getUser();
-
-        if (!$user) {
-            return $this->json(['message' => 'Authentication failed. You have to call this endpoint with a json body either containing email + password or username (ldap) + password'], Response::HTTP_UNAUTHORIZED);
-        }
         $fileName = uniqid();
         try {
             $fileContent = $request->getContent(true);
@@ -36,7 +32,7 @@ class FileUploadController extends AbstractController
             $this->filesystem->mkdir($directory);
             $this->filesystem->dumpFile($path, $fileContent);
         } catch (\Error $e) {
-            // TODO: Output error message here
+            return $this->json(ResponseCodes::makeResponse(ResponseCodes::$FILE_UPLOAD_ERROR, ["details" => $e->getMessage()]));
         }
 
         return $this->json(['id' => $fileName]);
@@ -50,7 +46,7 @@ class FileUploadController extends AbstractController
             $path = $directory . '/' . $id;
             return $this->file($path);
         } catch (\Error $e) {
-            return $this->json(['message' => 'Error']);
+            return $this->json(ResponseCodes::makeResponse(ResponseCodes::$FILE_NOT_FOUND));
         }
     }
 }

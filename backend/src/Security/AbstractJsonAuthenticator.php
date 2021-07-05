@@ -3,6 +3,7 @@
 namespace App\Security;
 
 use App\Repository\UserRepository;
+use App\ResponseCodes;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ContainerBagInterface;
 use Symfony\Component\HttpFoundation\Exception\BadRequestException;
@@ -15,12 +16,12 @@ use Symfony\Component\PropertyAccess\Exception\AccessException;
 use Symfony\Component\PropertyAccess\PropertyAccessorInterface;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
+use Symfony\Component\Security\Core\Exception\BadCredentialsException;
 use Symfony\Component\Security\Http\Authenticator\AbstractAuthenticator;
 use Symfony\Component\Security\Http\HttpUtils;
 
 abstract class AbstractJsonAuthenticator extends AbstractAuthenticator
 {
-
     protected HttpUtils $httpUtils;
     protected PropertyAccessorInterface $propertyAccessor;
     protected EntityManagerInterface $em;
@@ -47,7 +48,16 @@ abstract class AbstractJsonAuthenticator extends AbstractAuthenticator
 
     public function onAuthenticationFailure(Request $request, AuthenticationException $exception): ?Response
     {
-        return new JsonResponse(['message' => 'Authentication failed.'], Response::HTTP_UNAUTHORIZED);
+        $message = $exception->getMessage();
+        if ($exception instanceof BadCredentialsException) {
+            return new JsonResponse(ResponseCodes::makeResponse(ResponseCodes::$INVALID_CREDENTIALS), Response::HTTP_UNAUTHORIZED);
+        }
+
+        if($exception instanceof AppAuthenticationException) {
+            return new JsonResponse(ResponseCodes::makeResponse($exception->getMessageCode()), $exception->getStatusCode());
+        }
+
+        return new JsonResponse(ResponseCodes::makeResponse(ResponseCodes::$UNKNOWN_ERROR, ['message' => $message]), Response::HTTP_UNAUTHORIZED);
     }
 
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewallName): ?Response
@@ -58,7 +68,6 @@ abstract class AbstractJsonAuthenticator extends AbstractAuthenticator
 
     protected function supportsJsonLoginType(Request $request, string $authenticatorType): bool
     {
-
         if (!$this->httpUtils->checkRequestPath($request, '/login')) {
             return false;
         }
@@ -70,12 +79,12 @@ abstract class AbstractJsonAuthenticator extends AbstractAuthenticator
         $data = json_decode($request->getContent());
 
         if (!$data instanceof \stdClass) {
-            throw new BadRequestHttpException('Invalid JSON.');
+            throw AppAuthenticationException::withMessageCode(ResponseCodes::$INVALID_JSON, 400);
         }
 
         $type = $this->propertyAccessor->getValue($data, 'type');
         if (!\is_string($type)) {
-            throw new BadRequestException('The key "type" must be provided.');
+            throw AppAuthenticationException::withMessageCode(ResponseCodes::$VALIDATION_FAILED, 400);
         }
 
         return $authenticatorType === $type;
@@ -85,7 +94,7 @@ abstract class AbstractJsonAuthenticator extends AbstractAuthenticator
     {
         $data = json_decode($request->getContent());
         if (!$data instanceof \stdClass) {
-            throw new BadRequestHttpException('Invalid JSON.');
+            throw AppAuthenticationException::withMessageCode(ResponseCodes::$INVALID_JSON, 400);
         }
 
         return $data;
@@ -97,14 +106,14 @@ abstract class AbstractJsonAuthenticator extends AbstractAuthenticator
             $value = $this->propertyAccessor->getValue($data, $propertyName);
 
             if (!\is_string($value)) {
-                throw new BadRequestHttpException("The key \"{$propertyName}\" must be a string.");
+                throw AppAuthenticationException::withMessageCode(ResponseCodes::$VALIDATION_FAILED, 400);
             }
 
             if (strlen(trim($value)) === 0) {
-                throw new BadRequestException("The key \"{$propertyName}\" must not be empty.");
+                throw AppAuthenticationException::withMessageCode(ResponseCodes::$VALIDATION_FAILED, 400);
             }
         } catch (AccessException $e) {
-            throw new BadRequestHttpException("The key \"{$propertyName}\" must be provided.", $e);
+            throw AppAuthenticationException::withMessageCode(ResponseCodes::$VALIDATION_FAILED, 400);
         }
 
         return $value;

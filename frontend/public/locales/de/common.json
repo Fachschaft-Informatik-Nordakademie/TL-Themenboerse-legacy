@@ -1,4 +1,20 @@
 {
   "appName": "Themenbörse",
-  "unknownError": "Ein unbekannter Fehler ist aufgetreten"
+  "unknownError": "Ein unbekannter Fehler ist aufgetreten",
+  "responseCodes": {
+    "success": "Aktion war erfolgreich",
+    "validation_failed": "Ungültige Eingaben.",
+    "authentication_failed": "Anmeldung fehlgeschlagen.",
+    "topic_not_found": "Das Thema konnte nicht gefunden werden.",
+    "topic_edit_permission_denied": "Du darfst dieses Thema nicht bearbeiten.",
+    "file_not_found": "Die gewünschte Datei wurde nicht gefunden.",
+    "file_upload_error": "Datei konnte nicht hochgeladen werden.",
+    "email_already_in_use": "Die eingegebene E-Mail-Adresse wird bereits verwendet.",
+    "password_too_short": "Das Passwort muss mindestens 8 Zeichen lang sein.",
+    "profile_not_found": "Benutzerprofil wurde nicht gefunden.",
+    "invalid_credentials": "Die Zugangsdaten sind ungültig.",
+    "verification_token_invalid": "Der Token ist ungültig.",
+    "verification_token_expired": "Der Token ist bereits abgelaufen.",
+    "email_not_verified": "Deine E-Mail-Adresse ist noch nicht bestätigt."
+  }
 }
