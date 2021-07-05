@@ -1,6 +1,10 @@
 Guten Tag,
 
-es wurde ein neues Thema in der Themenbörse erstellt.
+{% if new %}
+ein neues Thema wurde in der Themenbörse erstellt.
+{% else %}
+ein bereits eingereichtes Thema wurde bearbeitet.
+{% endif %}
 
 Titel: {{ topic.title }}
 Erstellt von: {{ topic.author.profile.firstName }} {{ topic.author.profile.lastName }}

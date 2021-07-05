@@ -84,7 +84,7 @@ class TopicController extends AbstractController
         $topic = new Topic();
         $user = $this->getUser();
         $topic->setAuthor($user);
-        return $this->fillAndSaveTopic($topic, $request);
+        return $this->fillAndSaveTopic($topic, $request, true);
     }
 
     #[Route('/topic/{id}', name: 'topic_get', methods: ['get'])]
@@ -107,10 +107,10 @@ class TopicController extends AbstractController
         if ($topic->getAuthor()->getId() !== $user->getId()) {
             return $this->json(ResponseCodes::makeResponse(ResponseCodes::$TOPIC_EDIT_PERMISSION_DENIED), Response::HTTP_NOT_FOUND);
         }
-        return $this->fillAndSaveTopic($topic, $request);
+        return $this->fillAndSaveTopic($topic, $request, false);
     }
 
-    function fillAndSaveTopic(Topic $topic, Request $request): Response
+    function fillAndSaveTopic(Topic $topic, Request $request, bool $new): Response
     {
         try {
             $topic->setTitle($request->get('title'));
@@ -143,17 +143,19 @@ class TopicController extends AbstractController
         $entityManager->flush();
 
         $mailContext = [
+            "new" => $new,
             "topic" => $topic,
             "base_url" => $this->params->get('app.frontend_base_url'),
         ];
 
         $email = (new TemplatedEmail())
             ->to($this->params->get('app.mail.new_topic_recipient'))
-            ->subject('Neues Thema wurde eingereicht')
+            ->subject($new ? 'Neues Thema wurde eingereicht' : 'Ein Thema wurde bearbeitet')
             ->htmlTemplate('email/new-topic.html.twig')
             ->text(str_replace("\n", "\r\n", $this->twig->render('email/new-topic.txt.twig', $mailContext)))
             ->context($mailContext);
         $this->mailer->send($email);
+
 
         return $this->json(['id' => $topic->getId()]);
     }
