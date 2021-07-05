@@ -1,10 +1,10 @@
-import { Button, TextField, Typography } from '@material-ui/core';
+import { Button, Checkbox, FormControlLabel, TextField, Tooltip, Typography } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import { Autocomplete } from '@material-ui/lab';
 import { KeyboardDatePicker } from '@material-ui/pickers';
 import { useFormik } from 'formik';
 import * as yup from 'yup';
-import React from 'react';
+import React, { useState } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 import { useTranslation } from 'next-i18next';
@@ -47,6 +47,7 @@ export function topicForm(
     const { t: tTopic } = useTranslation('topic');
 
     const router = useRouter();
+    const [check, checkChange] = useState(false);
 
     const validationSchema = yup.object({
       title: yup.string().required(tTopic('messageTitleRequired')),
@@ -212,9 +213,17 @@ export function topicForm(
                 />
               )}
             />
-            <Button variant="contained" color="primary" type="submit">
-              {tTopic(submitId)}
-            </Button>
+            <FormControlLabel
+              control={<Checkbox checked={check} onChange={(_, checked) => checkChange(checked)} color="primary" />}
+              label={tTopic('scientificLabel')}
+            />
+            <Tooltip title={check ? '' : tTopic('scientificTooltip')}>
+              <span>
+                <Button variant="contained" color="primary" type="submit" disabled={!check}>
+                  {tTopic(submitId)}
+                </Button>
+              </span>
+            </Tooltip>
             <Link href="/">
               <Button className={classes.cancelButton} variant="contained" color="default" type="button">
                 {tTopic('buttonCancel')}
