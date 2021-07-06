@@ -4,6 +4,7 @@ import {
   AccordionDetails,
   AccordionSummary,
   Button,
+  Checkbox,
   Chip,
   Divider,
   FormControlLabel,
@@ -25,7 +26,7 @@ import { GetServerSidePropsContext, GetServerSidePropsResult } from 'next';
 import { fetchUser } from '../../src/server/fetchUser';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import { User } from '../../src/types/user';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import axiosClient from '../../src/api';
 import Link from 'next/link';
 import { format } from 'date-fns';
@@ -36,6 +37,10 @@ import { PageComponent } from '../../src/types/PageComponent';
 import SearchBar from 'material-ui-search-bar';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import { Autocomplete } from '@material-ui/lab';
+import { DatePicker, KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
+import DateFnsUtils from '@date-io/date-fns';
+import clsx from 'clsx';
+import Grid from '@material-ui/core/Grid';
 
 type Props = {
   user: User;
@@ -81,22 +86,40 @@ const useStyles = makeStyles((theme) => ({
   tableHover: {
     cursor: 'pointer',
   },
+  searchBar: {
+    width: '100%',
+    marginBottom: theme.spacing(2),
+  },
+  column: {},
+  onlyOpenCheckbox: {
+    margin: theme.spacing(2, 0, 1, -1),
+  },
 }));
 
 const TopicList: PageComponent<Props> = (): JSX.Element => {
   const classes = useStyles();
+  const dateFormat = 'yyyy-MM-dd';
   const [data, setData] = useState<ApiResult<Topic> | null>(null);
   const [page, setPage] = useState<number>(0);
   const [order, setOrder] = useState<'desc' | 'asc'>('asc');
   const [orderBy, setOrderBy] = useState<string>('deadline');
   const [text, setText] = useState<string>('');
   const [tags, setTags] = useState<string[]>([]);
+  const [onlyOpen, setOnlyOpen] = useState<boolean>(true);
+  const [startFrom, setStartFrom] = useState<Date>(null);
+  const [startUntil, setStartUntil] = useState<Date>(null);
+  const [endFrom, setEndFrom] = useState<Date>(null);
+  const [endUntil, setEndUntil] = useState<Date>(null);
 
   const router = useRouter();
 
   const fetchData = async (): Promise<void> => {
     const response = await axiosClient.get<ApiResult<Topic>>(
-      `/topic?page=${page}&order=${order}&orderBy=${orderBy}&text=${text}&tags=${tags}`,
+      `/topic?page=${page}&order=${order}&orderBy=${orderBy}&text=${text}&tags=${tags}&onlyOpen=${onlyOpen}&startFrom=${
+        startFrom ? format(startFrom, dateFormat) : ''
+      }&startUntil=${startUntil ? format(startUntil, dateFormat) : ''}&endFrom=${
+        endFrom ? format(endFrom, dateFormat) : ''
+      }&endUntil=${endUntil ? format(endUntil, dateFormat) : ''}`,
     );
     setData(response.data);
   };
@@ -122,35 +145,102 @@ const TopicList: PageComponent<Props> = (): JSX.Element => {
           Thema erstellen
         </Button>
       </Link>
-      <Accordion className={classes.controlItem}>
+
+      <SearchBar
+        className={classes.searchBar}
+        value={text}
+        onChange={(newValue) => setText(newValue)}
+        onRequestSearch={() => fetchData()}
+        placeholder={'Suchen'}
+        style={{ borderRadius: 0 }}
+      />
+
+      <Accordion className={clsx(classes.controlItem, 'filter-accordion')}>
         <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-label="Expand">
-          <FormControlLabel
-            aria-label="Erweiterte Suche"
-            onClick={(event) => event.stopPropagation()}
-            onFocus={(event) => event.stopPropagation()}
-            control={
-              <SearchBar
-                value={text}
-                onChange={(newValue) => setText(newValue)}
-                onRequestSearch={() => fetchData()}
-                placeholder={'Suchen'}
-              />
-            }
-            label=""
-          />
+          Erweiterte Filter
         </AccordionSummary>
         <AccordionDetails>
-          <Autocomplete
-            id="tags"
-            multiple
-            freeSolo
-            value={tags}
-            onChange={(e, values) => setTags(values)}
-            options={tagOptions}
-            getOptionLabel={(option) => option}
-            defaultValue={[]}
-            renderInput={(params) => <TextField {...params} variant="standard" label={'Tags'} />}
-          />
+          <Grid container>
+            <Grid item xs={12}>
+              <Autocomplete
+                className={classes.column}
+                id="tags"
+                multiple
+                freeSolo
+                fullWidth
+                value={tags}
+                onChange={(e, values) => setTags(values)}
+                options={tagOptions}
+                getOptionLabel={(option) => option}
+                defaultValue={[]}
+                renderInput={(params) => <TextField {...params} variant="standard" label={'Tags'} />}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <FormControlLabel
+                className={classes.onlyOpenCheckbox}
+                control={
+                  <Checkbox
+                    checked={onlyOpen}
+                    onChange={(e) => setOnlyOpen(e.target.checked)}
+                    defaultChecked
+                    color="primary"
+                  />
+                }
+                label="Nur offene Themen anzeigen"
+              />
+            </Grid>
+            <MuiPickersUtilsProvider utils={DateFnsUtils}>
+              <Grid item xs={3}>
+                <KeyboardDatePicker
+                  className={classes.column}
+                  disableToolbar
+                  variant="inline"
+                  format={dateFormat}
+                  margin="normal"
+                  label="Start von:"
+                  value={startFrom}
+                  onChange={setStartFrom}
+                />
+              </Grid>
+              <Grid item xs={3}>
+                <KeyboardDatePicker
+                  className={classes.column}
+                  disableToolbar
+                  variant="inline"
+                  format={dateFormat}
+                  margin="normal"
+                  label="Start bis:"
+                  value={startUntil}
+                  onChange={setStartUntil}
+                />
+              </Grid>
+              <Grid item xs={3}>
+                <KeyboardDatePicker
+                  className={classes.column}
+                  disableToolbar
+                  variant="inline"
+                  format={dateFormat}
+                  margin="normal"
+                  label="Ende von:"
+                  value={endFrom}
+                  onChange={setEndFrom}
+                />
+              </Grid>
+              <Grid item xs={3}>
+                <KeyboardDatePicker
+                  className={classes.column}
+                  disableToolbar
+                  variant="inline"
+                  format={dateFormat}
+                  margin="normal"
+                  label="Ende bis:"
+                  value={endUntil}
+                  onChange={setEndUntil}
+                />
+              </Grid>
+            </MuiPickersUtilsProvider>
+          </Grid>
         </AccordionDetails>
         <Divider />
         <AccordionActions>
@@ -160,7 +250,7 @@ const TopicList: PageComponent<Props> = (): JSX.Element => {
         </AccordionActions>
       </Accordion>
       <div className={classes.table}>
-        <TableContainer component={Paper} elevation={4}>
+        <TableContainer component={Paper} style={{ borderRadius: 0 }}>
           <Table className={classes.table} aria-label="simple table">
             <TableHead>
               <TableRow>

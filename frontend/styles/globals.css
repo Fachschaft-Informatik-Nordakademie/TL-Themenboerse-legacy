@@ -18,3 +18,7 @@ a {
 .snackbar-root {
   margin-top: 60px;
 }
+
+.filter-accordion.MuiAccordion-root:before {
+  background: none;
+}
