@@ -53,14 +53,8 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-function useForceUpdate(): () => void {
-  const [, setValue] = useState(0); // integer state
-  return () => setValue((value) => value + 1); // update the state to force render
-}
-
 const TopicDetail: PageComponent<Props> = ({ user }: Props): JSX.Element => {
   const { t: tTopic } = useTranslation('topic');
-  const forceUpdate = useForceUpdate();
   const router = useRouter();
   const classes = useStyles();
   const topicId = router.query.id as string;
@@ -77,8 +71,7 @@ const TopicDetail: PageComponent<Props> = ({ user }: Props): JSX.Element => {
   const handleApplication = async (): Promise<void> => {
     try {
       await axiosClient.post('/application', { topic: topicId, content });
-      topic.hasApplied = true;
-      setTopic(topic);
+      await fetchTopic();
       handleClose();
     } catch (e) {
       console.log(e); // TOOD: How do we handle error messages?
@@ -87,20 +80,10 @@ const TopicDetail: PageComponent<Props> = ({ user }: Props): JSX.Element => {
   const handleWithdraw = async (): Promise<void> => {
     try {
       await axiosClient.delete(`/application/${topicId}`);
-      topic.hasApplied = false;
-      setTopic(topic);
-      forceUpdate();
+      await fetchTopic();
     } catch (e) {
       console.log(e);
     }
-  };
-
-  const showApplyButton = (): boolean => {
-    return topic.status === 'OPEN' && topic.author && user.id !== topic.author?.id;
-  };
-
-  const canApply = (): boolean => {
-    return showApplyButton() && user.type === 'LDAP';
   };
 
   const fetchTopic = async (): Promise<void> => {
@@ -118,6 +101,9 @@ const TopicDetail: PageComponent<Props> = ({ user }: Props): JSX.Element => {
   if (loading) {
     return <div>Wird geladen</div>;
   }
+
+  const showApplyButton = topic.status === 'OPEN' && topic.author && user.id !== topic.author?.id;
+  const canApply = showApplyButton && user.type === 'LDAP';
 
   const lengths = {
     application: 1000,
@@ -177,11 +163,11 @@ const TopicDetail: PageComponent<Props> = ({ user }: Props): JSX.Element => {
           </span>
         </Typography>
       </div>
-      {showApplyButton() && !topic.hasApplied && (
+      {showApplyButton && !topic.hasApplied && (
         <>
-          <Tooltip title={canApply() ? '' : tTopic('tooltipCisOnly')}>
+          <Tooltip title={canApply ? '' : tTopic('tooltipCisOnly')}>
             <span>
-              <Button disabled={!canApply()} variant="contained" color="primary" onClick={handleOpen}>
+              <Button disabled={!canApply} variant="contained" color="primary" onClick={handleOpen}>
                 {tTopic('buttonApply')}
               </Button>
             </span>
@@ -214,7 +200,7 @@ const TopicDetail: PageComponent<Props> = ({ user }: Props): JSX.Element => {
           </Dialog>
         </>
       )}
-      {showApplyButton() && topic.hasApplied && (
+      {showApplyButton && topic.hasApplied && (
         <Button variant="contained" className={classes.withdraw} onClick={handleWithdraw}>
           {tTopic('buttonWithdraw')}
         </Button>
