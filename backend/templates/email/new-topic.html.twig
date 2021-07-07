@@ -18,7 +18,11 @@
 </style>
 
 <p>Guten Tag,</p>
+{% if new %}
 <p>ein neues Thema wurde in der Themenbörse erstellt.</p>
+{% else %}
+<p>ein bereits eingereichtes Thema wurde bearbeitet.</p>
+{% endif %}
 
 <table>
     <tr>
