@@ -4,7 +4,7 @@ import { Autocomplete } from '@material-ui/lab';
 import { KeyboardDatePicker } from '@material-ui/pickers';
 import { useFormik } from 'formik';
 import * as yup from 'yup';
-import React, { useState } from 'react';
+import React from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 import { useTranslation } from 'next-i18next';
@@ -21,6 +21,7 @@ interface IFormValues {
   readonly deadline: Date | null;
   readonly tags: string[];
   readonly website: string;
+  readonly scientific: boolean;
 }
 
 const useStyles = makeStyles((theme) => ({
@@ -47,7 +48,6 @@ export function topicForm(
     const { t: tTopic } = useTranslation('topic');
 
     const router = useRouter();
-    const [check, checkChange] = useState(false);
 
     const validationSchema = yup.object({
       title: yup.string().required(tTopic('messageTitleRequired')),
@@ -58,6 +58,7 @@ export function topicForm(
       tags: yup.array().ensure(),
       pages: yup.number().nullable(),
       website: yup.string().nullable().url(tTopic('messageUrlInvalid')),
+      scientific: yup.boolean().isTrue(),
     });
 
     const formik = useFormik<IFormValues>({
@@ -71,6 +72,7 @@ export function topicForm(
         requirements: '',
         pages: 0,
         website: '',
+        scientific: false,
       },
 
       validationSchema: validationSchema,
@@ -214,12 +216,19 @@ export function topicForm(
               )}
             />
             <FormControlLabel
-              control={<Checkbox checked={check} onChange={(_, checked) => checkChange(checked)} color="primary" />}
+              control={
+                <Checkbox
+                  checked={formik.values.scientific}
+                  color="primary"
+                  onChange={(_, check) => formik.setFieldValue('scientific', check)}
+                  onBlur={formik.handleBlur}
+                />
+              }
               label={tTopic('scientificLabel')}
             />
-            <Tooltip title={check ? '' : tTopic('scientificTooltip')}>
+            <Tooltip title={formik.values.scientific ? '' : tTopic('scientificTooltip')}>
               <span>
-                <Button variant="contained" color="primary" type="submit" disabled={!check}>
+                <Button variant="contained" color="primary" type="submit" disabled={!formik.values.scientific}>
                   {tTopic(submitId)}
                 </Button>
               </span>
