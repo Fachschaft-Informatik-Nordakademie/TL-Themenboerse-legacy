@@ -16,6 +16,8 @@
   "buttonCancel": "Abbrechen",
   "buttonApply": "Bewerben",
   "buttonEdit": "Bearbeiten",
+  "buttonWithdraw": "Bewerbung zurückziehen",
+  "tooltipCisOnly": "Nur CIS Nutzer können sich auf Themen bewerben",
   "applicationContentLabel": "Bewerbungsschreiben",
   "applicationDialog": "Überzeuge den Anbieter, dich für das Thema auszuwählen. Erkläre, wieso du dich für das Thema interessierst und am besten geeignet bist.",
   "messageTitleRequired": "Titel ist ein Pflichtfeld",

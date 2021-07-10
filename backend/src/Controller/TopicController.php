@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\StatusType;
 use App\Entity\Topic;
 use App\Entity\User;
+use App\Repository\ApplicationRepository;
 use App\Repository\TopicRepository;
 use App\ResponseCodes;
 use Carbon\Carbon;
@@ -15,8 +16,6 @@ use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Mailer\MailerInterface;
-use Symfony\Component\Mime\Address;
-use Symfony\Component\Mime\Email;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Twig\Environment;
@@ -24,14 +23,16 @@ use Twig\Environment;
 class TopicController extends AbstractController
 {
     private TopicRepository $topicRepository;
+    private ApplicationRepository $applicationRepository;
     private ValidatorInterface $validator;
     private ParameterBagInterface $params;
     private MailerInterface $mailer;
     private Environment $twig;
 
-    public function __construct(TopicRepository $topicRepository, ValidatorInterface $validator, ParameterBagInterface $params, MailerInterface $mailer, Environment $twig)
+    public function __construct(TopicRepository $topicRepository, ApplicationRepository $applicationRepository, ValidatorInterface $validator, ParameterBagInterface $params, MailerInterface $mailer, Environment $twig)
     {
         $this->topicRepository = $topicRepository;
+        $this->applicationRepository = $applicationRepository;
         $this->validator = $validator;
         $this->params = $params;
         $this->mailer = $mailer;
@@ -90,11 +91,15 @@ class TopicController extends AbstractController
     #[Route('/topic/{id}', name: 'topic_get', methods: ['get'])]
     public function getTopic(int $id): Response
     {
+        /** @var Topic $topic */
         $topic = $this->topicRepository->find($id);
 
         if (!$topic) {
             return $this->json(ResponseCodes::makeResponse(ResponseCodes::$TOPIC_NOT_FOUND), Response::HTTP_NOT_FOUND);
         }
+        /** @var User $user */
+        $user = $this->getUser();
+        $topic->setHasApplied($this->applicationRepository->hasCandidateForTopic($user->getId(), $topic->getId()));
         return $this->json($topic);
     }
 

@@ -26,4 +26,26 @@ class ApplicationRepository extends ServiceEntityRepository
             ->getQuery()
             ->getSingleScalarResult() > 0;
     }
+
+    public function delete(int $user, int $topic)
+    {
+        $applicationId = $this->createQueryBuilder('a')
+            ->select('a.id')
+            ->leftJoin('a.topic', 't')
+            ->leftJoin('a.candidate', 'u')
+            ->andWhere('t.id = :t_id')
+            ->andWhere('u.id = :u_id')
+            ->setParameter('t_id', $topic)
+            ->setParameter('u_id', $user)
+            ->getQuery()
+            ->getOneOrNullResult();
+        if ($applicationId) {
+            $this->createQueryBuilder('a')
+                ->delete()
+                ->andWhere('a.id = :id')
+                ->setParameter('id', $applicationId['id'])
+                ->getQuery()
+                ->execute();
+        }
+    }
 }
