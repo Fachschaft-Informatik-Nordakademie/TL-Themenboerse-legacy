@@ -1,4 +1,4 @@
-import { Button, TextField, Typography } from '@material-ui/core';
+import { Button, Checkbox, FormControlLabel, TextField, Tooltip, Typography } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import { Autocomplete } from '@material-ui/lab';
 import { KeyboardDatePicker } from '@material-ui/pickers';
@@ -21,6 +21,7 @@ interface IFormValues {
   readonly deadline: Date | null;
   readonly tags: string[];
   readonly website: string;
+  readonly scientific: boolean;
 }
 
 const useStyles = makeStyles((theme) => ({
@@ -57,6 +58,7 @@ export function topicForm(
       tags: yup.array().ensure(),
       pages: yup.number().nullable(),
       website: yup.string().nullable().url(tTopic('messageUrlInvalid')),
+      scientific: yup.boolean().isTrue(),
     });
 
     const formik = useFormik<IFormValues>({
@@ -70,6 +72,7 @@ export function topicForm(
         requirements: '',
         pages: 0,
         website: '',
+        scientific: false,
       },
 
       validationSchema: validationSchema,
@@ -212,9 +215,24 @@ export function topicForm(
                 />
               )}
             />
-            <Button variant="contained" color="primary" type="submit">
-              {tTopic(submitId)}
-            </Button>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={formik.values.scientific}
+                  color="primary"
+                  onChange={(_, check) => formik.setFieldValue('scientific', check)}
+                  onBlur={formik.handleBlur}
+                />
+              }
+              label={tTopic('scientificLabel')}
+            />
+            <Tooltip title={formik.values.scientific ? '' : tTopic('scientificTooltip')}>
+              <span>
+                <Button variant="contained" color="primary" type="submit" disabled={!formik.values.scientific}>
+                  {tTopic(submitId)}
+                </Button>
+              </span>
+            </Tooltip>
             <Link href="/">
               <Button className={classes.cancelButton} variant="contained" color="default" type="button">
                 {tTopic('buttonCancel')}
