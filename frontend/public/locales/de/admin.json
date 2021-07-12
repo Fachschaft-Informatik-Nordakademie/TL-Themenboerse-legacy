@@ -1,0 +1,15 @@
+{
+  "userControl": {
+    "title": "Benutzerverwaltung",
+    "columnId": "ID",
+    "columnLastName": "Nachname",
+    "columnFirstName": "Vorname",
+    "columnEmail": "E-Mail",
+    "columnType": "Typ",
+    "columnAdmin": "Admin",
+    "columnActions": "Aktionen",
+    "errorCantChangeOwnAdminStatus": "Du kannst deinen eigenen Admin-Status nicht ändern.",
+    "actionMakeAdmin": "Admin vergeben",
+    "actionRemoveAdmin": "Admin entfernen"
+  }
+}

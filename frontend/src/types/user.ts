@@ -9,5 +9,6 @@ export type User = {
   ldapUsername?: string;
   ldapDn?: string;
   roles: string[];
+  admin: boolean;
   profile: UserProfile;
 };

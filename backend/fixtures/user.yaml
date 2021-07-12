@@ -1,14 +1,54 @@
 App\Entity\User:
-    dummy_0:
+    dummy_user:
         email: dummy@example.com
         type: EXTERNAL
         password: <hashPassword('password')>
-        profile: '@dummy_profile_0'
+        profile: '@dummy_profile'
+        emailVerified: true
+    user_1:
+        email: dalen@example.com
+        type: EXTERNAL
+        password: <hashPassword('password')>
+        profile: '@profile_1'
+        emailVerified: true
+    user_2:
+        email: franck@example.com
+        type: EXTERNAL
+        password: <hashPassword('password')>
+        profile: '@profile_2'
+        emailVerified: true
+    user_3:
+        email: schroedinger@example.com
+        type: EXTERNAL
+        password: <hashPassword('password')>
+        profile: '@profile_3'
+        emailVerified: true
+    user_4:
+        email: born@example.com
+        type: EXTERNAL
+        password: <hashPassword('password')>
+        profile: '@profile_4'
         emailVerified: true
 
 
 App\Entity\UserProfile:
-    dummy_profile_0:
-        user: '@dummy_0'
+    dummy_profile:
+        user: '@dummy_user'
         firstName: Test
         lastName: Test
+    profile_1:
+        user: '@user_1'
+        firstName: Gustaf
+        lastName: Dalén
+    profile_2:
+        user: '@user_2'
+        firstName: James
+        lastName: Franck
+    profile_3:
+        user: '@user_3'
+        firstName: Erwin
+        lastName: Schrödinger
+    profile_4:
+        user: '@user_4'
+        firstName: Max
+        lastName: Born

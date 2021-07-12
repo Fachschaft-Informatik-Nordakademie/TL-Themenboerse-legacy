@@ -16,6 +16,7 @@
         "nelmio/cors-bundle": "^2.1",
         "nesbot/carbon": "^2.49",
         "phpdocumentor/reflection-docblock": "^5.2",
+        "sensio/framework-extra-bundle": "^6.1",
         "symfony-bundles/json-request-bundle": "^4.0",
         "symfony/asset": "5.2.*",
         "symfony/browser-kit": "5.2.*",

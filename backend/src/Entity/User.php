@@ -55,6 +55,9 @@ class User implements UserInterface, EquatableInterface
     #[Ignore]
     private ?DateTime $verficationTokenExpires;
 
+    #[ORM\Column(type: "boolean", nullable: false)]
+    private bool $admin = false;
+
     #[ORM\OneToMany(targetEntity: Topic::class, mappedBy: "author")]
     #[Ignore]
     private PersistentCollection $topics;
@@ -66,6 +69,10 @@ class User implements UserInterface, EquatableInterface
     public function getRoles(): array
     {
         $roles[] = 'ROLE_USER';
+
+        if ($this->isAdmin()) {
+            $roles[] = 'ROLE_ADMIN';
+        }
 
         return array_unique($roles);
     }
@@ -251,5 +258,14 @@ class User implements UserInterface, EquatableInterface
         return $this;
     }
 
+    public function isAdmin(): bool
+    {
+        return $this->admin;
+    }
 
+    public function setAdmin(bool $admin): self
+    {
+        $this->admin = $admin;
+        return $this;
+    }
 }
