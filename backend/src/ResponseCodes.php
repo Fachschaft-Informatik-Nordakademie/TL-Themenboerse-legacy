@@ -31,6 +31,10 @@ class ResponseCodes
     // USER PROFILE RELATED
     public static string $PROFILE_NOT_FOUND = "profile_not_found";
 
+    // USER RELATED
+    public static string $USER_NOT_FOUND = "user_not_found";
+    public static string $CANT_EDIT_OWN_USER = "cant_edit_own_user";
+
     public static function makeResponse(string $code, ?array $extra = null)
     {
         $result = [

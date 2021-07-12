@@ -76,6 +76,11 @@ export default function MainLayout(props: Props): JSX.Element {
             <Link href="/">
               <Button color="inherit">Startseite</Button>
             </Link>
+            {props.user.admin && (
+              <Link href="/admin/user">
+                <Button color="inherit">Benutzerverwaltung</Button>
+              </Link>
+            )}
           </div>
 
           <div className={classes.spacing}></div>

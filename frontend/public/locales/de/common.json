@@ -15,6 +15,8 @@
     "invalid_credentials": "Die Zugangsdaten sind ungültig.",
     "verification_token_invalid": "Der Token ist ungültig.",
     "verification_token_expired": "Der Token ist bereits abgelaufen.",
-    "email_not_verified": "Deine E-Mail-Adresse ist noch nicht bestätigt."
+    "email_not_verified": "Deine E-Mail-Adresse ist noch nicht bestätigt.",
+    "user_not_found": "Der Benutzer wurde nicht gefunden.",
+    "cant_edit_own_user": "Du kannst nicht deine eigenen Benutzerdaten ändern."
   }
 }
