@@ -1,7 +1,11 @@
+/* eslint-disable jsx-a11y/click-events-have-key-events */
+
 import { User } from '../../../src/types/user';
 import { GetServerSidePropsContext, GetServerSidePropsResult } from 'next';
 import { fetchUser } from '../../../src/server/fetchUser';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
+import GradeOutlinedIcon from '@material-ui/icons/GradeOutlined';
+import GradeIcon from '@material-ui/icons/Grade';
 import {
   Button,
   Chip,
@@ -17,9 +21,9 @@ import {
 import { useRouter } from 'next/router';
 import React, { useEffect, useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
-import { useTranslation } from 'next-i18next';
-import Link from 'next/link';
 import { PageComponent } from '../../../src/types/PageComponent';
+import Link from 'next/link';
+import { useTranslation } from 'next-i18next';
 import { Topic } from '../../../src/types/topic';
 import axiosClient from '../../../src/api';
 
@@ -93,6 +97,12 @@ const TopicDetail: PageComponent<Props> = ({ user }: Props): JSX.Element => {
     setLoading(false);
   };
 
+  const updateFollow = async (follow: boolean): Promise<void> => {
+    const request = { favorite: follow };
+    await axiosClient.put(`/topic/${topic.id}/favorite`, request);
+    fetchTopic();
+  };
+
   useEffect(() => {
     fetchTopic();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -101,6 +111,14 @@ const TopicDetail: PageComponent<Props> = ({ user }: Props): JSX.Element => {
   if (loading) {
     return <div>Wird geladen</div>;
   }
+
+  const unFollow = (): void => {
+    updateFollow(false);
+  };
+
+  const follow = (): void => {
+    updateFollow(true);
+  };
 
   const showApplyButton = topic.status === 'OPEN' && topic.author && user.id !== topic.author?.id;
   const canApply = showApplyButton && user.type === 'LDAP';
@@ -211,6 +229,22 @@ const TopicDetail: PageComponent<Props> = ({ user }: Props): JSX.Element => {
             {tTopic('buttonEdit')}
           </Button>
         </Link>
+      )}
+      {user.id !== topic.author.id && !topic.favorite && (
+        // eslint-disable-next-line jsx-a11y/no-static-element-interactions
+        <i onClick={() => follow()}>
+          <Tooltip title="Thema merken">
+            <GradeOutlinedIcon color="primary"></GradeOutlinedIcon>
+          </Tooltip>
+        </i>
+      )}
+      {user.id !== topic.author.id && topic.favorite && (
+        // eslint-disable-next-line jsx-a11y/no-static-element-interactions
+        <i onClick={() => unFollow()}>
+          <Tooltip title="Thema nicht merken">
+            <GradeIcon color="primary"></GradeIcon>
+          </Tooltip>
+        </i>
       )}
     </div>
   );

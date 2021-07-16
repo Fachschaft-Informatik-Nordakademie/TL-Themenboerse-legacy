@@ -57,7 +57,10 @@ class AuthenticationTest extends ApiTestCase
         $this->assertResponseStatusCodeSame(200);
         $this->assertJsonContains([
             'user' => [
-                'email' => 'dummy@example.com',
+                'profile' => [
+                    'firstName' => 'Test',
+                    'lastName' => 'Test'
+                ]
             ],
         ]);
 
@@ -81,7 +84,10 @@ class AuthenticationTest extends ApiTestCase
         $this->assertResponseStatusCodeSame(200);
         $this->assertJsonContains([
             'user' => [
-                'email' => 'max.mustermann@awesome-university.com',
+                'profile' => [
+                    'firstName' => 'Max',
+                    'lastName' => 'Mustermann'
+                ]
             ],
         ]);
 
@@ -146,7 +152,10 @@ class AuthenticationTest extends ApiTestCase
         $this->assertResponseStatusCodeSame(200);
         $this->assertJsonContains([
             'user' => [
-                'email' => 'max.mustermann@awesome-university.com',
+                'profile' => [
+                    'firstName' => 'Max',
+                    'lastName' => 'Mustermann'
+                ]
             ],
         ]);
 
@@ -161,7 +170,10 @@ class AuthenticationTest extends ApiTestCase
         $this->assertResponseStatusCodeSame(200);
         $this->assertJsonContains([
             'user' => [
-                'email' => 'mareike.musterfrau@awesome-university.com',
+                'profile' => [
+                    'firstName' => 'Mareike',
+                    'lastName' => 'Musterfrau'
+                ]
             ],
         ]);
 
@@ -194,7 +206,10 @@ class AuthenticationTest extends ApiTestCase
         $this->assertResponseStatusCodeSame(200);
         $this->assertJsonContains([
             'user' => [
-                'email' => 'max.mustermann@awesome-university.com',
+                'profile' => [
+                    'firstName' => 'Max',
+                    'lastName' => 'Mustermann'
+                ]
             ],
         ]);
 
@@ -227,7 +242,10 @@ class AuthenticationTest extends ApiTestCase
         $this->assertResponseStatusCodeSame(200);
         $this->assertJsonContains([
             'user' => [
-                'email' => 'max.mustermann@awesome-university.com',
+                'profile' => [
+                    'firstName' => 'Max',
+                    'lastName' => 'Mustermann'
+                ]
             ],
         ]);
 
@@ -248,7 +266,10 @@ class AuthenticationTest extends ApiTestCase
         $this->assertResponseStatusCodeSame(200);
         $this->assertJsonContains([
             'user' => [
-                'email' => 'max.mustermann@awesome-university.com',
+                'profile' => [
+                    'firstName' => 'Max',
+                    'lastName' => 'Mustermann'
+                ]
             ],
         ]);
 
