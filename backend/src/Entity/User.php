@@ -4,7 +4,6 @@ namespace App\Entity;
 
 use App\Repository\UserRepository;
 use DateTime;
-use DateTimeImmutable;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\PersistentCollection;
 use Symfony\Component\Security\Core\User\EquatableInterface;
@@ -27,16 +26,20 @@ class User implements UserInterface, EquatableInterface
     private string $type;
 
     #[ORM\Column(type: "datetime", name: '`createdAt`', nullable: false)]
+    #[Ignore]
     private ?DateTime $createdAt;
 
     #[ORM\Column(type: "string", length: 255, nullable: false, unique: true)]
     #[Email(message: 'The e-mail address is not valid.')]
+    #[Ignore]
     private string $email;
 
     #[ORM\Column(type: "string", length: 255, nullable: true, unique: true)]
+    #[Ignore]
     private ?string $ldapUsername = null;
 
     #[ORM\Column(type: "string", length: 500, nullable: true, unique: true)]
+    #[Ignore]
     private ?string $ldapDn = null;
 
     #[ORM\Column(type: "string", name: '`password`', nullable: true)]

@@ -14,4 +14,5 @@ export type Topic = {
   status: 'OPEN' | 'ASSIGNED' | 'LOCKED';
   author: User;
   hasApplied: boolean;
+  favorite: boolean;
 };

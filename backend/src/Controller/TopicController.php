@@ -44,6 +44,7 @@ class TopicController extends AbstractController
     {
         $pageSize = $this->params->get('app.page_size');
         $pageNumber = intval($request->get('page') ?? '0') ?? 0;
+        $isFavorite = $request->get('favorite', false);
 
         $orderBy = $request->get('orderBy') ?? 'deadline';
         $orderDirection = $request->get('order') ?? 'asc';
@@ -66,7 +67,8 @@ class TopicController extends AbstractController
             $text = null;
         }
 
-        $topics = $this->topicRepository->listTopics($pageNumber, $pageSize, $orderBy, $orderDirection, $text, $tags, $onlyOpenBool, $startUntil, $startFrom, $endUntil, $endFrom);
+        $user = $this->getUser();
+        $topics = $this->topicRepository->listTopics($isFavorite, $user->getId(), $pageNumber, $pageSize, $orderBy, $orderDirection, $text, $tags, $onlyOpenBool, $startUntil, $startFrom, $endUntil, $endFrom);
         $totalAmount = $this->topicRepository->count([]);
         $totalPages = (int)ceil($totalAmount / $pageSize);
 
@@ -100,6 +102,7 @@ class TopicController extends AbstractController
         /** @var User $user */
         $user = $this->getUser();
         $topic->setHasApplied($this->applicationRepository->hasCandidateForTopic($user->getId(), $topic->getId()));
+        $topic->setFavorite($topic->hasFavoriteUser($user->getId()));
         return $this->json($topic);
     }
 
@@ -171,5 +174,29 @@ class TopicController extends AbstractController
         if ($date === null) return null;
         if ($date !== null && empty(trim($date))) return null;
         return Carbon::parse($date);
+    }
+
+    #[Route('/topic/{topicId}/favorite', name: 'topic_favorite_put', methods: ['put'])]
+    public function updateFavorite(Request $request, int $topicId): Response
+    {
+        $topic = $this->topicRepository->find($topicId);
+        if (!$topic) {
+            return $this->json(['message' => 'Topic not found'], Response::HTTP_NOT_FOUND);
+        }
+
+        $user = $this->getUser();
+        $userId = $user->getId();
+        $isFavorite = $request->get('favorite');
+        if($isFavorite && !$topic->hasFavoriteUser($userId)) {
+            $topic->addFavoriteUser($user);
+        } else if (!$isFavorite && $topic->hasFavoriteUser($userId)) {
+            $topic->removeFavoriteUser($user);
+        }
+
+        $entityManager = $this->getDoctrine()->getManager();
+        $entityManager->persist($user);
+        $entityManager->flush();
+
+        return $this->json($topic);
     }
 }

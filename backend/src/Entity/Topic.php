@@ -4,7 +4,10 @@ namespace App\Entity;
 
 use App\Entity\User;
 use App\Repository\TopicRepository;
+use Doctrine\Common\Collections\Criteria;
+use Doctrine\ORM\PersistentCollection;
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Serializer\Annotation\Ignore;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: TopicRepository::class)]
@@ -52,7 +55,14 @@ class Topic
     #[ORM\ManyToOne(targetEntity: User::class, inversedBy: "topics", fetch: 'EAGER', cascade: ['all'])]
     private ?User $author;
 
-    private bool $hasApplied;
+    #[ORM\ManyToMany(targetEntity: User::class, cascade: ['all'])]
+    #[ORM\JoinTable(name: 'user_favorites')]
+    #[Ignore]
+    private PersistentCollection $favoriteUsers;
+
+    private bool $hasApplied = false;
+
+    private bool $favorite = false;
 
     /**
      * Get the value of id
@@ -325,11 +335,59 @@ class Topic
     }
 
     /**
+     * @return PersistentCollection
+     */
+    public function getFavoriteUser(): PersistentCollection
+    {
+        return $this->favoriteUsers;
+    }
+
+    public function addFavoriteUser(User $user): self
+    {
+        $this->favoriteUsers->add($user);
+        return $this;
+    }
+
+    public function removeFavoriteUser(User $user): self
+    {
+        $this->favoriteUsers->removeElement($user);
+        return $this;
+    }
+
+    public function hasFavoriteUser(int $userId): bool
+    {
+        $criteria = Criteria::create();
+        $criteria->where(Criteria::expr()->eq('id', $userId));
+
+        if (count($this->favoriteUsers->matching($criteria)) > 0) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isFavorite(): bool
+    {
+        return $this->favorite;
+    }
+
+    /**
+     * @param bool $favorite
+     */
+    public function setFavorite(bool $favorite): void
+    {
+        $this->favorite = $favorite;
+    }
+
+    /*
      * Get the value of hasApplied
      *
-     * @return  bool
+     * @return bool
      */
-    public function getHasApplied()
+    public function getHasApplied(): bool
     {
         return $this->hasApplied;
     }

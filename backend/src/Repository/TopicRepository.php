@@ -16,25 +16,15 @@ class TopicRepository extends ServiceEntityRepository
         parent::__construct($registry, Topic::class);
     }
 
-    public function listTopics(int $page, int $pageSize, string $orderBy, string $orderDirection, ?string $text, ?string $tags, bool $onlyOpen, ?Carbon $startUntil, ?Carbon $startFrom, ?Carbon $endUntil, ?Carbon $endFrom)
+    public function listTopics(bool $isFavorite, int $userId, int $page, int $pageSize, string $orderBy, string $orderDirection, ?string $text, ?string $tags, bool $onlyOpen, ?Carbon $startUntil, ?Carbon $startFrom, ?Carbon $endUntil, ?Carbon $endFrom)
     {
-        $offset = $page * $pageSize;
-
-        $query = $this->createQueryBuilder('t');
-
-        $query = $this->addSearchTextToQuery($text, $query);
-        $query = $this->addTagsToQuery($tags, $query);
-        $query = $this->addOnlyOpenToQuery($onlyOpen, $query);
-        $query = $this->addStartUntilToQuery($startUntil, $query);
-        $query = $this->addStartFromToQuery($startFrom, $query);
-        $query = $this->addEndUntilToQuery($endUntil, $query);
-        $query = $this->addEndFromToQuery($endFrom, $query);
+        $query = $this->buildFilteredOrderedAndPagedTopicQueryBuilder($page, $pageSize, $orderBy, $orderDirection, $text, $tags, $onlyOpen, $startUntil, $startFrom, $endUntil, $endFrom);
+        if($isFavorite) {
+            $query->innerJoin('t.favoriteUsers', 'u');
+            $query->andWhere($query->expr()->eq('u.id', ':userId'))->setParameter('userId', $userId);
+        }
 
         return $query
-            ->orderBy('t.' . $orderBy, $orderDirection)
-            ->addOrderBy('t.id', 'asc')
-            ->setMaxResults($pageSize)
-            ->setFirstResult($offset)
             ->getQuery()
             ->getArrayResult();
     }
@@ -128,5 +118,24 @@ class TopicRepository extends ServiceEntityRepository
         )
             ->setParameter('endFrom', $endFrom->startOfDay());
         return $query;
+    }
+
+    private function buildFilteredOrderedAndPagedTopicQueryBuilder(int $page, int $pageSize, string $orderBy, string $orderDirection, ?string $text, ?string $tags, bool $onlyOpen, ?Carbon $startUntil, ?Carbon $startFrom, ?Carbon $endUntil, ?Carbon $endFrom): QueryBuilder
+    {
+        $offset = $page * $pageSize;
+        $query = $this->createQueryBuilder('t');
+        $query = $this->addSearchTextToQuery($text, $query);
+        $query = $this->addTagsToQuery($tags, $query);
+        $query = $this->addOnlyOpenToQuery($onlyOpen, $query);
+        $query = $this->addStartUntilToQuery($startUntil, $query);
+        $query = $this->addStartFromToQuery($startFrom, $query);
+        $query = $this->addEndUntilToQuery($endUntil, $query);
+        $query = $this->addEndFromToQuery($endFrom, $query);
+
+        return $query
+            ->orderBy('t.' . $orderBy, $orderDirection)
+            ->addOrderBy('t.id', 'asc')
+            ->setMaxResults($pageSize)
+            ->setFirstResult($offset);
     }
 }
