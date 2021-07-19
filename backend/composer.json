@@ -79,6 +79,13 @@
         ],
         "test-ci": [
             "./vendor/bin/paratest --coverage-text --log-junit=phpunit-report.xml"
+        ],
+        "db-refresh": [
+            "bin/console cache:clear --env dev -q",
+            "bin/console cache:clear --env test -q",
+            "php bin/console doctrine:schema:drop --force -q",
+            "php bin/console doctrine:schema:update --force -q",
+            "php bin/console hautelook:fixtures:load -n -q"
         ]
     },
     "conflict": {
