@@ -15,6 +15,8 @@ class ResponseCodes
     // TOPIC RELATED
     public static string $TOPIC_NOT_FOUND = "topic_not_found";
     public static string $TOPIC_EDIT_PERMISSION_DENIED = "topic_edit_permission_denied";
+    public static string $TOPIC_DELETE_PERMISSION_DENIED = "topic_delete_permission_denied";
+    public static string $TOPIC_DELETE_ALREADY_ASSIGNED = "topic_delete_already_assigned";
     public static string $TOPIC_NOT_OPEN_FOR_APPLICATIONS = "topic_not_open_for_applications";
 
     // APPLICATION RELATED

@@ -118,15 +118,45 @@ class TopicController extends AbstractController
     #[Route('/topic/{id}', name: 'topic_put', methods: ['put'])]
     public function updateTopic(Request $request, int $id): Response
     {
+        /** @var User $user */
         $user = $this->getUser();
         $topic = $this->topicRepository->find($id);
-        if ($topic->getAuthor()->getId() !== $user->getId()) {
-            return $this->json(ResponseCodes::makeResponse(ResponseCodes::$TOPIC_EDIT_PERMISSION_DENIED), Response::HTTP_NOT_FOUND);
+        if ($topic->getAuthor()->getId() !== $user->getId() && !$user->isAdmin()) {
+            return $this->json(ResponseCodes::makeResponse(ResponseCodes::$TOPIC_EDIT_PERMISSION_DENIED), Response::HTTP_FORBIDDEN);
         }
         return $this->fillAndSaveTopic($topic, $request, false);
     }
 
-    function fillAndSaveTopic(Topic $topic, Request $request, bool $new): Response
+    #[Route('/topic/{id}', name: 'topic_delete', methods: ['delete'])]
+    public function deleteTopic(Request $request, int $id): Response
+    {
+        /** @var User $user */
+        $user = $this->getUser();
+        /** @var Topic $topic */
+        $topic = $this->topicRepository->find($id);
+
+        if ($topic === null) {
+            return $this->json(ResponseCodes::makeResponse(ResponseCodes::$TOPIC_NOT_FOUND), Response::HTTP_NOT_FOUND);
+        }
+
+        if (!$user->isAdmin()) {
+            return $this->json(ResponseCodes::makeResponse(ResponseCodes::$TOPIC_DELETE_PERMISSION_DENIED), Response::HTTP_FORBIDDEN);
+        }
+
+        if ($topic->getStatus() === StatusType::ASSIGNED) {
+            return $this->json(ResponseCodes::makeResponse(ResponseCodes::$TOPIC_DELETE_ALREADY_ASSIGNED), Response::HTTP_FORBIDDEN);
+        }
+
+        $topic->getAuthor()->getTopics()->removeElement($topic);
+        $topic->setAuthor(null);
+
+        $entityManager = $this->getDoctrine()->getManager();
+        $entityManager->remove($topic);
+        $entityManager->flush();
+        return $this->json(ResponseCodes::makeResponse(ResponseCodes::$SUCCESS), Response::HTTP_OK);
+    }
+
+    public function fillAndSaveTopic(Topic $topic, Request $request, bool $new): Response
     {
         try {
             $topic->setTitle($request->get('title'));
@@ -179,8 +209,12 @@ class TopicController extends AbstractController
     private function getDate(Request $request, string $dateName): ?Carbon
     {
         $date = $request->get($dateName);
-        if ($date === null) return null;
-        if ($date !== null && empty(trim($date))) return null;
+        if ($date === null) {
+            return null;
+        }
+        if ($date !== null && empty(trim($date))) {
+            return null;
+        }
         return Carbon::parse($date);
     }
 
@@ -195,9 +229,9 @@ class TopicController extends AbstractController
         $user = $this->getUser();
         $userId = $user->getId();
         $isFavorite = $request->get('favorite');
-        if($isFavorite && !$topic->hasFavoriteUser($userId)) {
+        if ($isFavorite && !$topic->hasFavoriteUser($userId)) {
             $topic->addFavoriteUser($user);
-        } else if (!$isFavorite && $topic->hasFavoriteUser($userId)) {
+        } elseif (!$isFavorite && $topic->hasFavoriteUser($userId)) {
             $topic->removeFavoriteUser($user);
         }
 

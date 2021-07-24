@@ -206,4 +206,78 @@ class TopicEditTest extends SecureApiTestCase
 
         $this->assertResponseStatusCodeSame(400);
     }
+
+    public function test_edit_topic__with_admin_works(): void
+    {
+        $this->ensureLoginExternal('dummy@example.com');
+        $changedTopic = $this->createTopic(start: Carbon::now()->addDays(2), end: Carbon::now()->addDays(25));
+        $changedTopicId = $changedTopic->getId();
+
+        $this->em->createQueryBuilder()
+            ->update(User::class, 'u')
+            ->set('u.admin', true)
+            ->where('u.email = :email')
+            ->setParameter('email', 'dalen@example.com')
+            ->getQuery()
+            ->execute();
+
+        $this->ensureLoginExternal('dalen@example.com');
+        $this->client->request('PUT', '/topic/' . $changedTopicId,  [
+            'json' => [
+                'title' => 'New Title',
+                'description' => 'This is a different description.',
+                'requirements' => 'These are the new requirements',
+                'tags' => array("PHP", "React"),
+                'deadline' => "2021-12-10",
+                'pages' => 1000,
+                'start' => "2021-10-04",
+                'website' => 'https://github.com',
+                'scope' => 'Change the topic',
+                'status' => 'OPEN',
+
+            ],
+        ]);
+
+
+        $response = $this->client->request('GET', '/topic/' . $changedTopicId);
+        $this->assertResponseStatusCodeSame(200);
+
+        $data = json_decode($response->getContent(), true);
+
+        $this->assertEquals('New Title', $data["title"]);
+        $this->assertEquals('This is a different description.', $data["description"]);
+        $this->assertEquals('These are the new requirements', $data["requirements"]);
+        $this->assertEquals(1000, $data["pages"]);
+        $this->assertEquals('https://github.com', ($data["website"]));
+        $this->assertEquals('2021-12-10T00:00:00+00:00', ($data["deadline"]));
+        $this->assertEquals('2021-10-04T00:00:00+00:00', ($data["start"]));
+        $this->assertEquals('Change the topic', ($data["scope"]));
+        $this->assertEquals('OPEN', ($data["status"]));
+    }
+
+    public function test_edit_topic__with_another_user_is_denied(): void
+    {
+        $this->ensureLoginExternal('dummy@example.com');
+        $changedTopic = $this->createTopic(start: Carbon::now()->addDays(2), end: Carbon::now()->addDays(25));
+        $changedTopicId = $changedTopic->getId();
+
+        $this->ensureLoginExternal('schroedinger@example.com');
+        $this->client->request('PUT', '/topic/' . $changedTopicId,  [
+            'json' => [
+                'title' => 'New Title',
+                'description' => 'This is a different description.',
+                'requirements' => 'These are the new requirements',
+                'tags' => array("PHP", "React"),
+                'deadline' => "2021-12-10",
+                'pages' => 1000,
+                'start' => "2021-10-04",
+                'website' => 'https://github.com',
+                'scope' => 'Change the topic',
+                'status' => 'OPEN',
+
+            ],
+        ]);
+
+        $this->assertResponseStatusCodeSame(403);
+    }
 }

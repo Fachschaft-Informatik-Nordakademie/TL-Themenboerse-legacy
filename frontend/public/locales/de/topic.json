@@ -17,6 +17,7 @@
   "buttonApply": "Bewerben",
   "buttonEdit": "Bearbeiten",
   "buttonWithdraw": "Bewerbung zurückziehen",
+  "buttonDelete": "Endgültig löschen",
   "tooltipCisOnly": "Nur CIS Nutzer können sich auf Themen bewerben",
   "scientificLabel": "Ich bestätige, dass das angebotene Thema eine angemessene Wissenschaftlichkeit besitzt, um für eine wissenschaftliche Arbeit verwendet zu werden.",
   "scientificTooltip": "Sie müssen die wissenschaftlichkeit des Themas bestätigen",

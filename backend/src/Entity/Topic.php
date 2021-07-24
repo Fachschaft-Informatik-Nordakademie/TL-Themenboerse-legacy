@@ -55,6 +55,10 @@ class Topic
     #[ORM\ManyToOne(targetEntity: User::class, inversedBy: "topics", fetch: 'EAGER', cascade: ['all'])]
     private ?User $author;
 
+    #[ORM\OneToMany(targetEntity: Application::class, mappedBy: 'topic', fetch: 'LAZY', orphanRemoval: true, cascade: ['all'])]
+    #[Ignore]
+    private PersistentCollection $applicationsInternal;
+
     #[ORM\ManyToMany(targetEntity: User::class, cascade: ['all'])]
     #[ORM\JoinTable(name: 'user_favorites')]
     #[Ignore]
