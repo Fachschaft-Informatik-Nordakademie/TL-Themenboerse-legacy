@@ -19,13 +19,14 @@ import {
   Typography,
 } from '@material-ui/core';
 import { useRouter } from 'next/router';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import { useTranslation } from 'next-i18next';
 import Link from '../../../src/components/MaterialNextLink';
 import { PageComponent } from '../../../src/types/PageComponent';
 import { Topic } from '../../../src/types/topic';
 import axiosClient from '../../../src/api';
+import { red } from '@material-ui/core/colors';
 import { Application } from '../../../src/types/application';
 
 type Props = {
@@ -61,6 +62,13 @@ const useStyles = makeStyles((theme) => ({
   },
   applicationsContentContainer: {
     marginTop: theme.spacing(2),
+  },
+  buttonDelete: {
+    color: theme.palette.getContrastText(red[500]),
+    backgroundColor: red[500],
+    '&:hover': {
+      backgroundColor: red[700],
+    },
   },
 }));
 
@@ -132,6 +140,11 @@ const TopicDetail: PageComponent<Props> = ({ user }: Props): JSX.Element => {
   if (loading) {
     return <div>{tCommon('loading')}</div>;
   }
+
+  const handleDelete = async (): Promise<void> => {
+    const response = await axiosClient.delete('/topic/' + topicId);
+    router.push('/');
+  };
 
   const unFollow = (): void => {
     updateFollow(false);
@@ -244,45 +257,51 @@ const TopicDetail: PageComponent<Props> = ({ user }: Props): JSX.Element => {
           {tTopic('buttonWithdraw')}
         </Button>
       )}
-      {topic.author && user.id === topic.author.id && (
-        <>
-          <Link href={`/topic/${topicId}/edit`}>
-            <Button variant="contained" color="primary" type="submit">
-              {tTopic('buttonEdit')}
-            </Button>
-          </Link>
-          <div className={classes.applicationsWrapper}>
-            <Typography gutterBottom variant="h4" component="h2">
-              {tTopic('applicationListTitle')}
-            </Typography>
-            <div>
-              {topic.applications.map((application) => (
-                <div key={application.id} className={classes.applicationsContentContainer}>
-                  <Link href={`/user/${application.candidate.id}`} variant="h6">
-                    {application.candidate.profile.firstName} {application.candidate.profile.lastName}
-                  </Link>
-                  <Typography component="p" variant="body2">
-                    {tTopic('applicationListLabelStatus')}: {application.status}
-                  </Typography>
-                  <Typography component="p" variant="body2" gutterBottom>
-                    {application.content}
-                  </Typography>
-                  {application.status === 'OPEN' && (
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      onClick={() => handleAcceptApplication(application)}
-                      disabled={applicationAcceptLoading}
-                    >
-                      {tTopic('applicationListAcceptButton')}
-                    </Button>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-        </>
+      {((topic.author && user.id === topic.author.id) || user.admin) && (
+        <Link href={`/topic/${topicId}/edit`}>
+          <Button variant="contained" color="primary" type="submit">
+            {tTopic('buttonEdit')}
+          </Button>
+        </Link>
       )}
+      {user.admin && topic.status !== 'ASSIGNED' && (
+        <Button color="secondary" onClick={handleDelete} className={classes.buttonDelete} variant="contained">
+          {tTopic('buttonDelete')}
+        </Button>
+      )}
+      {topic.author && user.id === topic.author.id && (
+        <div className={classes.applicationsWrapper}>
+          <Typography gutterBottom variant="h4" component="h2">
+            {tTopic('applicationListTitle')}
+          </Typography>
+          <div>
+            {topic.applications.map((application) => (
+              <div key={application.id} className={classes.applicationsContentContainer}>
+                <Link href={`/user/${application.candidate.id}`} variant="h6">
+                  {application.candidate.profile.firstName} {application.candidate.profile.lastName}
+                </Link>
+                <Typography component="p" variant="body2">
+                  {tTopic('applicationListLabelStatus')}: {application.status}
+                </Typography>
+                <Typography component="p" variant="body2" gutterBottom>
+                  {application.content}
+                </Typography>
+                {application.status === 'OPEN' && (
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={() => handleAcceptApplication(application)}
+                    disabled={applicationAcceptLoading}
+                  >
+                    {tTopic('applicationListAcceptButton')}
+                  </Button>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {user.id !== topic.author.id && !topic.favorite && (
         // eslint-disable-next-line jsx-a11y/no-static-element-interactions
         <i onClick={() => follow()}>
