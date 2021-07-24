@@ -15,6 +15,15 @@ class ResponseCodes
     // TOPIC RELATED
     public static string $TOPIC_NOT_FOUND = "topic_not_found";
     public static string $TOPIC_EDIT_PERMISSION_DENIED = "topic_edit_permission_denied";
+    public static string $TOPIC_NOT_OPEN_FOR_APPLICATIONS = "topic_not_open_for_applications";
+
+    // APPLICATION RELATED
+    public static string $APPLICATION_NOT_FOUND = "application_not_found";
+    public static string $APPLICATION_DENIED_OWN_TOPIC = "application_denied_own_topic";
+    public static string $APPLICATION_DENIED_ALREADY_APPLIED = "application_denied_already_applied";
+    public static string $APPLICATION_DENIED_ONLY_LDAP = "application_denied_only_ldap";
+    public static string $APPLICATION_ACCEPT_PERMISSION_DENIED = "application_accept_permission_denied";
+    public static string $APPLICATION_ACCEPT_TOPIC_NOT_OPEN = "application_accept_topic_not_open";
 
     // FILE RELATED
     public static string $FILE_NOT_FOUND = "file_not_found";

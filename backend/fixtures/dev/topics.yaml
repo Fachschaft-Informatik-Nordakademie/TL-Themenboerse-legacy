@@ -1,0 +1,14 @@
+App\Entity\Topic:
+  topic_{1..10}:
+    title: <sentence()>
+    description: <paragraph()>
+    requirements: <paragraph()>
+    website: <url()>
+    tags:
+      - php
+      - symfony
+    scope: <paragraph()>
+    status: OPEN
+    start: <dateTimeBetween('+1 week', '+5 weeks')>
+    deadline: <dateTimeBetween('+7 weeks', '+16 weeks')>
+    author: '@dummy_user'

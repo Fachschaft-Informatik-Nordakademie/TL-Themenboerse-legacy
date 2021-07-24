@@ -3,6 +3,9 @@
 namespace App\Tests;
 
 use App\Entity\Application;
+use App\Entity\ApplicationStatus;
+use App\Entity\StatusType;
+use App\Entity\Topic;
 
 class ApplicationControllerTest extends SecureApiTestCase
 {
@@ -171,5 +174,73 @@ class ApplicationControllerTest extends SecureApiTestCase
 
         $application = $this->em->getRepository(Application::class)->find($applicationId);
         $this->assertNull($application);
+    }
+
+    public function test_approving_application_works(): void
+    {
+        $this->ensureLoginExternal();
+        $topicId = $this->postDummyTopic();
+
+        $this->ensureLoginLDAP('10000');
+        $response = $this->client->request('POST', '/application', [
+            'json' => [
+                'topic' => $topicId,
+                'content' => 'Some Content'
+            ],
+        ]);
+
+        $this->assertResponseStatusCodeSame(200);
+        $applicationId1 = json_decode($response->getContent())->{'id'};
+
+        $this->ensureLoginLDAP('20000');
+        $response = $this->client->request('POST', '/application', [
+            'json' => [
+                'topic' => $topicId,
+                'content' => 'Some Content'
+            ],
+        ]);
+
+        $this->assertResponseStatusCodeSame(200);
+        $applicationId2 = json_decode($response->getContent())->{'id'};
+
+        $this->ensureLoginLDAP('30000');
+        $response = $this->client->request('POST', '/application', [
+            'json' => [
+                'topic' => $topicId,
+                'content' => 'Some Content'
+            ],
+        ]);
+
+        $this->assertResponseStatusCodeSame(200);
+        $applicationId3 = json_decode($response->getContent())->{'id'};
+
+        $applications = $this->em->getRepository(Application::class)->findAll();
+        $this->assertCount(3, $applications);
+
+        $this->ensureLoginExternal();
+        $this->client->request('PUT', '/application/' . $applicationId2, [
+            'json' => [
+                'status' => ApplicationStatus::ACCEPTED,
+            ],
+        ]);
+
+        $this->assertResponseStatusCodeSame(200);
+
+        /** @var Topic $topic */
+        $topic = $this->em->getRepository(Topic::class)->find($topicId);
+
+        /** @var Application $application1 */
+        $application1 = $this->em->getRepository(Application::class)->find($applicationId1);
+        /** @var Application $application2 */
+        $application2 = $this->em->getRepository(Application::class)->find($applicationId2);
+        /** @var Application $application3 */
+        $application3 = $this->em->getRepository(Application::class)->find($applicationId3);
+
+        $this->assertEquals(ApplicationStatus::REJECTED, $application1->getStatus());
+        $this->assertEquals(ApplicationStatus::ACCEPTED, $application2->getStatus());
+        $this->assertEquals(ApplicationStatus::REJECTED, $application3->getStatus());
+
+        $this->assertEquals(StatusType::ASSIGNED, $topic->getStatus());
+
     }
 }

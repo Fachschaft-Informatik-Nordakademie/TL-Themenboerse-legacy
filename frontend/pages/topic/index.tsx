@@ -37,7 +37,7 @@ import { PageComponent } from '../../src/types/PageComponent';
 import SearchBar from 'material-ui-search-bar';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import { Autocomplete } from '@material-ui/lab';
-import { DatePicker, KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
+import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
 import DateFnsUtils from '@date-io/date-fns';
 import clsx from 'clsx';
 import Grid from '@material-ui/core/Grid';
@@ -180,12 +180,7 @@ const TopicList: PageComponent<Props> = (): JSX.Element => {
               <FormControlLabel
                 className={classes.onlyOpenCheckbox}
                 control={
-                  <Checkbox
-                    checked={onlyOpen}
-                    onChange={(e) => setOnlyOpen(e.target.checked)}
-                    defaultChecked
-                    color="primary"
-                  />
+                  <Checkbox checked={onlyOpen} onChange={(e) => setOnlyOpen(e.target.checked)} color="primary" />
                 }
                 label="Nur offene Themen anzeigen"
               />

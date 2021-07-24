@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Application;
+use App\Entity\Topic;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -47,5 +48,17 @@ class ApplicationRepository extends ServiceEntityRepository
                 ->getQuery()
                 ->execute();
         }
+    }
+
+    public function findByTopic(Topic $topic): array
+    {
+        return $this->createQueryBuilder('a')
+            ->select('a, c, p')
+            ->leftJoin('a.candidate', 'c')
+            ->leftJoin('c.profile', 'p')
+            ->andWhere('a.topic = :topic')
+            ->setParameter('topic', $topic)
+            ->getQuery()
+            ->getArrayResult();
     }
 }
