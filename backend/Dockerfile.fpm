@@ -1,0 +1,21 @@
+FROM php:8.0-fpm as builder
+
+# Install php extensions and system libraries
+RUN apt update \
+    && apt install -y zlib1g-dev g++ git libicu-dev zip libzip-dev zip libldb-dev libldap2-dev \
+    && ln -s /usr/lib/x86_64-linux-gnu/libldap.so /usr/lib/libldap.so \
+    && ln -s /usr/lib/x86_64-linux-gnu/liblber.so /usr/lib/liblber.so \
+    && docker-php-ext-install intl opcache pdo pdo_mysql ldap \
+    && pecl install apcu \
+    && docker-php-ext-enable apcu \
+    && docker-php-ext-configure zip \
+    && docker-php-ext-install zip
+
+WORKDIR /var/www/app
+
+# Install composer
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+
+# Install dependencies
+COPY . .
+RUN composer install

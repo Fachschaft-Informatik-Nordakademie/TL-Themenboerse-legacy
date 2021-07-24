@@ -4,7 +4,7 @@ import { fetchUser } from '../../../src/server/fetchUser';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import { Topic } from '../../../src/types/topic';
 import { User } from '../../../src/types/user';
-import { topicForm } from '../common';
+import { topicForm } from '../../../src/components/topic-form';
 import { PageComponent } from '../../../src/types/PageComponent';
 
 type Props = {
