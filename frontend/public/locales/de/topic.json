@@ -21,10 +21,14 @@
   "scientificLabel": "Ich bestätige, dass das angebotene Thema eine angemessene Wissenschaftlichkeit besitzt, um für eine wissenschaftliche Arbeit verwendet zu werden.",
   "scientificTooltip": "Sie müssen die wissenschaftlichkeit des Themas bestätigen",
   "applicationContentLabel": "Bewerbungsschreiben",
+  "applicationDialogTitle": "Bewerbung",
   "applicationDialog": "Überzeuge den Anbieter, dich für das Thema auszuwählen. Erkläre, wieso du dich für das Thema interessierst und am besten geeignet bist.",
   "messageTitleRequired": "Titel ist ein Pflichtfeld",
   "messageDescriptionRequired": "Beschreibung ist ein Pflichtfeld",
   "messageRequirementsRequired": "Anforderungen ist ein Pflichtfeld",
   "messageScopeRequired": "Kontext (Unternehmen, Projekt) ist ein Pflichtfeld",
-  "messageUrlInvalid": "Bitte eine gültige Adresse eingeben"
+  "messageUrlInvalid": "Bitte eine gültige Adresse eingeben",
+  "applicationListTitle": "Bewerbungen für dieses Thema",
+  "applicationListLabelStatus": "Status",
+  "applicationListAcceptButton": "Bewerbung annehmen"
 }

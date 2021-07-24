@@ -99,10 +99,18 @@ class TopicController extends AbstractController
         if (!$topic) {
             return $this->json(ResponseCodes::makeResponse(ResponseCodes::$TOPIC_NOT_FOUND), Response::HTTP_NOT_FOUND);
         }
+
         /** @var User $user */
         $user = $this->getUser();
         $topic->setHasApplied($this->applicationRepository->hasCandidateForTopic($user->getId(), $topic->getId()));
         $topic->setFavorite($topic->hasFavoriteUser($user->getId()));
+
+        // Fetch applications only if user is author
+        if($user->getId() === $topic->getAuthor()->getId()) {
+            $applications = $this->applicationRepository->findByTopic($topic);
+            $topic->setApplications($applications);
+        }
+
         return $this->json($topic);
     }
 

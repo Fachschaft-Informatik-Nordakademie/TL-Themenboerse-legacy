@@ -63,6 +63,7 @@ class Topic
     private bool $hasApplied = false;
 
     private bool $favorite = false;
+    private ?array $applications = null;
 
     /**
      * Get the value of id
@@ -405,4 +406,17 @@ class Topic
 
         return $this;
     }
+
+    public function getApplications(): ?array
+    {
+        return $this->applications;
+    }
+
+    public function setApplications(?array $applications): Topic
+    {
+        $this->applications = $applications;
+        return $this;
+    }
+
+
 }

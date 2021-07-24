@@ -26,7 +26,6 @@ class Application
     #[ORM\Column(type: "string", length: 1000, nullable: true)]
     private ?string $content;
 
-    #[Ignore]
     #[ORM\ManyToOne(targetEntity: User::class)]
     private User $candidate;
 

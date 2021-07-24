@@ -19,13 +19,14 @@ import {
   Typography,
 } from '@material-ui/core';
 import { useRouter } from 'next/router';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
-import { PageComponent } from '../../../src/types/PageComponent';
-import Link from 'next/link';
 import { useTranslation } from 'next-i18next';
+import Link from '../../../src/components/MaterialNextLink';
+import { PageComponent } from '../../../src/types/PageComponent';
 import { Topic } from '../../../src/types/topic';
 import axiosClient from '../../../src/api';
+import { Application } from '../../../src/types/application';
 
 type Props = {
   user: User;
@@ -39,7 +40,7 @@ export async function getServerSideProps(context: GetServerSidePropsContext): Pr
   }
 
   return {
-    props: { user, ...(await serverSideTranslations('de', ['topic'])) },
+    props: { user, ...(await serverSideTranslations('de', ['topic', 'common'])) },
   };
 }
 
@@ -55,10 +56,17 @@ const useStyles = makeStyles((theme) => ({
     color: theme.palette.getContrastText(theme.palette.error.main),
     background: theme.palette.error.main,
   },
+  applicationsWrapper: {
+    marginTop: theme.spacing(6),
+  },
+  applicationsContentContainer: {
+    marginTop: theme.spacing(2),
+  },
 }));
 
 const TopicDetail: PageComponent<Props> = ({ user }: Props): JSX.Element => {
   const { t: tTopic } = useTranslation('topic');
+  const { t: tCommon } = useTranslation('common');
   const router = useRouter();
   const classes = useStyles();
   const topicId = router.query.id as string;
@@ -67,6 +75,9 @@ const TopicDetail: PageComponent<Props> = ({ user }: Props): JSX.Element => {
   const [loading, setLoading] = useState<boolean>(true);
   const [open, setOpen] = useState<boolean>(false);
   const [content, setContent] = useState<string>('');
+
+  const [applicationAcceptLoading, setApplicationAcceptLoading] = useState<boolean>(false);
+
   const handleOpen = (): void => {
     setContent('');
     setOpen(true);
@@ -108,8 +119,18 @@ const TopicDetail: PageComponent<Props> = ({ user }: Props): JSX.Element => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const handleAcceptApplication = React.useCallback(
+    async (application: Application) => {
+      setApplicationAcceptLoading(true);
+      await axiosClient.put(`/application/${application.id}`);
+      setApplicationAcceptLoading(false);
+      fetchTopic();
+    },
+    [setApplicationAcceptLoading],
+  );
+
   if (loading) {
-    return <div>Wird geladen</div>;
+    return <div>{tCommon('loading')}</div>;
   }
 
   const unFollow = (): void => {
@@ -173,7 +194,7 @@ const TopicDetail: PageComponent<Props> = ({ user }: Props): JSX.Element => {
         <Typography gutterBottom variant="h5" component="h3">
           {tTopic('labelTags')}
         </Typography>
-        <Typography variant="body1" component="p">
+        <Typography variant="body1" component="div">
           <span className={classes.tags}>
             {topic.tags.map((t) => (
               <Chip classes={{ root: classes.tagItem }} key={t} label={t} />
@@ -191,7 +212,7 @@ const TopicDetail: PageComponent<Props> = ({ user }: Props): JSX.Element => {
             </span>
           </Tooltip>
           <Dialog open={open} onClose={handleClose} aria-labelledby="form-dialog-title">
-            <DialogTitle id="form-dialog-title">Bewerbung</DialogTitle>
+            <DialogTitle id="form-dialog-title">{tTopic('applicationDialogTitle')}</DialogTitle>
             <DialogContent>
               <DialogContentText>{tTopic('applicationDialog')}</DialogContentText>
               <TextField
@@ -224,11 +245,43 @@ const TopicDetail: PageComponent<Props> = ({ user }: Props): JSX.Element => {
         </Button>
       )}
       {topic.author && user.id === topic.author.id && (
-        <Link href={`/topic/${topicId}/edit`}>
-          <Button variant="contained" color="primary" type="submit">
-            {tTopic('buttonEdit')}
-          </Button>
-        </Link>
+        <>
+          <Link href={`/topic/${topicId}/edit`}>
+            <Button variant="contained" color="primary" type="submit">
+              {tTopic('buttonEdit')}
+            </Button>
+          </Link>
+          <div className={classes.applicationsWrapper}>
+            <Typography gutterBottom variant="h4" component="h2">
+              {tTopic('applicationListTitle')}
+            </Typography>
+            <div>
+              {topic.applications.map((application) => (
+                <div key={application.id} className={classes.applicationsContentContainer}>
+                  <Link href={`/user/${application.candidate.id}`} variant="h6">
+                    {application.candidate.profile.firstName} {application.candidate.profile.lastName}
+                  </Link>
+                  <Typography component="p" variant="body2">
+                    {tTopic('applicationListLabelStatus')}: {application.status}
+                  </Typography>
+                  <Typography component="p" variant="body2" gutterBottom>
+                    {application.content}
+                  </Typography>
+                  {application.status === 'OPEN' && (
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      onClick={() => handleAcceptApplication(application)}
+                      disabled={applicationAcceptLoading}
+                    >
+                      {tTopic('applicationListAcceptButton')}
+                    </Button>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        </>
       )}
       {user.id !== topic.author.id && !topic.favorite && (
         // eslint-disable-next-line jsx-a11y/no-static-element-interactions

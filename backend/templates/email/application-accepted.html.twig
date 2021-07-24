@@ -1,0 +1,19 @@
+{% apply inline_css %}
+<style>
+    * {
+        font-family: Arial, sans-serif;
+    }
+</style>
+
+<p>Hallo {{ user.profile.firstName }},</p>
+<p>deine Bewerbung für das Thema <strong>"{{ topic.title }}"</strong> wurde akzeptiert. Der Themenanbieter wird sich in Kürze mit dir in Verbindung setzen.</p>
+
+<p>
+    <a href="{{ base_url }}/topic/{{ topic.id }}">Thema anzeigen</a>
+</p>
+
+<br>
+<br>
+<hr>
+<p>Diese E-Mail wurde automatisch erzeugt.</p>
+{% endapply %}

@@ -1,4 +1,5 @@
 import { User } from './user';
+import { Application } from './application';
 
 export type Topic = {
   id: number;
@@ -14,5 +15,6 @@ export type Topic = {
   status: 'OPEN' | 'ASSIGNED' | 'LOCKED';
   author: User;
   hasApplied: boolean;
+  applications?: Application[];
   favorite: boolean;
 };

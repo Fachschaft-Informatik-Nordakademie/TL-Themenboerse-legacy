@@ -1,6 +1,7 @@
 {
   "appName": "Themenbörse",
   "unknownError": "Ein unbekannter Fehler ist aufgetreten",
+  "loadaing": "Wird geladen",
   "responseCodes": {
     "success": "Aktion war erfolgreich",
     "validation_failed": "Ungültige Eingaben.",
@@ -17,6 +18,13 @@
     "verification_token_expired": "Der Token ist bereits abgelaufen.",
     "email_not_verified": "Deine E-Mail-Adresse ist noch nicht bestätigt.",
     "user_not_found": "Der Benutzer wurde nicht gefunden.",
-    "cant_edit_own_user": "Du kannst nicht deine eigenen Benutzerdaten ändern."
+    "cant_edit_own_user": "Du kannst nicht deine eigenen Benutzerdaten ändern.",
+    "topic_not_open_for_applications": "Für dieses Thema können keine Bewerbungen mehr eingereicht werden.",
+    "application_not_found": "Die Bewerbung wurde nicht gefunden.",
+    "application_denied_own_topic": "Du kannst dich nicht auf dein eigenes Thema bewerben.",
+    "application_denied_already_applied": "Du hast dich für dieses Thema bereits beworben.",
+    "application_denied_only_ldap": "Nur interne Benutzer können sich auf ein Thema bewerben.",
+    "application_accept_permission_denied": "Du kannst keine Bewerbungen für dieses Thema akzeptieren.",
+    "application_accept_topic_not_open": "Du kannst die Bewerbung nicht akzeptieren, da das Thema nicht mehr offen ist."
   }
 }
