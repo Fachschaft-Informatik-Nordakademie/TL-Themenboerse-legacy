@@ -1,0 +1,67 @@
+version: '3'
+
+services:
+  backend-fpm:
+    build:
+      context: backend
+      dockerfile: Dockerfile.fpm
+    networks:
+      - internal
+    environment:
+      # General settings
+      APP_ENV: prod
+      APP_SECRET: secret
+
+      # Database connection
+      DATABASE_URL: 'mysql://app:secret@db.example.com:3306/themenboerse'
+
+      # URL related
+      CORS_ALLOW_ORIGIN: 'themenboerse.example.com'
+      COOKIE_DOMAIN: '.themenboerse.example.com'
+      APP_FRONTEND_BASE_URL: 'themenboerse.example.com'
+
+      # Mail
+      MAILER_DSN: 'smtp://localhost:1025'
+      APP_MAIL_SENDER_ADDRESS: 'noreply@example.com'
+      APP_MAIL_SENDER_NAME: 'Themenbörse'
+      APP_MAIL_NEW_TOPIC_RECIPIENT: 'transferleistungen@example.com'
+
+      # LDAP connection
+      APP_LDAP_SERVER: 'ldap.example.com'
+      APP_LDAP_BIND_DN: 'cn=themenboerse,dc=example,dc=com'
+      APP_LDAP_BIND_PASSWORD: 'secret'
+      APP_LDAP_USER_QUERY: '(& (cn={username}) (objectClass=person))'
+      APP_LDAP_USER_BASE_DN: 'ou=people,dc=example,dc=com'
+      APP_LDAP_ATTRIBUTE_USERNAME: "cn"
+      APP_LDAP_ATTRIBUTE_MAIL: "mail"
+      APP_LDAP_ATTRIBUTE_FIRST_NAME: "givenName"
+      APP_LDAP_ATTRIBUTE_LAST_NAME: "sn"
+
+  backend-nginx:
+    build:
+      context: backend
+      dockerfile: Dockerfile.nginx
+    networks:
+      - internal
+      - default
+    ports:
+      - "8082:80"
+
+  frontend:
+    build:
+      context: frontend
+      dockerfile: Dockerfile
+      args:
+        APP_FRONTEND_BASE_URL: 'api.themenboerse.example.com'
+        NEXT_SERVER_SIDE_BACKEND_URL: 'api.themenboerse.example.com'
+    depends_on: ['backend-nginx']
+    networks:
+      - default
+    ports:
+      - "8081:3000"
+
+
+networks:
+  default: {}
+  internal:
+    internal: true

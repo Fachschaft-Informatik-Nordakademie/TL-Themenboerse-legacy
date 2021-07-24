@@ -22,9 +22,9 @@ parameters:
 
     app.frontend_base_url: '%env(string:resolve:APP_FRONTEND_BASE_URL)%'
 
-    app.mail.sender_address: 'noreply@example.com'
-    app.mail.sender_name: 'Themenbörse'
-    app.mail.new_topic_recipient: 'transferleistungen@example.com'
+    app.mail.sender_address: '%env(string:resolve:APP_MAIL_SENDER_ADDRESS)%'
+    app.mail.sender_name: '%env(string:resolve:APP_MAIL_SENDER_NAME)%'
+    app.mail.new_topic_recipient: '%env(string:resolve:APP_MAIL_NEW_TOPIC_RECIPIENT)%'
 
 
 services:

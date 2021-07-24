@@ -79,7 +79,7 @@ export default function MainLayout(props: Props): JSX.Element {
             <Link href="/favorites">
               <Button color="inherit">Gemerkte Themen</Button>
             </Link>
-            {props.user.admin && (
+            {props.user?.admin && (
               <Link href="/admin/user">
                 <Button color="inherit">Benutzerverwaltung</Button>
               </Link>

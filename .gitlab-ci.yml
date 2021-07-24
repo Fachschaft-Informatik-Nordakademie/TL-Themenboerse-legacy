@@ -3,23 +3,15 @@ image: themenboerse-test-base:latest
 # Only run in Merge Requests
 workflow:
   rules:
-    - if: $CI_MERGE_REQUEST_IID
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"' # Run merge request pipelines
+    - if: '$CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS' # Do not run branch pipeline when MR exists
+      when: never
+    - if: '$CI_COMMIT_BRANCH == "main"' # Run pipeline for main branch
 
+stages:
+  - test
+  - build-docker
 
-# Pick zero or more services to be used on all builds.
-# Only needed when using a docker container to run your tests in.
-# Check out: http://docs.gitlab.com/ce/ci/docker/using_docker_images.html#what-is-a-service
-services:
-  - name: osixia/openldap:1.5.0
-    alias: ldap
-
-variables:
-  LDAP_ORGANISATION: "Awesome University"
-  LDAP_DOMAIN: "awesome-university.com"
-  LDAP_ADMIN_PASSWORD: "awesome"
-  LDAP_REMOVE_CONFIG_AFTER_SETUP: "false"
-  LDAP_TLS: "false"
-  LDAP_READONLY_USER: "true"
   
 # This folder is cached between builds
 # http://docs.gitlab.com/ce/ci/yaml/README.html#cache
@@ -27,17 +19,76 @@ cache:
   paths:
     - backend/vendor/
 
-before_script:
-  - cd backend && composer install && cd ..
-  - ldapadd -x -D "cn=admin,dc=awesome-university,dc=com" -w awesome -H ldap://ldap:389 -f .gitpod/ldap-bootstrap.ldif
-
-test:
+run unit tests:
+  stage: test
   variables:
+    LDAP_ORGANISATION: "Awesome University"
+    LDAP_DOMAIN: "awesome-university.com"
+    LDAP_ADMIN_PASSWORD: "awesome"
+    LDAP_REMOVE_CONFIG_AFTER_SETUP: "false"
+    LDAP_TLS: "false"
+    LDAP_READONLY_USER: "true"
     APP_LDAP_SERVER: "ldap"
     APP_LDAP_PORT: 389
     XDEBUG_MODE: "coverage"
+  services:
+    - name: osixia/openldap:1.5.0
+      alias: ldap
+  before_script:
+    - cd backend && composer install && cd ..
+    - ldapadd -x -D "cn=admin,dc=awesome-university,dc=com" -w awesome -H ldap://ldap:389 -f .gitpod/ldap-bootstrap.ldif
   script:
     - cd backend && composer test-ci
   artifacts:
     reports:
       junit: backend/phpunit-report.xml
+
+image/frontend:
+  stage: build-docker
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+  image:
+    name: gcr.io/kaniko-project/executor:debug
+    entrypoint: [""]
+  script:
+    - mkdir -p /kaniko/.docker
+    - echo "{\"auths\":{\"$HARBOR_URL\":{\"auth\":\"$HARBOR_TOKEN\"}}}" > /kaniko/.docker/config.json
+    - >-
+        /kaniko/executor
+        --context $CI_PROJECT_DIR/frontend
+        --dockerfile $CI_PROJECT_DIR/frontend/Dockerfile
+        --build-arg APP_FRONTEND_BASE_URL=api.themenboerse.example.com
+        --build-arg NEXT_SERVER_SIDE_BACKEND_URL=api.themenboerse.example.com
+        --destination $HARBOR_URL/themenboerse/frontend:latest
+
+image/backend-fpm:
+  stage: build-docker
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+  image:
+    name: gcr.io/kaniko-project/executor:debug
+    entrypoint: [""]
+  script:
+    - mkdir -p /kaniko/.docker
+    - echo "{\"auths\":{\"$HARBOR_URL\":{\"auth\":\"$HARBOR_TOKEN\"}}}" > /kaniko/.docker/config.json
+    - >-
+        /kaniko/executor
+        --context $CI_PROJECT_DIR/backend
+        --dockerfile $CI_PROJECT_DIR/backend/Dockerfile.fpm
+        --destination $HARBOR_URL/themenboerse/backend-fpm:latest
+
+image/backend-nginx:
+  stage: build-docker
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+  image:
+    name: gcr.io/kaniko-project/executor:debug
+    entrypoint: [""]
+  script:
+    - mkdir -p /kaniko/.docker
+    - echo "{\"auths\":{\"$HARBOR_URL\":{\"auth\":\"$HARBOR_TOKEN\"}}}" > /kaniko/.docker/config.json
+    - >-
+      /kaniko/executor
+      --context $CI_PROJECT_DIR/backend
+      --dockerfile $CI_PROJECT_DIR/backend/Dockerfile.nginx
+      --destination $HARBOR_URL/themenboerse/backend-nginx:latest
