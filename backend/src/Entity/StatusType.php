@@ -5,7 +5,8 @@ namespace App\Entity;
 class StatusType
 {
 
-    const OPEN = "OPEN";
-    const ASSIGNED = "ASSIGNED";
-    const LOCKED = "LOCKED";
+    public const OPEN = "OPEN";
+    public const ASSIGNED = "ASSIGNED";
+    public const LOCKED = "LOCKED";
+    public const ARCHIVED = "ARCHIVED";
 }

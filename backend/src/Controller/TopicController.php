@@ -218,21 +218,56 @@ class TopicController extends AbstractController
         return Carbon::parse($date);
     }
 
+    #[Route('/topic/{topicId}/archive', name: 'topic_archive', methods: ['put'])]
+    public function archiveTopic(Request $request, int $topicId): Response
+    {
+        /** @var Topic $topic */
+        $topic = $this->topicRepository->find($topicId);
+        if (!$topic) {
+            return $this->json(ResponseCodes::makeResponse(ResponseCodes::$TOPIC_NOT_FOUND), Response::HTTP_NOT_FOUND);
+        } else if ($topic->getStatus() === StatusType::ASSIGNED) {
+            return $this->json(ResponseCodes::makeResponse(ResponseCodes::$TOPIC_ARCHIVE_ALREADY_ASSIGNED), Response::HTTP_BAD_REQUEST);
+        }
+        /** @var User $user */
+        $user = $this->getUser();
+
+        if ($topic->getAuthor()->getId() !== $user->getId()) {
+            return $this->json(ResponseCodes::makeResponse(ResponseCodes::$TOPIC_EDIT_PERMISSION_DENIED), Response::HTTP_UNAUTHORIZED);
+        }
+
+        $isArchived = $request->get('archive');
+        if ($isArchived) {
+            $topic->setStatus(StatusType::ARCHIVED);
+        } else {
+            $topic->setStatus(StatusType::OPEN);
+        }
+
+        $entityManager = $this->getDoctrine()->getManager();
+        $entityManager->persist($user);
+        $entityManager->flush();
+
+        return $this->json($topic);
+    }
+
     #[Route('/topic/{topicId}/favorite', name: 'topic_favorite_put', methods: ['put'])]
     public function updateFavorite(Request $request, int $topicId): Response
     {
+        /** @var Topic $topic */
         $topic = $this->topicRepository->find($topicId);
         if (!$topic) {
-            return $this->json(['message' => 'Topic not found'], Response::HTTP_NOT_FOUND);
+            return $this->json(ResponseCodes::makeResponse(ResponseCodes::$TOPIC_NOT_FOUND), Response::HTTP_NOT_FOUND);
         }
 
+        /** @var User $user */
         $user = $this->getUser();
         $userId = $user->getId();
         $isFavorite = $request->get('favorite');
         if ($isFavorite && !$topic->hasFavoriteUser($userId)) {
             $topic->addFavoriteUser($user);
+            $topic->setFavorite(true);
         } elseif (!$isFavorite && $topic->hasFavoriteUser($userId)) {
             $topic->removeFavoriteUser($user);
+            $topic->setFavorite(false);
         }
 
         $entityManager = $this->getDoctrine()->getManager();
