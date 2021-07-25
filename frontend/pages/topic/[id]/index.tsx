@@ -5,8 +5,6 @@ import { GetServerSidePropsContext, GetServerSidePropsResult } from 'next';
 import { fetchUser } from '../../../src/server/fetchUser';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import GradeOutlinedIcon from '@material-ui/icons/GradeOutlined';
-import LockOpenOutlinedIcon from '@material-ui/icons/LockOpenOutlined';
-import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import ArchiveOutlinedIcon from '@material-ui/icons/ArchiveOutlined';
 import UnarchiveOutlinedIcon from '@material-ui/icons/UnarchiveOutlined';
 import GradeIcon from '@material-ui/icons/Grade';
@@ -30,6 +28,7 @@ import Link from '../../../src/components/MaterialNextLink';
 import { PageComponent } from '../../../src/types/PageComponent';
 import { Topic } from '../../../src/types/topic';
 import axiosClient from '../../../src/api';
+import { useSnackbar } from 'notistack';
 import { pink, red } from '@material-ui/core/colors';
 import { Application } from '../../../src/types/application';
 
@@ -87,26 +86,38 @@ const TopicDetail: PageComponent<Props> = ({ user }: Props): JSX.Element => {
   const { t: tCommon } = useTranslation('common');
   const router = useRouter();
   const classes = useStyles();
+  const { enqueueSnackbar } = useSnackbar();
   const topicId = router.query.id as string;
 
   const [topic, setTopic] = useState<Topic>();
   const [loading, setLoading] = useState<boolean>(true);
   const [openApplication, setOpenApplication] = useState<boolean>(false);
   const [openArchive, setOpenArchive] = useState<boolean>(false);
-  const [content, setContent] = useState<string>('');
+  const [applicationContent, setApplicationContent] = useState<string>('');
+  const [reportOpen, setReportOpen] = useState<boolean>(false);
 
+  const handleReport = async (): Promise<void> => {
+    try {
+      await axiosClient.put(`/topic/${topicId}/report`);
+      enqueueSnackbar(tTopic('reportSuccess'), { variant: 'success' });
+    } catch (e) {
+      enqueueSnackbar(tTopic('reportFailure'), { variant: 'error' });
+      console.log(e);
+    }
+    setReportOpen(false);
+  };
   const [applicationAcceptLoading, setApplicationAcceptLoading] = useState<boolean>(false);
 
   const handleOpenApplication = (): void => {
-    setContent('');
+    setApplicationContent('');
     setOpenApplication(true);
   };
-  const handleCloseApplication = (): void => setOpenApplication(false);
+  const handleApplicationClose = (): void => setOpenApplication(false);
   const handleApplication = async (): Promise<void> => {
     try {
-      await axiosClient.post('/application', { topic: topicId, content });
+      await axiosClient.post('/application', { topic: topicId, content: applicationContent });
       await fetchTopic();
-      handleCloseApplication();
+      handleApplicationClose();
     } catch (e) {
       console.log(e); // TOOD: How do we handle error messages?
     }
@@ -242,7 +253,7 @@ const TopicDetail: PageComponent<Props> = ({ user }: Props): JSX.Element => {
               </Button>
             </span>
           </Tooltip>
-          <Dialog open={openApplication} onClose={handleCloseApplication} aria-labelledby="form-dialog-title">
+          <Dialog open={openApplication} onClose={handleApplicationClose} aria-labelledby="form-dialog-title">
             <DialogTitle id="form-dialog-title">{tTopic('applicationDialogTitle')}</DialogTitle>
             <DialogContent>
               <DialogContentText>{tTopic('applicationDialog')}</DialogContentText>
@@ -250,7 +261,7 @@ const TopicDetail: PageComponent<Props> = ({ user }: Props): JSX.Element => {
                 margin="dense"
                 id="name"
                 label={tTopic('applicationContentLabel')}
-                onChange={(e) => setContent(e.target.value)}
+                onChange={(e) => setApplicationContent(e.target.value)}
                 type="text"
                 fullWidth
                 multiline
@@ -258,11 +269,11 @@ const TopicDetail: PageComponent<Props> = ({ user }: Props): JSX.Element => {
                 inputProps={{
                   maxLength: lengths.application,
                 }}
-                helperText={`${content.length}/${lengths.application}`}
+                helperText={`${applicationContent.length}/${lengths.application}`}
               />
             </DialogContent>
             <DialogActions>
-              <Button onClick={handleCloseApplication}>{tTopic('buttonCancel')}</Button>
+              <Button onClick={handleApplicationClose}>{tTopic('buttonCancel')}</Button>
               <Button onClick={handleApplication} variant="contained" color="primary">
                 {tTopic('buttonApply')}
               </Button>
@@ -286,6 +297,25 @@ const TopicDetail: PageComponent<Props> = ({ user }: Props): JSX.Element => {
         <Button color="secondary" onClick={handleDelete} className={classes.buttonDelete} variant="contained">
           {tTopic('buttonDelete')}
         </Button>
+      )}
+      {topic.status === 'OPEN' && topic.author && user.id !== topic.author.id && (
+        <>
+          <Button variant="contained" color="primary" onClick={() => setReportOpen(true)}>
+            {tTopic('buttonReport')}
+          </Button>
+          <Dialog open={reportOpen} onClose={handleApplicationClose} aria-labelledby="form-dialog-title">
+            <DialogTitle id="form-dialog-title">{tTopic('buttonReport')}</DialogTitle>
+            <DialogContent>
+              <DialogContentText>{tTopic('reportDialog')}</DialogContentText>
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={() => setReportOpen(false)}>{tTopic('buttonCancel')}</Button>
+              <Button onClick={handleReport} variant="contained" color="primary">
+                {tTopic('buttonReport')}
+              </Button>
+            </DialogActions>
+          </Dialog>
+        </>
       )}
       {topic.author && user.id === topic.author.id && topic.status !== 'ASSIGNED' && (
         <>

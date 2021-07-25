@@ -1,0 +1,19 @@
+{% apply inline_css %}
+<style>
+    * {
+        font-family: Arial, sans-serif;
+    }
+</style>
+
+<p>Guten Tag,</p>
+<p>ein Thema wurde gemeldet.</p>
+
+<p>
+    <a href="{{ base_url }}/topic/{{ topic.id }}">Hier klicken, um zum Thema zu gelangen.</a>
+</p>
+
+<br>
+<br>
+<hr>
+<p>Diese E-Mail wurde automatisch erzeugt.</p>
+{% endapply %}

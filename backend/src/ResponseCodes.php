@@ -14,6 +14,7 @@ class ResponseCodes
 
     // TOPIC RELATED
     public static string $TOPIC_NOT_FOUND = "topic_not_found";
+    public static string $TOPIC_LOCKED = "topic_locked";
     public static string $TOPIC_ARCHIVE_ALREADY_ASSIGNED = "topic_archive_already_assigned";
     public static string $TOPIC_EDIT_PERMISSION_DENIED = "topic_edit_permission_denied";
     public static string $TOPIC_DELETE_PERMISSION_DENIED = "topic_delete_permission_denied";

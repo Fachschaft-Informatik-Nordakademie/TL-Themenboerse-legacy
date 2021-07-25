@@ -39,6 +39,41 @@ class TopicController extends AbstractController
         $this->twig = $twig;
     }
 
+    #[Route('/topic/{id}/report', name: 'report_topic', methods: ['put'])]
+    public function reportTopic(Request $request, int $id): Response
+    {
+        /** @var Topic $topic */
+        $topic = $this->topicRepository->find($id);
+
+        if (!$topic) {
+            return $this->json(ResponseCodes::makeResponse(ResponseCodes::$TOPIC_NOT_FOUND), Response::HTTP_NOT_FOUND);
+        }
+
+        if ($topic->getWasReported()) {
+            return $this->json([]);
+        }
+
+        $topic->setWasReported(true);
+        $topic->setStatus(StatusType::LOCKED);
+        $entityManager = $this->getDoctrine()->getManager();
+        $entityManager->persist($topic);
+        $entityManager->flush();
+
+        $mailContext = [
+            "topic" => $topic,
+            "base_url" => $this->params->get('app.frontend_base_url'),
+        ];
+
+        $email = (new TemplatedEmail())
+            ->to($this->params->get('app.mail.new_topic_recipient'))
+            ->subject('Ein Thema wurde gemeldet')
+            ->htmlTemplate('email/report-topic.html.twig')
+            ->text(str_replace("\n", "\r\n", $this->twig->render('email/report-topic.txt.twig', $mailContext)))
+            ->context($mailContext);
+        $this->mailer->send($email);
+        return $this->json([]);
+    }
+
     #[Route('/topic', name: 'topic_list', methods: ['get'])]
     public function listTopics(Request $request): Response
     {
@@ -227,7 +262,10 @@ class TopicController extends AbstractController
             return $this->json(ResponseCodes::makeResponse(ResponseCodes::$TOPIC_NOT_FOUND), Response::HTTP_NOT_FOUND);
         } else if ($topic->getStatus() === StatusType::ASSIGNED) {
             return $this->json(ResponseCodes::makeResponse(ResponseCodes::$TOPIC_ARCHIVE_ALREADY_ASSIGNED), Response::HTTP_BAD_REQUEST);
+        } else if ($topic->getStatus() === StatusType::LOCKED) {
+            return $this->json(ResponseCodes::makeResponse(ResponseCodes::$TOPIC_LOCKED), Response::HTTP_BAD_REQUEST);
         }
+
         /** @var User $user */
         $user = $this->getUser();
 

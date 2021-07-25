@@ -55,6 +55,9 @@ class Topic
     #[ORM\ManyToOne(targetEntity: User::class, inversedBy: "topics", fetch: 'EAGER', cascade: ['all'])]
     private ?User $author;
 
+    #[ORM\Column(type: 'boolean', nullable: false)]
+    private bool $wasReported = false;
+
     #[ORM\OneToMany(targetEntity: Application::class, mappedBy: 'topic', fetch: 'LAZY', orphanRemoval: true, cascade: ['all'])]
     #[Ignore]
     private PersistentCollection $applicationsInternal;
@@ -407,6 +410,30 @@ class Topic
     public function setHasApplied(bool $hasApplied)
     {
         $this->hasApplied = $hasApplied;
+
+        return $this;
+    }
+
+    /**
+     * Get the value of wasReported
+     *
+     * @return  bool
+     */
+    public function getWasReported()
+    {
+        return $this->wasReported;
+    }
+
+    /**
+     * Set the value of wasReported
+     *
+     * @param  bool  $wasReported
+     *
+     * @return  self
+     */
+    public function setWasReported(bool $wasReported)
+    {
+        $this->wasReported = $wasReported;
 
         return $this;
     }
