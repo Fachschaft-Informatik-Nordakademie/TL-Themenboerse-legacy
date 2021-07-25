@@ -5,6 +5,10 @@ import { GetServerSidePropsContext, GetServerSidePropsResult } from 'next';
 import { fetchUser } from '../../../src/server/fetchUser';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import GradeOutlinedIcon from '@material-ui/icons/GradeOutlined';
+import LockOpenOutlinedIcon from '@material-ui/icons/LockOpenOutlined';
+import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
+import ArchiveOutlinedIcon from '@material-ui/icons/ArchiveOutlined';
+import UnarchiveOutlinedIcon from '@material-ui/icons/UnarchiveOutlined';
 import GradeIcon from '@material-ui/icons/Grade';
 import {
   Button,
@@ -26,7 +30,7 @@ import Link from '../../../src/components/MaterialNextLink';
 import { PageComponent } from '../../../src/types/PageComponent';
 import { Topic } from '../../../src/types/topic';
 import axiosClient from '../../../src/api';
-import { red } from '@material-ui/core/colors';
+import { pink, red } from '@material-ui/core/colors';
 import { Application } from '../../../src/types/application';
 
 type Props = {
@@ -53,9 +57,12 @@ const useStyles = makeStyles((theme) => ({
     marginLeft: theme.spacing(-1),
   },
   tagItem: { marginLeft: theme.spacing(1) },
-  withdraw: {
-    color: theme.palette.getContrastText(theme.palette.error.main),
-    background: theme.palette.error.main,
+  consequences: {
+    color: theme.palette.getContrastText(pink[500]),
+    background: pink[500],
+    '&:hover': {
+      backgroundColor: pink[700],
+    },
   },
   applicationsWrapper: {
     marginTop: theme.spacing(6),
@@ -70,6 +77,9 @@ const useStyles = makeStyles((theme) => ({
       backgroundColor: red[700],
     },
   },
+  archiveButtonIcon: {
+    marginLeft: theme.spacing(1),
+  },
 }));
 
 const TopicDetail: PageComponent<Props> = ({ user }: Props): JSX.Element => {
@@ -81,21 +91,22 @@ const TopicDetail: PageComponent<Props> = ({ user }: Props): JSX.Element => {
 
   const [topic, setTopic] = useState<Topic>();
   const [loading, setLoading] = useState<boolean>(true);
-  const [open, setOpen] = useState<boolean>(false);
+  const [openApplication, setOpenApplication] = useState<boolean>(false);
+  const [openArchive, setOpenArchive] = useState<boolean>(false);
   const [content, setContent] = useState<string>('');
 
   const [applicationAcceptLoading, setApplicationAcceptLoading] = useState<boolean>(false);
 
-  const handleOpen = (): void => {
+  const handleOpenApplication = (): void => {
     setContent('');
-    setOpen(true);
+    setOpenApplication(true);
   };
-  const handleClose = (): void => setOpen(false);
+  const handleCloseApplication = (): void => setOpenApplication(false);
   const handleApplication = async (): Promise<void> => {
     try {
       await axiosClient.post('/application', { topic: topicId, content });
       await fetchTopic();
-      handleClose();
+      handleCloseApplication();
     } catch (e) {
       console.log(e); // TOOD: How do we handle error messages?
     }
@@ -104,6 +115,17 @@ const TopicDetail: PageComponent<Props> = ({ user }: Props): JSX.Element => {
     try {
       await axiosClient.delete(`/application/${topicId}`);
       await fetchTopic();
+    } catch (e) {
+      console.log(e);
+    }
+  };
+  const handleArchive = async (): Promise<void> => {
+    setOpenArchive(false);
+    try {
+      const response = await axiosClient.put(`/topic/${topicId}/archive`, {
+        archive: topic.status === 'OPEN',
+      });
+      setTopic(response.data);
     } catch (e) {
       console.log(e);
     }
@@ -118,8 +140,12 @@ const TopicDetail: PageComponent<Props> = ({ user }: Props): JSX.Element => {
 
   const updateFollow = async (follow: boolean): Promise<void> => {
     const request = { favorite: follow };
-    await axiosClient.put(`/topic/${topic.id}/favorite`, request);
-    fetchTopic();
+    try {
+      const response = await axiosClient.put(`/topic/${topic.id}/favorite`, request);
+      setTopic(response.data);
+    } catch (e) {
+      console.log(e);
+    }
   };
 
   useEffect(() => {
@@ -144,14 +170,6 @@ const TopicDetail: PageComponent<Props> = ({ user }: Props): JSX.Element => {
   const handleDelete = async (): Promise<void> => {
     const response = await axiosClient.delete('/topic/' + topicId);
     router.push('/');
-  };
-
-  const unFollow = (): void => {
-    updateFollow(false);
-  };
-
-  const follow = (): void => {
-    updateFollow(true);
   };
 
   const showApplyButton = topic.status === 'OPEN' && topic.author && user.id !== topic.author?.id;
@@ -219,12 +237,12 @@ const TopicDetail: PageComponent<Props> = ({ user }: Props): JSX.Element => {
         <>
           <Tooltip title={canApply ? '' : tTopic('tooltipCisOnly')}>
             <span>
-              <Button disabled={!canApply} variant="contained" color="primary" onClick={handleOpen}>
+              <Button disabled={!canApply} variant="contained" color="primary" onClick={handleOpenApplication}>
                 {tTopic('buttonApply')}
               </Button>
             </span>
           </Tooltip>
-          <Dialog open={open} onClose={handleClose} aria-labelledby="form-dialog-title">
+          <Dialog open={openApplication} onClose={handleCloseApplication} aria-labelledby="form-dialog-title">
             <DialogTitle id="form-dialog-title">{tTopic('applicationDialogTitle')}</DialogTitle>
             <DialogContent>
               <DialogContentText>{tTopic('applicationDialog')}</DialogContentText>
@@ -244,7 +262,7 @@ const TopicDetail: PageComponent<Props> = ({ user }: Props): JSX.Element => {
               />
             </DialogContent>
             <DialogActions>
-              <Button onClick={handleClose}>{tTopic('buttonCancel')}</Button>
+              <Button onClick={handleCloseApplication}>{tTopic('buttonCancel')}</Button>
               <Button onClick={handleApplication} variant="contained" color="primary">
                 {tTopic('buttonApply')}
               </Button>
@@ -253,7 +271,7 @@ const TopicDetail: PageComponent<Props> = ({ user }: Props): JSX.Element => {
         </>
       )}
       {showApplyButton && topic.hasApplied && (
-        <Button variant="contained" className={classes.withdraw} onClick={handleWithdraw}>
+        <Button variant="contained" className={classes.consequences} onClick={handleWithdraw}>
           {tTopic('buttonWithdraw')}
         </Button>
       )}
@@ -268,6 +286,49 @@ const TopicDetail: PageComponent<Props> = ({ user }: Props): JSX.Element => {
         <Button color="secondary" onClick={handleDelete} className={classes.buttonDelete} variant="contained">
           {tTopic('buttonDelete')}
         </Button>
+      )}
+      {topic.author && user.id === topic.author.id && topic.status !== 'ASSIGNED' && (
+        <>
+          <Button variant="contained" className={classes.consequences} onClick={() => setOpenArchive(true)}>
+            {tTopic(topic.status === 'ARCHIVED' ? 'buttonUnarchive' : 'buttonArchive')}
+            {topic.status === 'ARCHIVED' ? (
+              <UnarchiveOutlinedIcon className={classes.archiveButtonIcon} />
+            ) : (
+              <ArchiveOutlinedIcon className={classes.archiveButtonIcon} />
+            )}
+          </Button>
+          <Dialog
+            open={openArchive}
+            onClose={() => setOpenArchive(false)}
+            aria-labelledby="alert-dialog-title"
+            aria-describedby="alert-dialog-description"
+          >
+            <DialogTitle id="alert-dialog-title">
+              {tTopic(topic.status === 'ARCHIVED' ? 'buttonUnarchive' : 'buttonArchive')}
+            </DialogTitle>
+            <DialogContent>
+              <DialogContentText id="alert-dialog-description">
+                {tTopic(topic.status === 'ARCHIVED' ? 'noticeUnarchive' : 'noticeArchive')}
+              </DialogContentText>
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={() => setOpenArchive(false)} color="primary">
+                {tTopic('buttonCancel')}
+              </Button>
+              <Button variant="contained" onClick={handleArchive} className={classes.consequences}>
+                {tTopic(topic.status === 'ARCHIVED' ? 'buttonUnarchive' : 'buttonArchive')}
+              </Button>
+            </DialogActions>
+          </Dialog>
+        </>
+      )}
+      {user.id !== topic.author.id && (
+        // eslint-disable-next-line jsx-a11y/no-static-element-interactions
+        <i onClick={() => updateFollow(!topic.favorite)}>
+          <Tooltip title={tTopic(topic.favorite ? 'unfavorite' : 'favorite')}>
+            {topic.favorite ? <GradeIcon color="primary" /> : <GradeOutlinedIcon color="primary" />}
+          </Tooltip>
+        </i>
       )}
       {topic.author && user.id === topic.author.id && (
         <div className={classes.applicationsWrapper}>
@@ -300,23 +361,6 @@ const TopicDetail: PageComponent<Props> = ({ user }: Props): JSX.Element => {
             ))}
           </div>
         </div>
-      )}
-
-      {user.id !== topic.author.id && !topic.favorite && (
-        // eslint-disable-next-line jsx-a11y/no-static-element-interactions
-        <i onClick={() => follow()}>
-          <Tooltip title="Thema merken">
-            <GradeOutlinedIcon color="primary"></GradeOutlinedIcon>
-          </Tooltip>
-        </i>
-      )}
-      {user.id !== topic.author.id && topic.favorite && (
-        // eslint-disable-next-line jsx-a11y/no-static-element-interactions
-        <i onClick={() => unFollow()}>
-          <Tooltip title="Thema nicht merken">
-            <GradeIcon color="primary"></GradeIcon>
-          </Tooltip>
-        </i>
       )}
     </div>
   );

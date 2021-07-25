@@ -12,7 +12,7 @@ export type Topic = {
   start?: string;
   deadline?: string;
   pages?: number;
-  status: 'OPEN' | 'ASSIGNED' | 'LOCKED';
+  status: 'OPEN' | 'ASSIGNED' | 'LOCKED' | 'ARCHIVED';
   author: User;
   hasApplied: boolean;
   applications?: Application[];
